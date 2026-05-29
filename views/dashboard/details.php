@@ -18,30 +18,82 @@
         </div>
         
         <div id="body-secStockInfo" class="details-card-body">
-            <div class="form-group-stack" style="gap: 1.25rem;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
-                    <div class="form-field">
-                        <label class="form-label">Audit Team Leader</label>
-                        <input type="text" id="infoLeader" class="form-input" placeholder="e.g. David Ocloo" oninput="saveStockInfoState()">
-                    </div>
-                    <div class="form-field">
-                        <label class="form-label">Store Location</label>
-                        <input type="text" id="infoStore" class="form-input" placeholder="e.g. Accra Central Mall" oninput="saveStockInfoState()">
-                    </div>
-                    <div class="form-field">
-                        <label class="form-label">Audit Scope Type</label>
-                        <select id="infoScope" class="form-select" onchange="saveStockInfoState()">
-                            <option value="Full Audit">Full Stock Audit (Standard)</option>
-                            <option value="Partial Audit">Partial Audit (Cyclic)</option>
-                            <option value="High Value Spot Audit">High Value Spot Check</option>
-                        </select>
-                    </div>
-                </div>
+            <div class="form-group-stack" style="gap: 1.5rem;">
                 
-                <div class="form-field">
-                    <label class="form-label">Active Audit Notes / Operational Instructions</label>
-                    <textarea id="infoNotes" class="form-input" style="min-height: 100px; resize: vertical; padding: 0.75rem; font-size: 13px;" placeholder="Add special instructions, department restrictions, recount procedures, or operational notices for the active audit session..." oninput="saveStockInfoState()"></textarea>
+                <!-- Group A: Store Identification & Period -->
+                <div style="border-bottom: 1px dashed var(--color-border); padding-bottom: 1.25rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">I. Store & Audit Timeline</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                        <div class="form-field">
+                            <label class="form-label">Store Name</label>
+                            <input type="text" id="infoStoreName" class="form-input" placeholder="e.g. Accra Central Mall" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Store Code</label>
+                            <input type="text" id="infoStoreCode" class="form-input" placeholder="e.g. ACC-01" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Audit Period</label>
+                            <input type="text" id="infoAuditPeriod" class="form-input" placeholder="e.g. Q2 2026 (May 29 - Jun 02)" oninput="saveStockInfoState()">
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Group B: Store & Operations Contacts -->
+                <div style="border-bottom: 1px dashed var(--color-border); padding-bottom: 1.25rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">II. Store & Operations Management</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                        <div class="form-field">
+                            <label class="form-label">Store Manager Name</label>
+                            <input type="text" id="infoStoreManager" class="form-input" placeholder="e.g. Samuel Kojo" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Store Manager Contact Number</label>
+                            <input type="tel" id="infoStoreManagerContact" class="form-input" placeholder="e.g. +233 24 123 4567" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Operations Manager Name</label>
+                            <input type="text" id="infoOpsManager" class="form-input" placeholder="e.g. David Mensah" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Operations Manager Contact Number</label>
+                            <input type="tel" id="infoOpsManagerContact" class="form-input" placeholder="e.g. +233 50 987 6543" oninput="saveStockInfoState()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group C: Audit Leadership & Roster Counts -->
+                <div style="border-bottom: 1px dashed var(--color-border); padding-bottom: 1.25rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">III. Audit Personnel & Workforce Counts</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                        <div class="form-field">
+                            <label class="form-label">Audit Lead</label>
+                            <input type="text" id="infoAuditLead" class="form-input" placeholder="e.g. David Ocloo" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Auditor (HO)</label>
+                            <input type="text" id="infoAuditorHO" class="form-input" placeholder="e.g. Head Office Inspector" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Audit Team Count</label>
+                            <input type="number" id="infoAuditTeamCount" class="form-input" min="0" placeholder="e.g. 5" oninput="saveStockInfoState()">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Operations Team Count</label>
+                            <input type="number" id="infoOpsTeamCount" class="form-input" min="0" placeholder="e.g. 12" oninput="saveStockInfoState()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group D: Zone Details -->
+                <div>
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">IV. Zone Details & Notes</h4>
+                    <div class="form-field">
+                        <label class="form-label">Zone Details</label>
+                        <textarea id="infoZoneDetails" class="form-input" style="min-height: 90px; resize: vertical; padding: 0.75rem; font-size: 13px;" placeholder="Describe active audit zones, department codes, scanner mappings, or specific boundaries..." oninput="saveStockInfoState()"></textarea>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -430,10 +482,18 @@
     // -------------------------------------------------------------
     function saveStockInfoState() {
         const state = {
-            leader: document.getElementById("infoLeader").value,
-            store: document.getElementById("infoStore").value,
-            scope: document.getElementById("infoScope").value,
-            notes: document.getElementById("infoNotes").value
+            storeName: document.getElementById("infoStoreName").value,
+            storeCode: document.getElementById("infoStoreCode").value,
+            storeManager: document.getElementById("infoStoreManager").value,
+            storeManagerContact: document.getElementById("infoStoreManagerContact").value,
+            opsManager: document.getElementById("infoOpsManager").value,
+            opsManagerContact: document.getElementById("infoOpsManagerContact").value,
+            auditLead: document.getElementById("infoAuditLead").value,
+            auditorHO: document.getElementById("infoAuditorHO").value,
+            auditTeamCount: document.getElementById("infoAuditTeamCount").value,
+            opsTeamCount: document.getElementById("infoOpsTeamCount").value,
+            auditPeriod: document.getElementById("infoAuditPeriod").value,
+            zoneDetails: document.getElementById("infoZoneDetails").value
         };
         localStorage.setItem("melcom_details_info", JSON.stringify(state));
         updateSidebarDetailsTracker();
@@ -449,10 +509,18 @@
         if (info) {
             try {
                 const state = JSON.parse(info);
-                document.getElementById("infoLeader").value = state.leader || "";
-                document.getElementById("infoStore").value = state.store || "";
-                document.getElementById("infoScope").value = state.scope || "Full Audit";
-                document.getElementById("infoNotes").value = state.notes || "";
+                document.getElementById("infoStoreName").value = state.storeName || "";
+                document.getElementById("infoStoreCode").value = state.storeCode || "";
+                document.getElementById("infoStoreManager").value = state.storeManager || "";
+                document.getElementById("infoStoreManagerContact").value = state.storeManagerContact || "";
+                document.getElementById("infoOpsManager").value = state.opsManager || "";
+                document.getElementById("infoOpsManagerContact").value = state.opsManagerContact || "";
+                document.getElementById("infoAuditLead").value = state.auditLead || "";
+                document.getElementById("infoAuditorHO").value = state.auditorHO || "";
+                document.getElementById("infoAuditTeamCount").value = state.auditTeamCount || "";
+                document.getElementById("infoOpsTeamCount").value = state.opsTeamCount || "";
+                document.getElementById("infoAuditPeriod").value = state.auditPeriod || "";
+                document.getElementById("infoZoneDetails").value = state.zoneDetails || "";
             } catch(e) {}
         }
 
@@ -478,10 +546,10 @@
 
         let completed = 0;
         
-        // Check stock take info
-        const leader = document.getElementById("infoLeader").value.trim();
-        const store = document.getElementById("infoStore").value.trim();
-        if (leader !== "" && store !== "") completed++;
+        // Check stock take info (critical fields)
+        const storeName = document.getElementById("infoStoreName").value.trim();
+        const auditLead = document.getElementById("infoAuditLead").value.trim();
+        if (storeName !== "" && auditLead !== "") completed++;
 
         // Check CSVs
         if (localStorage.getItem("melcom_details_csv_attendance")) completed++;
