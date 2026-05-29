@@ -20,8 +20,8 @@
         </div>
         
         <div id="body-secStockInfo" class="details-card-body">
-            <!-- 2x2 Grid of visual panels (i. ii. iii. iv.) -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+            <!-- Stacked Visual Panels (i. ii. iii. iv. almost filling the cards) -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%;">
                 
                 <!-- Group I: Store Identification & Period -->
                 <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
