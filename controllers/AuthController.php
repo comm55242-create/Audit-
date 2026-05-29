@@ -32,8 +32,15 @@ class AuthController {
         $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
         $email = isset($_POST['email']) ? trim($_POST['email']) : '';
 
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || (isset($_GET['format']) && $_GET['format'] === 'json');
+
         $validation = UserModel::validateCredentials($phone, $email);
         if ($validation['status'] === 'error') {
+            if ($isAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['status' => 'error', 'message' => $validation['message']]);
+                exit;
+            }
             $_SESSION['login_error'] = $validation['message'];
             header("Location: index.php?route=login");
             exit;
@@ -47,9 +54,25 @@ class AuthController {
         $otpRes = OtpModel::generateOtp($validation['phone'], $validation['email']);
         if ($otpRes['status'] === 'success') {
             $_SESSION['otp_pending'] = true;
+            if ($isAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'OTP generated successfully.',
+                    'code' => isset($_SESSION['otp_code']) ? $_SESSION['otp_code'] : '',
+                    'mode' => isset($_SESSION['otp_mode']) ? $_SESSION['otp_mode'] : 'mock',
+                    'expires_in' => $otpRes['expires_in']
+                ]);
+                exit;
+            }
             header("Location: index.php?route=otp");
             exit;
         } else {
+            if ($isAjax) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['status' => 'error', 'message' => $otpRes['message']]);
+                exit;
+            }
             $_SESSION['login_error'] = $otpRes['message'];
             header("Location: index.php?route=login");
             exit;
