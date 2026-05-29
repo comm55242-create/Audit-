@@ -8,7 +8,7 @@
 <div class="details-grid">
 
     <!-- CARD 1: STOCK TAKE INFORMATION SHEET -->
-    <div class="details-card">
+    <div id="panelDetailsStep-1" class="details-card">
         <div class="details-card-header" onclick="toggleDetailsCard('secStockInfo')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
@@ -118,7 +118,7 @@
     </div>
 
     <!-- CARD 2: AUDIT STAFF ATTENDANCE SHEET -->
-    <div class="details-card">
+    <div id="panelDetailsStep-2" class="details-card hidden">
         <div class="details-card-header" onclick="toggleDetailsCard('secAttendance')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
@@ -170,7 +170,7 @@
     </div>
 
     <!-- CARD 3: ZONE TRACKER -->
-    <div class="details-card">
+    <div id="panelDetailsStep-3" class="details-card hidden">
         <div class="details-card-header" onclick="toggleDetailsCard('secZones')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
@@ -221,7 +221,7 @@
     </div>
 
     <!-- CARD 4: SCAN CONTROL SHEET -->
-    <div class="details-card">
+    <div id="panelDetailsStep-4" class="details-card hidden">
         <div class="details-card-header" onclick="toggleDetailsCard('secScanners')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
@@ -269,6 +269,19 @@
                 </table>
             </div>
         </div>
+    </div>
+
+    <!-- Footer Navigation Buttons -->
+    <div class="workspace-footer-nav" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; border-top: 1px solid var(--color-border); margin-top: 2rem; width: 100%;">
+        <button type="button" id="btnDetailsBack" onclick="handleDetailsNavigationBack()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.35rem; visibility: hidden;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 3;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            <span>Back</span>
+        </button>
+
+        <button type="button" id="btnDetailsNext" onclick="handleDetailsNavigationNext()" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span id="btnDetailsNextText">Next</span>
+            <svg id="btnDetailsNextIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 3;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
     </div>
 
 </div>
@@ -561,6 +574,7 @@
         });
         
         updateSidebarDetailsTracker();
+        updateDetailsWizardState();
     }
 
     function updateSidebarDetailsTracker() {
@@ -584,6 +598,88 @@
         const percent = Math.round((completed / 4) * 100);
         tracker.innerText = `${completed}/4 Completed`;
         if (fill) fill.style.width = `${percent}%`;
+    }
+
+    // Details Wizard Sequential Navigation
+    let activeDetailsStep = 1;
+
+    function handleDetailsNavigationNext() {
+        if (activeDetailsStep === 4) {
+            alert("Congratulations! All stock take details have been successfully configured.");
+            return;
+        }
+        activeDetailsStep++;
+        updateDetailsWizardState();
+    }
+
+    function handleDetailsNavigationBack() {
+        if (activeDetailsStep === 1) return;
+        activeDetailsStep--;
+        updateDetailsWizardState();
+    }
+
+    function updateDetailsWizardState() {
+        // Toggle card panels
+        for (let i = 1; i <= 4; i++) {
+            const panel = document.getElementById("panelDetailsStep-" + i);
+            if (panel) {
+                if (i === activeDetailsStep) {
+                    panel.classList.remove("hidden");
+                } else {
+                    panel.classList.add("hidden");
+                }
+            }
+        }
+
+        // Toggle back buttons
+        const btnBack = document.getElementById("btnDetailsBack");
+        if (btnBack) {
+            if (activeDetailsStep === 1) {
+                btnBack.style.visibility = "hidden";
+            } else {
+                btnBack.style.visibility = "visible";
+            }
+        }
+
+        // Toggle next buttons
+        const btnNextText = document.getElementById("btnDetailsNextText");
+        const btnNextIcon = document.getElementById("btnDetailsNextIcon");
+        if (btnNextText) {
+            if (activeDetailsStep === 4) {
+                btnNextText.innerText = "Finish";
+                if (btnNextIcon) btnNextIcon.style.display = "none";
+            } else {
+                btnNextText.innerText = "Next";
+                if (btnNextIcon) btnNextIcon.style.display = "inline";
+            }
+        }
+
+        updateSidebarDetailsStepNodes();
+    }
+
+    function updateSidebarDetailsStepNodes() {
+        for (let i = 1; i <= 4; i++) {
+            const circle = document.getElementById("circleDetails-" + i);
+            const text = document.getElementById("textDetails-" + i);
+            if (!circle || !text) continue;
+
+            circle.className = "step-circle";
+            text.className = "step-text";
+
+            if (i < activeDetailsStep) {
+                circle.classList.add("completed");
+                text.classList.add("completed");
+                circle.innerText = "✓";
+            } else if (i === activeDetailsStep) {
+                circle.classList.add("active");
+                text.classList.add("active");
+                circle.innerText = i;
+            } else {
+                circle.classList.add("upcoming");
+                text.classList.add("upcoming");
+                circle.innerText = i;
+            }
+        }
     }
 
     // Auto-run state loaders on dom content load

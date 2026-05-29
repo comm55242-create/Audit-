@@ -120,21 +120,21 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                 </div>
 
                 <nav class="sidebar-nav" style="margin-top: 1.25rem;">
-                    <div class="step-node">
-                        <div class="step-circle active">1</div>
-                        <span class="step-text active">Stock Take Info</span>
+                    <div class="step-node" id="menuDetailsStep-1">
+                        <div id="circleDetails-1" class="step-circle active">1</div>
+                        <span id="textDetails-1" class="step-text active">Stock Take Info</span>
                     </div>
-                    <div class="step-node">
-                        <div class="step-circle active">2</div>
-                        <span class="step-text active">Staff Attendance</span>
+                    <div class="step-node" id="menuDetailsStep-2">
+                        <div id="circleDetails-2" class="step-circle upcoming">2</div>
+                        <span id="textDetails-2" class="step-text upcoming">Staff Attendance</span>
                     </div>
-                    <div class="step-node">
-                        <div class="step-circle active">3</div>
-                        <span class="step-text active">Zone Tracker</span>
+                    <div class="step-node" id="menuDetailsStep-3">
+                        <div id="circleDetails-3" class="step-circle upcoming">3</div>
+                        <span id="textDetails-3" class="step-text upcoming">Zone Tracker</span>
                     </div>
-                    <div class="step-node">
-                        <div class="step-circle active">4</div>
-                        <span class="step-text active">Scan Control</span>
+                    <div class="step-node" id="menuDetailsStep-4">
+                        <div id="circleDetails-4" class="step-circle upcoming">4</div>
+                        <span id="textDetails-4" class="step-text upcoming">Scan Control</span>
                     </div>
                 </nav>
             </div>
@@ -150,13 +150,13 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                 </div>
 
                 <nav class="sidebar-nav" style="margin-top: 1.25rem;">
-                    <div class="step-node">
-                        <div class="step-circle active">1</div>
-                        <span class="step-text active">Pre-Stock Workflow</span>
+                    <div class="step-node" id="menuChecklistStep-1">
+                        <div id="circleChecklist-1" class="step-circle active">1</div>
+                        <span id="textChecklist-1" class="step-text active">Pre-Stock Workflow</span>
                     </div>
-                    <div class="step-node">
-                        <div class="step-circle active">2</div>
-                        <span class="step-text active">Report Alert Checklist</span>
+                    <div class="step-node" id="menuChecklistStep-2">
+                        <div id="circleChecklist-2" class="step-circle upcoming">2</div>
+                        <span id="textChecklist-2" class="step-text upcoming">Report Alert Checklist</span>
                     </div>
                 </nav>
             </div>
