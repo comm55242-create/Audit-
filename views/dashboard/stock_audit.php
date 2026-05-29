@@ -287,7 +287,7 @@
 
 <!-- ============================================== -->
 <!-- POPUPS, DIALOGS, MODALS -->
-// ============================================== -->
+<!-- ============================================== -->
 
 <!-- Premium Custom Confirmation Alert Dialog modal (Wide review layout) -->
 <div id="confirmSubmitModal" class="modal-backdrop hidden">
@@ -347,20 +347,20 @@
 
 <!-- Premium Loader Modal -->
 <div id="loadingModal" class="modal-backdrop hidden">
-    <div class="modal-card" style="max-width: 320px;">
-        <div class="spinner-container" style="display: flex; justify-content: center; margin: 1rem 0;">
-            <div class="loading-spinner"></div>
+    <div class="modal-card" style="max-width: 360px; padding: 2.25rem 2rem; border-radius: 20px;">
+        <div class="spinner-container" style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+            <div class="loading-spinner" style="width: 48px; height: 48px; border-width: 4.5px;"></div>
         </div>
         <div class="modal-info-stack" style="text-align: center;">
-            <h3 class="modal-title" style="font-size: 1rem;">Compiling Scope...</h3>
-            <p class="modal-desc" style="font-size: 11px;">Please wait while we structure your database-wide audit configurations. This may take a moment.</p>
+            <h3 id="loadingTitle" class="modal-title" style="font-size: 1.15rem; font-weight: 900; color: var(--color-text-main); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: -0.01em;">Compiling Scope...</h3>
+            <p id="loadingDesc" class="modal-desc" style="font-size: 12px; color: var(--color-text-muted); line-height: 1.5; margin: 0;">Please wait while we structure your database-wide audit configurations. This may take a moment.</p>
         </div>
     </div>
 </div>
 
 <!-- ============================================== -->
 <!-- ACTIVE WIZARD ENGINE SCRIPTS -->
-// ============================================== -->
+<!-- ============================================== -->
 <script>
     const deptsData = <?php
     if ($db_status === 'ONLINE' && !empty($db_depts)) {
@@ -498,6 +498,27 @@
         renderCheckboxDepts();
         updateWizardState();
     });
+
+    /**
+     * Displays the premium full-screen loading overlay with custom messages.
+     */
+    function showLoader(title, description) {
+        const loader = document.getElementById("loadingModal");
+        const titleEl = document.getElementById("loadingTitle");
+        const descEl = document.getElementById("loadingDesc");
+        
+        if (titleEl) titleEl.innerText = title;
+        if (descEl) descEl.innerText = description;
+        if (loader) loader.classList.remove("hidden");
+    }
+
+    /**
+     * Dismisses the premium loading overlay.
+     */
+    function hideLoader() {
+        const loader = document.getElementById("loadingModal");
+        if (loader) loader.classList.add("hidden");
+    }
 
     // -------------------------------------------------------------
     // CORE NAVIGATION CONTROLLER
@@ -646,15 +667,17 @@
         }
         
         if (targetStep === 8) {
-            const loader = document.getElementById("loadingModal");
-            if (loader) loader.classList.remove("hidden");
+            showLoader(
+                "Compiling Scope...",
+                "Please wait while we structure and pull your selected departments, groups, and items into the master initialization table. This may take a moment."
+            );
             
             setTimeout(() => {
                 activeStep = targetStep;
                 compileSummaryData();
                 updateWizardState();
-                if (loader) loader.classList.add("hidden");
-            }, 100);
+                hideLoader();
+            }, 800); // 800ms timeout to allow smooth visual compiling state render
         } else {
             activeStep = targetStep;
             updateWizardState();
@@ -1346,6 +1369,11 @@
     // FINAL SECURE AJAX DATABASE SUBMIT ACTION
     // -------------------------------------------------------------
     function submitSetupData() {
+        showLoader(
+            "Saving Setup Configuration...",
+            "Writing parameters to the secure Oracle database and performing live catalog schema audits. Please do not refresh this page."
+        );
+
         const stockDate = document.getElementById("setupDate").value;
         const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
         
@@ -1400,6 +1428,7 @@
         })
         .then(res => res.text())
         .then(data => {
+            hideLoader();
             if (data.trim() === "ok") {
                 isSetupSubmitted = true;
                 updateWizardState();
@@ -1409,6 +1438,7 @@
             }
         })
         .catch(err => {
+            hideLoader();
             alert("Network Error: Could not connect to the database save script.");
         });
     }
