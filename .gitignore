@@ -1,0 +1,12 @@
+# Melcom Audit System - Git Ignore Rules
+.gradle/
+.idea/
+app/build/
+build/
+melcomgroup.zahed.melcomshopaudit/
+*.apk
+*.jadx
+*.bak
+*.log
+.system_generated/
+*.ps1
