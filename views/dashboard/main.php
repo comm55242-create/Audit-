@@ -37,6 +37,10 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                 <span class="dashboard-tab-icon">📦</span>
                 <span>Stock Audit</span>
             </button>
+            <button id="menuTabDetails" class="dashboard-tab-item" onclick="switchTab('details')">
+                <span class="dashboard-tab-icon">📊</span>
+                <span>Details</span>
+            </button>
             <button id="menuTabChecklist" class="dashboard-tab-item" onclick="switchTab('checklist')">
                 <span class="dashboard-tab-icon">📋</span>
                 <span>Checklist</span>
@@ -99,28 +103,54 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                 </nav>
             </div>
 
-            <!-- DYNAMIC SIDEBAR 2: CHECKLIST TRACKER (Hidden by default) -->
-            <div id="sidebarChecklistTracker" class="hidden" style="width: 100%;">
+            <!-- DYNAMIC SIDEBAR 2: DETAILS TRACKER (Hidden by default) -->
+            <div id="sidebarDetailsTracker" class="hidden" style="width: 100%;">
                 <div class="sidebar-progress-labels" style="margin-top: 0.5rem;">
-                    <span>Scope</span>
-                    <span class="progress-number" style="color: var(--color-primary);">Checklist Config</span>
+                    <span>Progress</span>
+                    <span id="sidebarDetailsProgressText" class="progress-number">0/4 Completed</span>
                 </div>
                 <div class="sidebar-progress-track">
-                    <div class="sidebar-progress-fill" style="width: 100%;"></div>
+                    <div id="sidebarDetailsProgress" class="sidebar-progress-fill" style="width: 0%;"></div>
                 </div>
 
                 <nav class="sidebar-nav" style="margin-top: 1.25rem;">
                     <div class="step-node">
                         <div class="step-circle active">1</div>
-                        <span class="step-text active">Store Environment</span>
+                        <span class="step-text active">Stock Take Info</span>
                     </div>
                     <div class="step-node">
-                        <div class="step-circle upcoming">2</div>
-                        <span class="step-text upcoming">Staff Checklist</span>
+                        <div class="step-circle active">2</div>
+                        <span class="step-text active">Staff Attendance</span>
                     </div>
                     <div class="step-node">
-                        <div class="step-circle upcoming">3</div>
-                        <span class="step-text upcoming">Variance Audit</span>
+                        <div class="step-circle active">3</div>
+                        <span class="step-text active">Zone Tracker</span>
+                    </div>
+                    <div class="step-node">
+                        <div class="step-circle active">4</div>
+                        <span class="step-text active">Scan Control</span>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- DYNAMIC SIDEBAR 3: CHECKLIST TRACKER (Hidden by default) -->
+            <div id="sidebarChecklistTracker" class="hidden" style="width: 100%;">
+                <div class="sidebar-progress-labels" style="margin-top: 0.5rem;">
+                    <span>Progress</span>
+                    <span id="sidebarChecklistProgressText" class="progress-number">0/10 Completed</span>
+                </div>
+                <div class="sidebar-progress-track">
+                    <div id="sidebarChecklistProgress" class="sidebar-progress-fill" style="width: 0%;"></div>
+                </div>
+
+                <nav class="sidebar-nav" style="margin-top: 1.25rem;">
+                    <div class="step-node">
+                        <div class="step-circle active">1</div>
+                        <span class="step-text active">Pre-Stock Workflow</span>
+                    </div>
+                    <div class="step-node">
+                        <div class="step-circle active">2</div>
+                        <span class="step-text active">Report Alert Checklist</span>
                     </div>
                 </nav>
             </div>
@@ -205,6 +235,10 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                 <?php require_once __DIR__ . '/stock_audit.php'; ?>
             </div>
 
+            <div id="tabContentDetails" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%;">
+                <?php require_once __DIR__ . '/details.php'; ?>
+            </div>
+
             <div id="tabContentChecklist" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%;">
                 <?php require_once __DIR__ . '/checklist.php'; ?>
             </div>
@@ -218,32 +252,59 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
      */
     function switchTab(tabName) {
         const tabStockAudit = document.getElementById("tabContentStockAudit");
+        const tabDetails = document.getElementById("tabContentDetails");
         const tabChecklist = document.getElementById("tabContentChecklist");
         
         const menuStockAudit = document.getElementById("menuTabStockAudit");
+        const menuDetails = document.getElementById("menuTabDetails");
         const menuChecklist = document.getElementById("menuTabChecklist");
 
         const sidebarStockAudit = document.getElementById("sidebarProgressTracker");
+        const sidebarDetails = document.getElementById("sidebarDetailsTracker");
         const sidebarChecklist = document.getElementById("sidebarChecklistTracker");
 
         if (tabName === 'stock_audit') {
             tabStockAudit.classList.remove("hidden");
+            tabDetails.classList.add("hidden");
             tabChecklist.classList.add("hidden");
             
             menuStockAudit.classList.add("active");
+            menuDetails.classList.remove("active");
             menuChecklist.classList.remove("active");
 
             sidebarStockAudit.classList.remove("hidden");
+            sidebarDetails.classList.add("hidden");
             sidebarChecklist.classList.add("hidden");
+        } else if (tabName === 'details') {
+            tabStockAudit.classList.add("hidden");
+            tabDetails.classList.remove("hidden");
+            tabChecklist.classList.add("hidden");
+            
+            menuStockAudit.classList.remove("active");
+            menuDetails.classList.add("active");
+            menuChecklist.classList.remove("active");
+
+            sidebarStockAudit.classList.add("hidden");
+            sidebarDetails.classList.remove("hidden");
+            sidebarChecklist.classList.add("hidden");
+
+            // Safe state triggers
+            if (window.loadDetailsState) window.loadDetailsState();
         } else {
             tabStockAudit.classList.add("hidden");
+            tabDetails.classList.add("hidden");
             tabChecklist.classList.remove("hidden");
             
             menuStockAudit.classList.remove("active");
+            menuDetails.classList.remove("active");
             menuChecklist.classList.add("active");
 
             sidebarStockAudit.classList.add("hidden");
+            sidebarDetails.classList.add("hidden");
             sidebarChecklist.classList.remove("hidden");
+
+            // Safe state triggers
+            if (window.loadChecklistState) window.loadChecklistState();
         }
     }
 
