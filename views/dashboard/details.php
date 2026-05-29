@@ -457,7 +457,6 @@
         }
 
         // 2. Load CSV Tables
-        @$folders = @('attendance', 'zones', 'scanners');
         ['attendance', 'zones', 'scanners'].forEach(type => {
             const csv = localStorage.getItem("melcom_details_csv_" + type);
             if (csv) {
