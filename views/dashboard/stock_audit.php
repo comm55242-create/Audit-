@@ -15,14 +15,7 @@
     <div class="shop-setup-grid">
         <div class="form-field">
             <label class="form-label">Stock Date</label>
-            <select id="setupDate" class="form-select">
-                <?php
-                $today = date('Y-m-d');
-                $tomorrow = date('Y-m-d', strtotime('+1 day'));
-                echo "<option value='$today'>Today ($today)</option>";
-                echo "<option value='$tomorrow'>Tomorrow ($tomorrow)</option>";
-                ?>
-            </select>
+            <input type="date" id="setupDate" class="form-input" value="<?php echo date('Y-m-d'); ?>" required style="height: 38px; padding: 0.375rem 0.75rem;">
         </div>
 
         <div class="form-field">
@@ -123,25 +116,20 @@
         <p class="workspace-subtitle">Filter specific scoping categories for SST parameters</p>
     </div>
 
-    <!-- Hidden dynamic auto scoping depth toggle switch -->
-    <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem; width: 100%; max-width: 1152px;">
-        <div style="display: flex; flex-direction: column;">
-            <span style="font-size: 13px; font-weight: 800; color: var(--color-text-main); text-transform: uppercase;">Scoping Depth: Shop Stock-Take (SST)</span>
-            <span style="font-size: 11px; color: var(--color-text-light);">Turn toggle ON to automatically configure all segments under selected departments.</span>
-        </div>
-        
-        <label class="switch">
-            <input type="checkbox" id="toggleScopeSstDepth" onchange="handleScopeDepthToggleChange(this)">
-            <span class="slider"></span>
-        </label>
-    </div>
+    <!-- (Scoping Depth toggle removed) -->
 
     <!-- Main dynamic categorization grids (Visible only when scoping depth is segment-specific) -->
     <div id="sstCategoriesGrid" class="tree-container" style="max-height: 380px;">
         
         <!-- Column 1: Groups Checklist -->
         <div class="tree-column">
-            <span class="tree-column-header">Active Groups Selection</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--color-border);">
+                <span class="tree-column-header" style="margin-bottom: 0;">Active Groups Selection</span>
+                <div style="display: flex; gap: 0.35rem;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllGroups(true)">Select All</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllGroups(false)">Deselect All</button>
+                </div>
+            </div>
             <div id="groupsColumnList" class="tree-column-list">
                 <span class="tree-node-text disabled-msg">Select departments in Step 6 to populate groups.</span>
             </div>
@@ -149,7 +137,13 @@
 
         <!-- Column 2: Subgroups Checklist -->
         <div class="tree-column" style="grid-column: span 2;">
-            <span class="tree-column-header">Active Subgroups Selection</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--color-border);">
+                <span class="tree-column-header" style="margin-bottom: 0;">Active Subgroups Selection</span>
+                <div style="display: flex; gap: 0.35rem;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllSubgroups(true)">Select All</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllSubgroups(false)">Deselect All</button>
+                </div>
+            </div>
             <div id="subgroupsColumnList" class="tree-column-list">
                 <span class="tree-node-text disabled-msg">Select active groups to populate subgroups.</span>
             </div>
@@ -427,7 +421,7 @@
     let selectedType = "";
     let selectedMode = [];
     let selectedScopeDepth = "Dept";
-    let isSetupSubmitted = false;
+    let isSetupSubmitted = localStorage.getItem("melcom_stock_audit_submitted") === "true";
     let selectedItemwiseItems = [];
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -689,16 +683,21 @@
         validateActiveStepForm();
     }
 
-    function handleScopeDepthToggleChange(toggle) {
-        selectedScopeDepth = toggle.checked ? "SST" : "Dept";
-        const grid = document.getElementById("sstCategoriesGrid");
-        if (toggle.checked) {
-            grid.style.opacity = "0.5";
-            grid.style.pointerEvents = "none";
-        } else {
-            grid.style.opacity = "1";
-            grid.style.pointerEvents = "auto";
-        }
+    function toggleAllGroups(checked) {
+        const checkboxes = document.querySelectorAll(".group-node");
+        checkboxes.forEach(chk => {
+            chk.checked = checked;
+        });
+        renderSubgroupsSegmentColumnList();
+        validateActiveStepForm();
+    }
+
+    function toggleAllSubgroups(checked) {
+        const checkboxes = document.querySelectorAll(".subgroup-node");
+        checkboxes.forEach(chk => {
+            chk.checked = checked;
+        });
+        validateActiveStepForm();
     }
 
     // -------------------------------------------------------------
@@ -1280,6 +1279,16 @@
             hideLoader();
             if (data.trim() === "ok") {
                 isSetupSubmitted = true;
+                localStorage.setItem("melcom_stock_audit_submitted", "true");
+                localStorage.setItem("melcom_stock_audit_data", JSON.stringify({
+                    shopCode: shopCode,
+                    stockDate: stockDate,
+                    auditType: selectedType,
+                    auditMode: selectedMode.join(", "),
+                    depts: depts.join(", "),
+                    groups: groups.join(", "),
+                    subgroups: subgroups.join(", ")
+                }));
                 updateWizardState();
                 printSetupSheet(true); // Automatically triggers windows print layout upon final confirmed submit!
             } else {

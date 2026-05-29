@@ -1,13 +1,68 @@
 <?php
 // ==========================================================================
-// MELCOM AUDIT SYSTEM - DETAILS WORKSPACE VIEW
-// Premium digital spreadsheets, Drag-and-Drop secure CSV parsers, and sheets.
+// MELCOM AUDIT SYSTEM - NEW CONSOLIDATED DETAILS & CHECKLIST WORKSPACE VIEW
+// Sequential wizard featuring:
+// 1. Live submitted Stock Audit uneditable summary panel (with verification checkbox)
+// 2. Step 1: Stock Take Information Sheet
+// 3. Step 2: Merged Attendance & Zone Tracker CSV Parser (SI, STAFF NAME, ROLE IN AUDIT, ZONE NAME, SCANNING ID)
+// 4. Step 3: Pre-Stock Take Checklist Workflow Board
+// 5. Step 4: Mandatory Report Alert Checklist Board
 // ==========================================================================
 ?>
 
-<div class="details-grid">
+<div class="details-grid" style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%; max-width: 1152px; margin: 0 auto;">
 
-    <!-- CARD 1: STOCK TAKE INFORMATION SHEET -->
+    <!-- ========================================== -->
+    <!-- UNEDITABLE STOCK AUDIT SETUP SUMMARY CARD -->
+    <!-- ========================================== -->
+    <div id="stockAuditSubmittedSummary" class="details-card hidden" style="background: var(--color-primary-light); border: 1px solid var(--color-primary-ring); padding: 1.5rem; border-radius: 18px; display: flex; flex-direction: column; gap: 1.25rem; width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+            <span style="font-size: 0.9rem; font-weight: 900; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.5; color: var(--color-primary);"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Active Stock Audit Setup Parameters (Uneditable)</span>
+            </span>
+            <span class="badge badge-success" style="font-size: 10px; font-weight: 800; text-transform: uppercase;">Submitted & Locked</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 13px;">
+            <div>
+                <span style="font-weight: 500; color: var(--color-text-muted);">Shop Code:</span>
+                <strong id="sumShopCode" style="color: var(--color-text-main); font-family: monospace; font-size: 14px;">-</strong>
+            </div>
+            <div>
+                <span style="font-weight: 500; color: var(--color-text-muted);">Stock Date:</span>
+                <strong id="sumStockDate" style="color: var(--color-text-main); font-family: monospace; font-size: 14px;">-</strong>
+            </div>
+            <div>
+                <span style="font-weight: 500; color: var(--color-text-muted);">Audit Type:</span>
+                <strong id="sumAuditType" style="color: var(--color-text-main);">-</strong>
+            </div>
+            <div>
+                <span style="font-weight: 500; color: var(--color-text-muted);">Audit Mode:</span>
+                <strong id="sumAuditMode" style="color: var(--color-text-main);">-</strong>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 12px; background: #ffffff; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem;">
+            <div>
+                <span style="font-weight: 700; color: var(--color-text-muted);">Scope Departments:</span>
+                <span id="sumDepts" style="color: var(--color-text-main); font-weight: 500;">None</span>
+            </div>
+            <div style="margin-top: 0.25rem; border-top: 1px solid var(--color-border); padding-top: 0.25rem;">
+                <span style="font-weight: 700; color: var(--color-text-muted);">Scope Segments:</span>
+                <span id="sumSegments" style="color: var(--color-text-main); font-weight: 500;">None</span>
+            </div>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 0.75rem; background: #ffffff; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chkConfirmSetupVerified" style="width: 18px; height: 18px; accent-color: var(--color-primary); cursor: pointer;" onchange="saveDetailsVerificationCheckbox()">
+            <span style="font-size: 13px; font-weight: 700; color: var(--color-text-main);">I confirm that I have reviewed, verified and approved this submitted Stock Audit Setup on the Details Sheet.</span>
+        </label>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STEP 1: STOCK TAKE INFORMATION SHEET -->
+    <!-- ========================================== -->
     <div id="panelDetailsStep-1" class="details-card">
         <div class="details-card-header" onclick="toggleDetailsCard('secStockInfo')">
             <span class="details-card-title">
@@ -20,7 +75,6 @@
         </div>
         
         <div id="body-secStockInfo" class="details-card-body">
-            <!-- Stacked Visual Panels (i. ii. iii. iv. almost filling the cards) -->
             <div style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%;">
                 
                 <!-- Group I: Store Identification & Period -->
@@ -117,51 +171,53 @@
         </div>
     </div>
 
-    <!-- CARD 2: AUDIT STAFF ATTENDANCE SHEET -->
+    <!-- ========================================== -->
+    <!-- STEP 2: MERGED ATTENDANCE / ZONE TRACKER CSV UPLOAD -->
+    <!-- ========================================== -->
     <div id="panelDetailsStep-2" class="details-card hidden">
-        <div class="details-card-header" onclick="toggleDetailsCard('secAttendance')">
+        <div class="details-card-header" onclick="toggleDetailsCard('secMerged')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 </span>
-                <span>2. Audit Staff Attendance Sheet</span>
+                <span>2. Attendance / Zone Tracker File Sync</span>
             </span>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span id="badge-secAttendance" class="badge badge-warning">Empty</span>
-                <span id="icon-secAttendance" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
+                <span id="badge-secMerged" class="badge badge-warning">Empty</span>
+                <span id="icon-secMerged" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
             </div>
         </div>
         
-        <div id="body-secAttendance" class="details-card-body">
+        <div id="body-secMerged" class="details-card-body">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="font-size: 12px; color: var(--color-text-muted);">Upload the parsed csv personnel data to audit attendance registry.</span>
-                <a href="javascript:void(0)" onclick="downloadCsvTemplate('attendance')" class="template-link">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Download Attendance Template</span>
+                <span style="font-size: 12px; color: var(--color-text-muted);">Upload your combined auditor attendance roster and zone terminal devices CSV sheet.</span>
+                <a href="javascript:void(0)" onclick="downloadCsvTemplate('merged')" class="template-link" style="display: flex; align-items: center; gap: 0.25rem; font-size: 12px; font-weight: 700; color: var(--color-primary); text-decoration: none;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Download Merged CSV Template</span>
                 </a>
             </div>
 
             <!-- Upload Area -->
-            <div id="uploadAttendance" class="upload-zone" onclick="triggerFileInput('fileAttendance')" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, this, 'attendance')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="upload-zone-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                <span class="upload-zone-text">Drag and drop your attendance CSV file here, or <span style="color: var(--color-primary); text-decoration: underline;">browse files</span></span>
-                <span class="upload-zone-subtext">Supports CSV format with Staff Name, Staff ID, Department, Shift, Check-in Time headers</span>
-                <input type="file" id="fileAttendance" accept=".csv" style="display: none;" onchange="handleFileSelect(event, 'attendance')">
+            <div id="uploadMerged" class="upload-zone" onclick="triggerFileInput('fileMerged')" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, this, 'merged')" style="border: 2px dashed #cbd5e1; border-radius: 14px; padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; background: #f8fafc; cursor: pointer; transition: all 0.2s ease;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="upload-zone-icon" style="width: 38px; height: 38px; color: var(--color-text-light);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <span class="upload-zone-text" style="font-size: 13px; font-weight: 700; color: var(--color-text-main);">Drag and drop your combined Attendance/Zone CSV here, or <span style="color: var(--color-primary); text-decoration: underline;">browse files</span></span>
+                <span class="upload-zone-subtext" style="font-size: 11px; color: var(--color-text-light);">Supports headers: SI, STAFF NAME, ROLE IN AUDIT, ZONE NAME, SCANNING ID</span>
+                <input type="file" id="fileMerged" accept=".csv" style="display: none;" onchange="handleFileSelect(event, 'merged')">
             </div>
 
             <!-- Parsed Results Table -->
-            <div id="wrapperAttendance" class="table-wrapper hidden" style="margin-top: 1.25rem;">
+            <div id="wrapperMerged" class="table-wrapper hidden" style="margin-top: 1.25rem;">
                 <table class="summary-table">
                     <thead>
                         <tr>
+                            <th style="width: 70px; text-align: center;">SI</th>
                             <th>Staff Name</th>
-                            <th>Staff ID</th>
-                            <th>Department</th>
-                            <th>Shift</th>
-                            <th>Check-in Time</th>
+                            <th>Role in Audit</th>
+                            <th>Zone Name</th>
+                            <th>Scanning ID</th>
                         </tr>
                     </thead>
-                    <tbody id="tableAttendanceBody">
+                    <tbody id="tableMergedBody">
                         <!-- CSV rows rendered dynamically -->
                     </tbody>
                 </table>
@@ -169,102 +225,222 @@
         </div>
     </div>
 
-    <!-- CARD 3: ZONE TRACKER -->
+    <!-- ========================================== -->
+    <!-- STEP 3: PRE-STOCK TAKE CHECKLIST WORKFLOW -->
+    <!-- ========================================== -->
     <div id="panelDetailsStep-3" class="details-card hidden">
-        <div class="details-card-header" onclick="toggleDetailsCard('secZones')">
+        <div class="details-card-header" onclick="toggleDetailsCard('secChecklistPreStock')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 </span>
-                <span>3. Zone Tracker</span>
+                <span>3. Pre-Stock Take Checklist Workflow</span>
             </span>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span id="badge-secZones" class="badge badge-warning">Empty</span>
-                <span id="icon-secZones" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
+                <span id="badge-chkPreStock" class="badge badge-warning">2/5 Done</span>
+                <span id="icon-secChecklistPreStock" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
             </div>
         </div>
-        
-        <div id="body-secZones" class="details-card-body">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="font-size: 12px; color: var(--color-text-muted);">Sync the physical store zones list to keep tracking scanning progress.</span>
-                <a href="javascript:void(0)" onclick="downloadCsvTemplate('zones')" class="template-link">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Download Zone Template</span>
-                </a>
-            </div>
 
-            <!-- Upload Area -->
-            <div id="uploadZones" class="upload-zone" onclick="triggerFileInput('fileZones')" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, this, 'zones')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="upload-zone-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span class="upload-zone-text">Drag and drop your Zone CSV file here, or <span style="color: var(--color-primary); text-decoration: underline;">browse files</span></span>
-                <span class="upload-zone-subtext">Supports CSV format with Zone ID, Zone Description, Scanned Count, Status headers</span>
-                <input type="file" id="fileZones" accept=".csv" style="display: none;" onchange="handleFileSelect(event, 'zones')">
-            </div>
-
-            <!-- Parsed Results Table -->
-            <div id="wrapperZones" class="table-wrapper hidden" style="margin-top: 1.25rem;">
-                <table class="summary-table">
+        <div id="body-secChecklistPreStock" class="details-card-body">
+            <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 1.25rem;">
+                Ensure all essential prerequisites are checked and fully completed before commencing physical scans.
+            </p>
+            <div class="table-wrapper">
+                <table class="summary-table checklist-table">
                     <thead>
                         <tr>
-                            <th>Zone ID</th>
-                            <th>Zone Description</th>
-                            <th>Scanned Items</th>
-                            <th>Status</th>
+                            <th style="width: 50px; text-align: center;">Sr.</th>
+                            <th>Workflow Task Description</th>
+                            <th style="width: 150px;">Status</th>
+                            <th>Auditor Remarks</th>
                         </tr>
                     </thead>
-                    <tbody id="tableZonesBody">
-                        <!-- CSV rows rendered dynamically -->
+                    <tbody>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">1</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Backup ERP Data & Active Audit Schema</td>
+                            <td>
+                                <select id="taskStatus-1" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Completed" selected>Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="taskRemark-1" class="checklist-input" placeholder="e.g. Local schema dump successful" oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">2</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Charge Scanner Terminals to 100%</td>
+                            <td>
+                                <select id="taskStatus-2" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Completed" selected>Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="taskRemark-2" class="checklist-input" placeholder="e.g. All 4 terminals charged" oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">3</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Setup Store Zone Boundaries & Labels</td>
+                            <td>
+                                <select id="taskStatus-3" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="Pending" selected>Pending</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="taskRemark-3" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">4</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Conduct Staff Briefing & Team Allocation</td>
+                            <td>
+                                <select id="taskStatus-4" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="Pending" selected>Pending</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="taskRemark-4" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">5</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Print Recount Adjustment Sheets</td>
+                            <td>
+                                <select id="taskStatus-5" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="Pending" selected>Pending</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="taskRemark-5" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- CARD 4: SCAN CONTROL SHEET -->
+    <!-- ========================================== -->
+    <!-- STEP 4: MANDATORY REPORT ALERT CHECKLIST -->
+    <!-- ========================================== -->
     <div id="panelDetailsStep-4" class="details-card hidden">
-        <div class="details-card-header" onclick="toggleDetailsCard('secScanners')">
+        <div class="details-card-header" onclick="toggleDetailsCard('secChecklistAlerts')">
             <span class="details-card-title">
                 <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </span>
-                <span>4. Scan Control Sheet</span>
+                <span>4. Mandatory Report Alert Checklist</span>
             </span>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span id="badge-secScanners" class="badge badge-warning">Empty</span>
-                <span id="icon-secScanners" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
+                <span id="badge-chkAlerts" class="badge badge-warning">1/5 Verified</span>
+                <span id="icon-secChecklistAlerts" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
             </div>
         </div>
-        
-        <div id="body-secScanners" class="details-card-body">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="font-size: 12px; color: var(--color-text-muted);">Manage and monitor terminal barcode scanning devices assigned to audit staff.</span>
-                <a href="javascript:void(0)" onclick="downloadCsvTemplate('scanners')" class="template-link">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Download Scan Control Template</span>
-                </a>
-            </div>
 
-            <!-- Upload Area -->
-            <div id="uploadScanners" class="upload-zone" onclick="triggerFileInput('fileScanners')" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDrop(event, this, 'scanners')">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="upload-zone-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0a8 8 0 11-16 0 8 8 0 0116 0z"/></svg>
-                <span class="upload-zone-text">Drag and drop your Scan Control CSV file here, or <span style="color: var(--color-primary); text-decoration: underline;">browse files</span></span>
-                <span class="upload-zone-subtext">Supports CSV format with Scanner ID, Assigned User, Total Scanned, Verification Status headers</span>
-                <input type="file" id="fileScanners" accept=".csv" style="display: none;" onchange="handleFileSelect(event, 'scanners')">
-            </div>
-
-            <!-- Parsed Results Table -->
-            <div id="wrapperScanners" class="table-wrapper hidden" style="margin-top: 1.25rem;">
-                <table class="summary-table">
+        <div id="body-secChecklistAlerts" class="details-card-body">
+            <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 1.25rem;">
+                Verify and confirm the availability of mandatory reports before final audit reconciliation.
+            </p>
+            <div class="table-wrapper">
+                <table class="summary-table checklist-table">
                     <thead>
                         <tr>
-                            <th>Scanner ID</th>
-                            <th>Assigned Auditor</th>
-                            <th>Total Items Scanned</th>
-                            <th>Verification Status</th>
+                            <th style="width: 50px; text-align: center;">Sr.</th>
+                            <th>Mandatory Report Alert Target</th>
+                            <th style="width: 130px;">Available</th>
+                            <th style="width: 180px;">Verified By</th>
+                            <th>Remarks / Action Logs</th>
                         </tr>
                     </thead>
-                    <tbody id="tableScannersBody">
-                        <!-- CSV rows rendered dynamically -->
+                    <tbody>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">1</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Zero-Scan Pending Report</td>
+                            <td>
+                                <select id="alertAvail-1" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="No">No</option>
+                                    <option value="Yes" selected>Yes</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="alertUser-1" class="checklist-input" placeholder="Auditor Name" value="David Ocloo" oninput="saveChecklistState()">
+                            </td>
+                            <td>
+                                <input type="text" id="alertRemark-1" class="checklist-input" placeholder="e.g. Exported successfully" oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">2</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Consolidated Discrepancies Summary</td>
+                            <td>
+                                <select id="alertAvail-2" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="No" selected>No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="alertUser-2" class="checklist-input" placeholder="Auditor Name" oninput="saveChecklistState()">
+                            </td>
+                            <td>
+                                <input type="text" id="alertRemark-2" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">3</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">High-Value Scopes Report (>1000 GHC)</td>
+                            <td>
+                                <select id="alertAvail-3" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="No" selected>No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="alertUser-3" class="checklist-input" placeholder="Auditor Name" oninput="saveChecklistState()">
+                            </td>
+                            <td>
+                                <input type="text" id="alertRemark-3" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">4</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Audit Staff Shift & Attendance Log</td>
+                            <td>
+                                <select id="alertAvail-4" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="No" selected>No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="alertUser-4" class="checklist-input" placeholder="Auditor Name" oninput="saveChecklistState()">
+                            </td>
+                            <td>
+                                <input type="text" id="alertRemark-4" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">5</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">Scanner Recount Differential Sheet</td>
+                            <td>
+                                <select id="alertAvail-5" class="checklist-select" onchange="saveChecklistState()">
+                                    <option value="No" selected>No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" id="alertUser-5" class="checklist-input" placeholder="Auditor Name" oninput="saveChecklistState()">
+                            </td>
+                            <td>
+                                <input type="text" id="alertRemark-5" class="checklist-input" placeholder="Remarks..." oninput="saveChecklistState()">
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -273,12 +449,12 @@
 
     <!-- Footer Navigation Buttons -->
     <div class="workspace-footer-nav" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; border-top: 1px solid var(--color-border); margin-top: 2rem; width: 100%;">
-        <button type="button" id="btnDetailsBack" onclick="handleDetailsNavigationBack()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.35rem; visibility: hidden;">
+        <button type="button" id="btnDetailsBack" onclick="handleDetailsNavigationBack()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.35rem; visibility: hidden; cursor: pointer; height: auto;">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 3;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
             <span>Back</span>
         </button>
 
-        <button type="button" id="btnDetailsNext" onclick="handleDetailsNavigationNext()" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+        <button type="button" id="btnDetailsNext" onclick="handleDetailsNavigationNext()" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; height: auto;">
             <span id="btnDetailsNextText">Next</span>
             <svg id="btnDetailsNextIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 3;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
@@ -287,7 +463,26 @@
 </div>
 
 <!-- ========================================== -->
-<!-- HIGH FIDELITY CSV PARSING SCRIPTS -->
+<!-- PREMIUM SECURE CONFIRMATION MODAL -->
+<!-- ========================================== -->
+<div id="confirmDetailsFinishModal" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.2s ease;">
+    <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 480px; padding: 1.75rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--color-primary);">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <h3 style="font-size: 1.2rem; font-weight: 900; color: var(--color-text-main); margin: 0; text-transform: uppercase; letter-spacing: -0.01em;">Finish & Submit Details</h3>
+        </div>
+        <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin: 0;">
+            Are you sure you want to finish and submit all stock take information, parsed attendance/zone data, and checklists? This will freeze the details configuration.
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+            <button type="button" onclick="closeDetailsFinishModal()" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 12px; font-weight: 700; border-radius: 10px; cursor: pointer; height: auto;">Cancel</button>
+            <button type="button" onclick="executeDetailsFinish()" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 12px; font-weight: 700; border-radius: 10px; cursor: pointer; height: auto;">Confirm & Finish</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- HIGH FIDELITY CSV PARSING SCRIPTS & STATE -->
 <!-- ========================================== -->
 <script>
     /**
@@ -409,63 +604,27 @@
     }
 
     /**
-     * Renders Parsed Data into styled sheets.
+     * Renders Parsed Data into styled merged table.
      */
     function renderParsedData(rows, type) {
-        const headers = rows[0].map(h => h.trim().toUpperCase());
         const dataRows = rows.slice(1);
-        
         let html = "";
         let count = dataRows.length;
 
-        if (type === 'attendance') {
-            const tbody = document.getElementById("tableAttendanceBody");
+        if (type === 'merged') {
+            const tbody = document.getElementById("tableMergedBody");
             dataRows.forEach(row => {
                 html += `<tr>
-                    <td style="font-weight: 800; color: var(--color-text-main);">${escapeHtml(row[0] || 'N/A')}</td>
-                    <td style="font-family: monospace; font-weight: 700;">${escapeHtml(row[1] || 'N/A')}</td>
-                    <td>${escapeHtml(row[2] || 'General')}</td>
-                    <td><span class="badge ${row[3]?.trim().toLowerCase() === 'night' ? 'badge-info' : 'badge-success'}">${escapeHtml(row[3] || 'Day')}</span></td>
-                    <td style="font-weight: 700; color: var(--color-primary);">${escapeHtml(row[4] || '--:--')}</td>
+                    <td style="font-family: monospace; font-weight: 800; color: var(--color-text-main); text-align: center;">${escapeHtml(row[0] || 'N/A')}</td>
+                    <td style="font-weight: 800; color: var(--color-text-main);">${escapeHtml(row[1] || 'N/A')}</td>
+                    <td><span class="badge badge-info">${escapeHtml(row[2] || 'Auditor')}</span></td>
+                    <td style="font-family: monospace; font-weight: 700;">${escapeHtml(row[3] || 'N/A')}</td>
+                    <td style="font-family: monospace; font-weight: 700; color: var(--color-primary);">${escapeHtml(row[4] || 'N/A')}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
-            document.getElementById("wrapperAttendance").classList.remove("hidden");
-            updateBadge('secAttendance', `${count} Active`, 'success');
-            
-        } else if (type === 'zones') {
-            const tbody = document.getElementById("tableZonesBody");
-            dataRows.forEach(row => {
-                const status = (row[3] || 'Pending').trim().toLowerCase();
-                const badgeClass = status === 'scanned' ? 'badge-success' : 'badge-warning';
-                
-                html += `<tr>
-                    <td style="font-family: monospace; font-weight: 800; color: var(--color-text-main);">${escapeHtml(row[0] || 'N/A')}</td>
-                    <td>${escapeHtml(row[1] || 'N/A')}</td>
-                    <td style="font-weight: 800; font-family: monospace;">${parseInt(row[2] || '0').toLocaleString()}</td>
-                    <td><span class="badge ${badgeClass}">${escapeHtml(row[3] || 'Pending')}</span></td>
-                </tr>`;
-            });
-            tbody.innerHTML = html;
-            document.getElementById("wrapperZones").classList.remove("hidden");
-            updateBadge('secZones', `${count} Zones`, 'success');
-            
-        } else if (type === 'scanners') {
-            const tbody = document.getElementById("tableScannersBody");
-            dataRows.forEach(row => {
-                const status = (row[3] || 'Pending').trim().toLowerCase();
-                const isVerified = status === 'verified' || status === 'completed';
-                
-                html += `<tr>
-                    <td style="font-family: monospace; font-weight: 800; color: var(--color-text-main);">${escapeHtml(row[0] || 'N/A')}</td>
-                    <td style="font-weight: 700;">${escapeHtml(row[1] || 'Unassigned')}</td>
-                    <td style="font-weight: 800; font-family: monospace;">${parseInt(row[2] || '0').toLocaleString()}</td>
-                    <td><span class="badge ${isVerified ? 'badge-success' : 'badge-warning'}">${escapeHtml(row[3] || 'Pending')}</span></td>
-                </tr>`;
-            });
-            tbody.innerHTML = html;
-            document.getElementById("wrapperScanners").classList.remove("hidden");
-            updateBadge('secScanners', `${count} Devices`, 'success');
+            document.getElementById("wrapperMerged").classList.remove("hidden");
+            updateBadge('secMerged', `${count} Records`, 'success');
         }
 
         updateSidebarDetailsTracker();
@@ -491,15 +650,9 @@
         let csvContent = "";
         let filename = "";
 
-        if (type === 'attendance') {
-            csvContent = "Staff Name,Staff ID,Department,Shift,Check-in Time\nDavid Ocloo,M104,IT Support,Day,08:15 AM\nSamuel Amegbletor,M203,Internal Audit,Day,08:30 AM\nAuditor Kojo,M405,Inventory,Night,10:00 PM\nOfficer Zahed,M301,Management,Day,09:00 AM";
-            filename = "attendance_template.csv";
-        } else if (type === 'zones') {
-            csvContent = "Zone ID,Zone Description,Scanned Count,Status\nZONE-01,Grocery Aisle 1 (A-C),1420,Scanned\nZONE-02,Electronics Wall Case,580,Scanned\nZONE-03,Warehouse Cold Room,0,Pending\nZONE-04,Main Counter Display,120,Scanned\nZONE-05,Souk Vegetable Baskets,420,Scanned";
-            filename = "zones_template.csv";
-        } else if (type === 'scanners') {
-            csvContent = "Scanner ID,Assigned User,Total Scanned,Verification Status\nSCN-801,David Ocloo,1420,Verified\nSCN-802,Samuel,580,Verified\nSCN-803,Auditor Kojo,0,Pending\nSCN-804,Officer Zahed,540,Verified";
-            filename = "scanners_template.csv";
+        if (type === 'merged') {
+            csvContent = "SI,STAFF NAME,ROLE IN AUDIT,ZONE NAME,SCANNING ID\n1,David Ocloo,IT Support,ZONE-01,SCN-801\n2,Samuel Amegbletor,Internal Audit,ZONE-02,SCN-802\n3,Auditor Kojo,Inventory,ZONE-03,SCN-803\n4,Officer Zahed,Management,ZONE-04,SCN-804";
+            filename = "attendance_zone_tracker_template.csv";
         }
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -537,11 +690,116 @@
         updateSidebarDetailsTracker();
     }
 
+    function saveChecklistState() {
+        const preStockState = [];
+        const alertState = [];
+
+        // Save Pre-Stock Workflow
+        for (let i = 1; i <= 5; i++) {
+            const status = document.getElementById("taskStatus-" + i).value;
+            const remark = document.getElementById("taskRemark-" + i).value;
+            preStockState.push({ status, remark });
+            
+            // Render nice color indicators dynamically
+            const select = document.getElementById("taskStatus-" + i);
+            if (status === 'Completed') {
+                select.style.color = '#065f46';
+                select.style.backgroundColor = '#ecfdf5';
+                select.style.borderColor = '#a7f3d0';
+            } else {
+                select.style.color = '#92400e';
+                select.style.backgroundColor = '#fffbeb';
+                select.style.borderColor = '#fde68a';
+            }
+        }
+
+        // Save Mandatory Report Alerts
+        for (let i = 1; i <= 5; i++) {
+            const avail = document.getElementById("alertAvail-" + i).value;
+            const user = document.getElementById("alertUser-" + i).value;
+            const remark = document.getElementById("alertRemark-" + i).value;
+            alertState.push({ avail, user, remark });
+
+            const select = document.getElementById("alertAvail-" + i);
+            if (avail === 'Yes') {
+                select.style.color = '#065f46';
+                select.style.backgroundColor = '#ecfdf5';
+                select.style.borderColor = '#a7f3d0';
+            } else {
+                select.style.color = '#991b1b';
+                select.style.backgroundColor = '#fef2f2';
+                select.style.borderColor = '#fca5a5';
+            }
+        }
+
+        localStorage.setItem("melcom_checklist_prestock", JSON.stringify(preStockState));
+        localStorage.setItem("melcom_checklist_alerts", JSON.stringify(alertState));
+
+        updateChecklistBadges();
+        updateSidebarDetailsTracker();
+    }
+
+    function updateChecklistBadges() {
+        let completedPre = 0;
+        let verifiedAlert = 0;
+
+        for (let i = 1; i <= 5; i++) {
+            if (document.getElementById("taskStatus-" + i).value === 'Completed') completedPre++;
+            if (document.getElementById("alertAvail-" + i).value === 'Yes') verifiedAlert++;
+        }
+
+        const badgePre = document.getElementById("badge-chkPreStock");
+        const badgeAlert = document.getElementById("badge-chkAlerts");
+        
+        if (badgePre) {
+            badgePre.innerText = `${completedPre}/5 Completed`;
+            badgePre.className = `badge ${completedPre === 5 ? 'badge-success' : 'badge-warning'}`;
+        }
+
+        if (badgeAlert) {
+            badgeAlert.innerText = `${verifiedAlert}/5 Verified`;
+            badgeAlert.className = `badge ${verifiedAlert === 5 ? 'badge-success' : 'badge-warning'}`;
+        }
+    }
+
     function saveDetailsState(type, csvText) {
         localStorage.setItem("melcom_details_csv_" + type, csvText);
     }
 
+    function saveDetailsVerificationCheckbox() {
+        const chk = document.getElementById("chkConfirmSetupVerified");
+        localStorage.setItem("melcom_details_setup_verified", chk.checked ? "true" : "false");
+    }
+
     function loadDetailsState() {
+        // 0. Load submitted Stock Audit parameters
+        const isSubmitted = localStorage.getItem("melcom_stock_audit_submitted") === "true";
+        const auditDataRaw = localStorage.getItem("melcom_stock_audit_data");
+        const summaryCard = document.getElementById("stockAuditSubmittedSummary");
+
+        if (isSubmitted && auditDataRaw && summaryCard) {
+            try {
+                const data = JSON.parse(auditDataRaw);
+                document.getElementById("sumShopCode").innerText = data.shopCode || "-";
+                document.getElementById("sumStockDate").innerText = data.stockDate || "-";
+                document.getElementById("sumAuditType").innerText = data.auditType || "-";
+                document.getElementById("sumAuditMode").innerText = data.auditMode || "-";
+                document.getElementById("sumDepts").innerText = data.depts || "None";
+                document.getElementById("sumSegments").innerText = data.groups || "None";
+                
+                // Show summary
+                summaryCard.classList.remove("hidden");
+                
+                // Load verification checkbox
+                const chk = document.getElementById("chkConfirmSetupVerified");
+                if (chk) {
+                    chk.checked = localStorage.getItem("melcom_details_setup_verified") === "true";
+                }
+            } catch(e){}
+        } else if (summaryCard) {
+            summaryCard.classList.add("hidden");
+        }
+
         // 1. Load Stock Info
         const info = localStorage.getItem("melcom_details_info");
         if (info) {
@@ -562,50 +820,93 @@
             } catch(e) {}
         }
 
-        // 2. Load CSV Tables
-        ['attendance', 'zones', 'scanners'].forEach(type => {
-            const csv = localStorage.getItem("melcom_details_csv_" + type);
-            if (csv) {
-                const rows = parseCsvText(csv);
-                if (rows && rows.length > 0) {
-                    renderParsedData(rows, type);
-                }
+        // 2. Load CSV Table
+        const csv = localStorage.getItem("melcom_details_csv_merged");
+        if (csv) {
+            const rows = parseCsvText(csv);
+            if (rows && rows.length > 0) {
+                renderParsedData(rows, 'merged');
             }
-        });
+        }
         
+        // 3. Load Checklist states
+        const prestock = localStorage.getItem("melcom_checklist_prestock");
+        const alerts = localStorage.getItem("melcom_checklist_alerts");
+
+        if (prestock) {
+            try {
+                const state = JSON.parse(prestock);
+                state.forEach((item, index) => {
+                    const i = index + 1;
+                    if (document.getElementById("taskStatus-" + i)) {
+                        document.getElementById("taskStatus-" + i).value = item.status || "Pending";
+                        document.getElementById("taskRemark-" + i).value = item.remark || "";
+                    }
+                });
+            } catch(e) {}
+        }
+
+        if (alerts) {
+            try {
+                const state = JSON.parse(alerts);
+                state.forEach((item, index) => {
+                    const i = index + 1;
+                    if (document.getElementById("alertAvail-" + i)) {
+                        document.getElementById("alertAvail-" + i).value = item.avail || "No";
+                        document.getElementById("alertUser-" + i).value = item.user || "";
+                        document.getElementById("alertRemark-" + i).value = item.remark || "";
+                    }
+                });
+            } catch(e) {}
+        }
+
+        saveChecklistState(); // Sync badge colors and values immediately
         updateSidebarDetailsTracker();
         updateDetailsWizardState();
     }
 
     function updateSidebarDetailsTracker() {
-        // Check if there is an active progress tracker panel in sidebar
         const tracker = document.getElementById("sidebarDetailsProgressText");
         const fill = document.getElementById("sidebarDetailsProgress");
         if (!tracker) return;
 
         let completed = 0;
         
-        // Check stock take info (critical fields)
+        // Check stock take info
         const storeName = document.getElementById("infoStoreName").value.trim();
         const auditLead = document.getElementById("infoAuditLead").value.trim();
         if (storeName !== "" && auditLead !== "") completed++;
 
-        // Check CSVs
-        if (localStorage.getItem("melcom_details_csv_attendance")) completed++;
-        if (localStorage.getItem("melcom_details_csv_zones")) completed++;
-        if (localStorage.getItem("melcom_details_csv_scanners")) completed++;
+        // Check Merged CSV
+        if (localStorage.getItem("melcom_details_csv_merged")) completed++;
+
+        // Check Checklist Pre-stock
+        let completedPre = 0;
+        for (let i = 1; i <= 5; i++) {
+            if (document.getElementById("taskStatus-" + i) && document.getElementById("taskStatus-" + i).value === 'Completed') completedPre++;
+        }
+        if (completedPre === 5) completed++;
+
+        // Check Checklist Alerts
+        let verifiedAlert = 0;
+        for (let i = 1; i <= 5; i++) {
+            if (document.getElementById("alertAvail-" + i) && document.getElementById("alertAvail-" + i).value === 'Yes') verifiedAlert++;
+        }
+        if (verifiedAlert === 5) completed++;
 
         const percent = Math.round((completed / 4) * 100);
         tracker.innerText = `${completed}/4 Completed`;
         if (fill) fill.style.width = `${percent}%`;
     }
 
-    // Details Wizard Sequential Navigation
+    // -------------------------------------------------------------
+    // DETAILS WIZARD SEQUENTIAL NAVIGATION
+    // -------------------------------------------------------------
     let activeDetailsStep = 1;
 
     function handleDetailsNavigationNext() {
         if (activeDetailsStep === 4) {
-            alert("Congratulations! All stock take details have been successfully configured.");
+            showDetailsFinishModal();
             return;
         }
         activeDetailsStep++;
@@ -616,6 +917,20 @@
         if (activeDetailsStep === 1) return;
         activeDetailsStep--;
         updateDetailsWizardState();
+    }
+
+    function showDetailsFinishModal() {
+        document.getElementById("confirmDetailsFinishModal").classList.remove("hidden");
+    }
+
+    function closeDetailsFinishModal() {
+        document.getElementById("confirmDetailsFinishModal").classList.add("hidden");
+    }
+
+    function executeDetailsFinish() {
+        closeDetailsFinishModal();
+        localStorage.setItem("melcom_details_finished", "true");
+        alert("Congratulations! All stock take details and checklists have been successfully completed and locked.");
     }
 
     function updateDetailsWizardState() {

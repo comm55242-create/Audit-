@@ -45,12 +45,6 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                 </span>
                 <span>Details</span>
             </button>
-            <button id="menuTabChecklist" class="dashboard-tab-item" onclick="switchTab('checklist')">
-                <span class="dashboard-tab-icon" style="display: flex; align-items: center; justify-content: center;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                </span>
-                <span>Checklist</span>
-            </button>
         </div>
 
         <!-- Scrollable Sidebar Content: Progress Trackers -->
@@ -126,37 +120,15 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
                     </div>
                     <div class="step-node" id="menuDetailsStep-2">
                         <div id="circleDetails-2" class="step-circle upcoming">2</div>
-                        <span id="textDetails-2" class="step-text upcoming">Staff Attendance</span>
+                        <span id="textDetails-2" class="step-text upcoming">Staff & Zone CSV</span>
                     </div>
                     <div class="step-node" id="menuDetailsStep-3">
                         <div id="circleDetails-3" class="step-circle upcoming">3</div>
-                        <span id="textDetails-3" class="step-text upcoming">Zone Tracker</span>
+                        <span id="textDetails-3" class="step-text upcoming">Pre-Stock Checklist</span>
                     </div>
                     <div class="step-node" id="menuDetailsStep-4">
                         <div id="circleDetails-4" class="step-circle upcoming">4</div>
-                        <span id="textDetails-4" class="step-text upcoming">Scan Control</span>
-                    </div>
-                </nav>
-            </div>
-
-            <!-- DYNAMIC SIDEBAR 3: CHECKLIST TRACKER (Hidden by default) -->
-            <div id="sidebarChecklistTracker" class="hidden" style="width: 100%;">
-                <div class="sidebar-progress-labels" style="margin-top: 0.5rem;">
-                    <span>Progress</span>
-                    <span id="sidebarChecklistProgressText" class="progress-number">0/10 Completed</span>
-                </div>
-                <div class="sidebar-progress-track">
-                    <div id="sidebarChecklistProgress" class="sidebar-progress-fill" style="width: 0%;"></div>
-                </div>
-
-                <nav class="sidebar-nav" style="margin-top: 1.25rem;">
-                    <div class="step-node" id="menuChecklistStep-1">
-                        <div id="circleChecklist-1" class="step-circle active">1</div>
-                        <span id="textChecklist-1" class="step-text active">Pre-Stock Workflow</span>
-                    </div>
-                    <div class="step-node" id="menuChecklistStep-2">
-                        <div id="circleChecklist-2" class="step-circle upcoming">2</div>
-                        <span id="textChecklist-2" class="step-text upcoming">Report Alert Checklist</span>
+                        <span id="textDetails-4" class="step-text upcoming">Mandatory Alerts</span>
                     </div>
                 </nav>
             </div>
@@ -244,10 +216,6 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
             <div id="tabContentDetails" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%;">
                 <?php require_once __DIR__ . '/details.php'; ?>
             </div>
-
-            <div id="tabContentChecklist" class="hidden" style="display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%;">
-                <?php require_once __DIR__ . '/checklist.php'; ?>
-            </div>
         </div>
     </main>
 </div>
@@ -259,58 +227,34 @@ $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'a
     function switchTab(tabName) {
         const tabStockAudit = document.getElementById("tabContentStockAudit");
         const tabDetails = document.getElementById("tabContentDetails");
-        const tabChecklist = document.getElementById("tabContentChecklist");
         
         const menuStockAudit = document.getElementById("menuTabStockAudit");
         const menuDetails = document.getElementById("menuTabDetails");
-        const menuChecklist = document.getElementById("menuTabChecklist");
 
         const sidebarStockAudit = document.getElementById("sidebarProgressTracker");
         const sidebarDetails = document.getElementById("sidebarDetailsTracker");
-        const sidebarChecklist = document.getElementById("sidebarChecklistTracker");
 
         if (tabName === 'stock_audit') {
             tabStockAudit.classList.remove("hidden");
             tabDetails.classList.add("hidden");
-            tabChecklist.classList.add("hidden");
             
             menuStockAudit.classList.add("active");
             menuDetails.classList.remove("active");
-            menuChecklist.classList.remove("active");
 
             sidebarStockAudit.classList.remove("hidden");
             sidebarDetails.classList.add("hidden");
-            sidebarChecklist.classList.add("hidden");
-        } else if (tabName === 'details') {
+        } else {
             tabStockAudit.classList.add("hidden");
             tabDetails.classList.remove("hidden");
-            tabChecklist.classList.add("hidden");
             
             menuStockAudit.classList.remove("active");
             menuDetails.classList.add("active");
-            menuChecklist.classList.remove("active");
 
             sidebarStockAudit.classList.add("hidden");
             sidebarDetails.classList.remove("hidden");
-            sidebarChecklist.classList.add("hidden");
 
             // Safe state triggers
             if (window.loadDetailsState) window.loadDetailsState();
-        } else {
-            tabStockAudit.classList.add("hidden");
-            tabDetails.classList.add("hidden");
-            tabChecklist.classList.remove("hidden");
-            
-            menuStockAudit.classList.remove("active");
-            menuDetails.classList.remove("active");
-            menuChecklist.classList.add("active");
-
-            sidebarStockAudit.classList.add("hidden");
-            sidebarDetails.classList.add("hidden");
-            sidebarChecklist.classList.remove("hidden");
-
-            // Safe state triggers
-            if (window.loadChecklistState) window.loadChecklistState();
         }
     }
 
