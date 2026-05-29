@@ -519,7 +519,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    max-width: 576px;
+    max-width: 768px;
     width: 100%;
 }
 
@@ -551,7 +551,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    max-width: 576px;
+    max-width: 768px;
     width: 100%;
 }
 
@@ -697,7 +697,7 @@ body {
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    max-width: 896px; /* max-w-4xl */
+    max-width: 1152px; /* Expanded max-w-6xl for wider viewports */
     max-height: 420px;
     overflow-y: auto;
     width: 100%;
@@ -1747,7 +1747,7 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     width: 100%;
-    max-width: 896px;
+    max-width: 1152px;
     margin: 0 auto;
 }
 
@@ -1890,7 +1890,7 @@ body {
     grid-template-columns: 1fr;
     gap: 1.75rem;
     width: 100%;
-    max-width: 896px;
+    max-width: 1152px;
     margin: 0 auto;
 }
 
