@@ -11,61 +11,75 @@
     <div class="details-card">
         <div class="details-card-header" onclick="toggleDetailsCard('secStockInfo')">
             <span class="details-card-title">
-                <span class="details-card-icon">📄</span>
+                <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </span>
                 <span>1. Stock Take Information Sheet</span>
             </span>
             <span id="icon-secStockInfo" style="font-size: 11px; font-weight: 800; color: var(--color-text-light);">[ COLLAPSE ]</span>
         </div>
         
         <div id="body-secStockInfo" class="details-card-body">
-            <div class="form-group-stack" style="gap: 1.5rem;">
+            <!-- 2x2 Grid of visual panels (i. ii. iii. iv.) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
                 
-                <!-- Group A: Store Identification & Period -->
-                <div style="border-bottom: 1px dashed var(--color-border); padding-bottom: 1.25rem;">
-                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">I. Store & Audit Timeline</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
-                        <div class="form-field">
-                            <label class="form-label">Store Name</label>
-                            <input type="text" id="infoStoreName" class="form-input" placeholder="e.g. Accra Central Mall" oninput="saveStockInfoState()">
-                        </div>
+                <!-- Group I: Store Identification & Period -->
+                <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 0.25rem; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: var(--color-primary-light); color: var(--color-primary); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900;">I</span>
+                        <span>Store & Audit Timeline</span>
+                    </h4>
+                    <div class="form-field">
+                        <label class="form-label">Store Name</label>
+                        <input type="text" id="infoStoreName" class="form-input" placeholder="e.g. Accra Central Mall" oninput="saveStockInfoState()">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-field">
                             <label class="form-label">Store Code</label>
                             <input type="text" id="infoStoreCode" class="form-input" placeholder="e.g. ACC-01" oninput="saveStockInfoState()">
                         </div>
                         <div class="form-field">
                             <label class="form-label">Audit Period</label>
-                            <input type="text" id="infoAuditPeriod" class="form-input" placeholder="e.g. Q2 2026 (May 29 - Jun 02)" oninput="saveStockInfoState()">
+                            <input type="text" id="infoAuditPeriod" class="form-input" placeholder="e.g. Q2 2026" oninput="saveStockInfoState()">
                         </div>
                     </div>
                 </div>
 
-                <!-- Group B: Store & Operations Contacts -->
-                <div style="border-bottom: 1px dashed var(--color-border); padding-bottom: 1.25rem;">
-                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">II. Store & Operations Management</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                <!-- Group II: Store & Operations Contacts -->
+                <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 0.25rem; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: var(--color-primary-light); color: var(--color-primary); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900;">II</span>
+                        <span>Store & Operations Management</span>
+                    </h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-field">
                             <label class="form-label">Store Manager Name</label>
                             <input type="text" id="infoStoreManager" class="form-input" placeholder="e.g. Samuel Kojo" oninput="saveStockInfoState()">
                         </div>
                         <div class="form-field">
-                            <label class="form-label">Store Manager Contact Number</label>
+                            <label class="form-label">Manager Contact</label>
                             <input type="tel" id="infoStoreManagerContact" class="form-input" placeholder="e.g. +233 24 123 4567" oninput="saveStockInfoState()">
                         </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-field">
-                            <label class="form-label">Operations Manager Name</label>
+                            <label class="form-label">Operations Manager</label>
                             <input type="text" id="infoOpsManager" class="form-input" placeholder="e.g. David Mensah" oninput="saveStockInfoState()">
                         </div>
                         <div class="form-field">
-                            <label class="form-label">Operations Manager Contact Number</label>
+                            <label class="form-label">Ops Contact</label>
                             <input type="tel" id="infoOpsManagerContact" class="form-input" placeholder="e.g. +233 50 987 6543" oninput="saveStockInfoState()">
                         </div>
                     </div>
                 </div>
 
-                <!-- Group C: Audit Leadership & Roster Counts -->
-                <div style="border-bottom: 1px dashed var(--color-border); padding-bottom: 1.25rem;">
-                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">III. Audit Personnel & Workforce Counts</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+                <!-- Group III: Audit Leadership & Roster Counts -->
+                <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 0.25rem; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: var(--color-primary-light); color: var(--color-primary); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900;">III</span>
+                        <span>Audit Personnel & Counts</span>
+                    </h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-field">
                             <label class="form-label">Audit Lead</label>
                             <input type="text" id="infoAuditLead" class="form-input" placeholder="e.g. David Ocloo" oninput="saveStockInfoState()">
@@ -74,23 +88,28 @@
                             <label class="form-label">Auditor (HO)</label>
                             <input type="text" id="infoAuditorHO" class="form-input" placeholder="e.g. Head Office Inspector" oninput="saveStockInfoState()">
                         </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div class="form-field">
                             <label class="form-label">Audit Team Count</label>
                             <input type="number" id="infoAuditTeamCount" class="form-input" min="0" placeholder="e.g. 5" oninput="saveStockInfoState()">
                         </div>
                         <div class="form-field">
-                            <label class="form-label">Operations Team Count</label>
+                            <label class="form-label">Ops Team Count</label>
                             <input type="number" id="infoOpsTeamCount" class="form-input" min="0" placeholder="e.g. 12" oninput="saveStockInfoState()">
                         </div>
                     </div>
                 </div>
 
-                <!-- Group D: Zone Details -->
-                <div>
-                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 1rem; letter-spacing: 0.05em;">IV. Zone Details & Notes</h4>
-                    <div class="form-field">
+                <!-- Group IV: Zone Details -->
+                <div style="background: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--color-primary); margin-bottom: 0.25rem; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="background: var(--color-primary-light); color: var(--color-primary); width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900;">IV</span>
+                        <span>Zone Details & Notes</span>
+                    </h4>
+                    <div class="form-field" style="flex: 1; display: flex; flex-direction: column;">
                         <label class="form-label">Zone Details</label>
-                        <textarea id="infoZoneDetails" class="form-input" style="min-height: 90px; resize: vertical; padding: 0.75rem; font-size: 13px;" placeholder="Describe active audit zones, department codes, scanner mappings, or specific boundaries..." oninput="saveStockInfoState()"></textarea>
+                        <textarea id="infoZoneDetails" class="form-input" style="flex: 1; min-height: 104px; resize: vertical; padding: 0.75rem; font-size: 13px;" placeholder="Describe active audit zones, department codes, scanner mappings, or specific boundaries..." oninput="saveStockInfoState()"></textarea>
                     </div>
                 </div>
 
@@ -102,7 +121,9 @@
     <div class="details-card">
         <div class="details-card-header" onclick="toggleDetailsCard('secAttendance')">
             <span class="details-card-title">
-                <span class="details-card-icon">👥</span>
+                <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </span>
                 <span>2. Audit Staff Attendance Sheet</span>
             </span>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -152,7 +173,9 @@
     <div class="details-card">
         <div class="details-card-header" onclick="toggleDetailsCard('secZones')">
             <span class="details-card-title">
-                <span class="details-card-icon">📍</span>
+                <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </span>
                 <span>3. Zone Tracker</span>
             </span>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -201,7 +224,9 @@
     <div class="details-card">
         <div class="details-card-header" onclick="toggleDetailsCard('secScanners')">
             <span class="details-card-title">
-                <span class="details-card-icon">📟</span>
+                <span class="details-card-icon" style="display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; stroke-width: 2.25;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                </span>
                 <span>4. Scan Control Sheet</span>
             </span>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
