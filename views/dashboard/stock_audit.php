@@ -84,70 +84,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Hidden dynamic items search toggle switch & inputs block (Visible when Itemwise card selected) -->
-    <div id="itemwiseContainer" class="hidden" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 896px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem;">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 13px; font-weight: 800; color: var(--color-text-main);">ITEMS CONFIGURATION SCOPE</span>
-                <span style="font-size: 11px; color: var(--color-text-light);">Turn toggle ON to restrict the active audit only to selected items.</span>
-            </div>
-            
-            <label class="switch">
-                <input type="checkbox" id="toggleItemwiseItems" onchange="handleItemwiseToggleChange()">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <!-- Dynamic Ajax Live Autocomplete items search bar section -->
-        <div id="itemsSearchSection" class="hidden" style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <div style="display: flex; gap: 0.75rem; width: 100%;">
-                <div class="input-icon-wrapper" style="flex: 1;">
-                    <span class="input-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </span>
-                    <input type="text" id="itemQueryInput" class="form-input has-icon" placeholder="Search by Code, Name, or Barcode..." onkeydown="handleSearchInputKeyDown(event)">
-                </div>
-                
-                <button type="button" onclick="executeItemSearch()" class="btn btn-primary" style="padding: 0 1.5rem; height: auto;">Search</button>
-                
-                <!-- Rapid client CSV parser import button -->
-                <button type="button" onclick="triggerCsvImport()" class="btn btn-secondary" style="padding: 0 1.5rem; border-color: var(--color-primary); color: var(--color-primary); display: inline-flex; align-items: center; gap: 0.35rem; height: auto;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    <span>Import CSV</span>
-                </button>
-                
-                <input type="file" id="csvFileInput" accept=".csv" onchange="parseItemCsvFile(event)" style="display: none;">
-            </div>
-
-            <!-- Tabular Search Results list box with off-screen rendering buffers -->
-            <div class="table-wrapper" style="max-height: 250px; background-color: #ffffff;">
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px; padding: 0.5rem 1rem; text-align: center;">
-                                <label style="display: inline-flex; align-items: center; cursor: pointer; user-select: none; font-size: 9px; font-weight: 900; gap: 0.25rem;">
-                                    <input type="checkbox" id="toggleSelectAllItems" onchange="handleSelectAllItemsToggleChange(this)" style="accent-color: var(--color-primary); width: 14px; height: 14px; border-radius: 4px;">
-                                    <span>ALL</span>
-                                </label>
-                            </th>
-                            <th style="padding: 0.5rem 1rem;">Item Code</th>
-                            <th style="padding: 0.5rem 1rem;">Item Name</th>
-                            <th style="padding: 0.5rem 1rem;">Barcode</th>
-                            <th style="padding: 0.5rem 1rem;">Price</th>
-                            <th style="padding: 0.5rem 1rem;">Stock</th>
-                            <th style="padding: 0.5rem 1rem;">Dept</th>
-                            <th style="padding: 0.5rem 1rem;">Group</th>
-                            <th style="padding: 0.5rem 1rem;">Subgroup</th>
-                        </tr>
-                    </thead>
-                    <tbody id="itemsSearchResultTableBody">
-                        <tr><td colspan="9" style="text-align: center; color: var(--color-text-light); font-size: 11px; padding: 1.5rem 0;">Type search query above to populate database matching items list.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- STEP 6: DEPARTMENT SELECTOR -->
@@ -158,7 +94,7 @@
     </div>
 
     <!-- Search Input & Auto-Select toggle section -->
-    <div style="display: flex; gap: 1rem; align-items: center; width: 100%; max-width: 896px; margin-bottom: 0.75rem;">
+    <div style="display: flex; gap: 1rem; align-items: center; width: 100%; max-width: 1152px; margin-bottom: 0.75rem;">
         <div class="input-icon-wrapper" style="flex: 1;">
             <span class="input-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -188,7 +124,7 @@
     </div>
 
     <!-- Hidden dynamic auto scoping depth toggle switch -->
-    <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem; width: 100%; max-width: 896px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem; width: 100%; max-width: 1152px;">
         <div style="display: flex; flex-direction: column;">
             <span style="font-size: 13px; font-weight: 800; color: var(--color-text-main); text-transform: uppercase;">Scoping Depth: Shop Stock-Take (SST)</span>
             <span style="font-size: 11px; color: var(--color-text-light);">Turn toggle ON to automatically configure all segments under selected departments.</span>
@@ -649,13 +585,9 @@
         }
 
         let targetStep = activeStep;
-        const toggle = document.getElementById("toggleItemwiseItems");
-        const itemwise = document.getElementById("chkModeItemwise").checked;
 
         if (activeStep === 5) {
-            if (itemwise && toggle && toggle.checked) {
-                targetStep = 8; // Route directly from Step 5 Mode configuration to Step 8 Summary
-            } else if (selectedType === 'PI') {
+            if (selectedType === 'PI') {
                 targetStep = 8; // Complete PI skips Steps 6 & 7
             } else {
                 targetStep = 6;
@@ -688,13 +620,9 @@
         if (activeStep === 3) return; // Prevent going back to authentication views
 
         let targetStep = activeStep;
-        const toggle = document.getElementById("toggleItemwiseItems");
-        const itemwise = document.getElementById("chkModeItemwise").checked;
 
         if (activeStep === 8) {
-            if (itemwise && toggle && toggle.checked) {
-                targetStep = 5;
-            } else if (selectedType === 'PI') {
+            if (selectedType === 'PI') {
                 targetStep = 5;
             } else if (selectedScopeDepth === 'SST') {
                 targetStep = 6;
@@ -734,11 +662,6 @@
         document.getElementById("chkModeScanning").checked = false;
         document.getElementById("cardItemwise").className = "select-card";
         document.getElementById("cardScanning").className = "select-card";
-        document.getElementById("itemwiseContainer").classList.add("hidden");
-
-        const toggle = document.getElementById("toggleItemwiseItems");
-        if (toggle) toggle.checked = false;
-        document.getElementById("itemsSearchSection").classList.add("hidden");
         selectedItemwiseItems = [];
 
         validateActiveStepForm();
@@ -763,31 +686,6 @@
         if (chkItemwise.checked) selectedMode.push("Itemwise");
         if (chkScanning.checked) selectedMode.push("Scanning");
 
-        // Toggle ITEMS scope visibility
-        const container = document.getElementById("itemwiseContainer");
-        if (chkItemwise.checked) {
-            container.classList.remove("hidden");
-        } else {
-            container.classList.add("hidden");
-            const toggle = document.getElementById("toggleItemwiseItems");
-            if (toggle) toggle.checked = false;
-            document.getElementById("itemsSearchSection").classList.add("hidden");
-            selectedItemwiseItems = [];
-        }
-
-        validateActiveStepForm();
-    }
-
-    function handleItemwiseToggleChange() {
-        const toggle = document.getElementById("toggleItemwiseItems");
-        const searchSect = document.getElementById("itemsSearchSection");
-        if (toggle.checked) {
-            searchSect.classList.remove("hidden");
-            document.getElementById("itemQueryInput").focus();
-        } else {
-            searchSect.classList.add("hidden");
-            selectedItemwiseItems = [];
-        }
         validateActiveStepForm();
     }
 
@@ -1150,16 +1048,11 @@
         } else if (activeStep === 4) {
             isValid = (selectedType !== "");
         } else if (activeStep === 5) {
-            const toggle = document.getElementById("toggleItemwiseItems");
             const chkItemwise = document.getElementById("chkModeItemwise").checked;
             const chkScanning = document.getElementById("chkModeScanning").checked;
 
             if (chkItemwise) {
-                if (toggle.checked) {
-                    isValid = (selectedItemwiseItems.length > 0);
-                } else {
-                    isValid = true;
-                }
+                isValid = true;
             } else if (chkScanning) {
                 isValid = false; // Prevents progression for SCANNING mode as requested
             } else {
@@ -1194,28 +1087,7 @@
 
         let htmlBuffer = "";
 
-        const toggle = document.getElementById("toggleItemwiseItems");
-        const itemwise = document.getElementById("chkModeItemwise").checked;
-
-        if (itemwise && toggle && toggle.checked) {
-            selectedItemwiseItems.forEach(item => {
-                const deptLabel = `${item.DEPT} [${item.ITEM_CODE}]`;
-                const groupLabel = `${item.VC_GROUP}`;
-                const subgroupLabel = `${item.VC_SUBGROUP} [${item.ITEM_NAME}]`;
-                
-                htmlBuffer += `
-                    <tr class="row-highlight">
-                        <td>${stockDate}</td>
-                        <td>${shopCode}</td>
-                        <td>${typeBadge}</td>
-                        <td>${modesList}</td>
-                        <td>${deptLabel}</td>
-                        <td>${groupLabel}</td>
-                        <td>${subgroupLabel}</td>
-                    </tr>
-                `;
-            });
-        } else if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
+        if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
             deptsData.forEach(dept => {
                 const deptName = dept.name;
                 if (dept.groups.length === 0) {
@@ -1381,14 +1253,7 @@
         let groups = [];
         let subgroups = [];
 
-        const toggle = document.getElementById("toggleItemwiseItems");
-        const itemwise = document.getElementById("chkModeItemwise").checked;
-
-        if (itemwise && toggle && toggle.checked) {
-            depts = selectedItemwiseItems.map(i => `${i.DEPT} [${i.ITEM_CODE}]`);
-            groups = selectedItemwiseItems.map(i => i.VC_GROUP);
-            subgroups = selectedItemwiseItems.map(i => `${i.VC_SUBGROUP} [${i.ITEM_NAME}]`);
-        } else if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
+        if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
             const uniqueDepts = new Set();
             const uniqueGroups = new Set();
             const uniqueSubs = new Set();
