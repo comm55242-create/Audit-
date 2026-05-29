@@ -1087,56 +1087,40 @@
 
         let htmlBuffer = "";
 
-        if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
-            deptsData.forEach(dept => {
-                const deptName = dept.name;
-                if (dept.groups.length === 0) {
-                    htmlBuffer += `
-                        <tr class="row-highlight">
-                            <td>${stockDate}</td>
-                            <td>${shopCode}</td>
-                            <td>${typeBadge}</td>
-                            <td>${modesList}</td>
-                            <td>${deptName}</td>
-                            <td>All Groups</td>
-                            <td>All Subgroups</td>
-                        </tr>
-                    `;
-                } else {
-                    dept.groups.forEach(group => {
-                        const groupName = group.name;
-                        if (group.subgroups.length === 0) {
-                            htmlBuffer += `
-                                <tr class="row-highlight">
-                                    <td>${stockDate}</td>
-                                    <td>${shopCode}</td>
-                                    <td>${typeBadge}</td>
-                                    <td>${modesList}</td>
-                                    <td>${deptName}</td>
-                                    <td>${groupName}</td>
-                                    <td>All Subgroups</td>
-                                </tr>
-                            `;
-                        } else {
-                            group.subgroups.forEach(sub => {
-                                const subName = sub.name;
-                                htmlBuffer += `
-                                    <tr class="row-highlight">
-                                        <td>${stockDate}</td>
-                                        <td>${shopCode}</td>
-                                        <td>${typeBadge}</td>
-                                        <td>${modesList}</td>
-                                        <td>${deptName}</td>
-                                        <td>${groupName}</td>
-                                        <td>${subName}</td>
-                                    </tr>
-                                `;
-                            });
-                        }
-                    });
-                }
+        if (selectedType === 'PI') {
+            // PI (Perpetual Inventory) includes the ENTIRE catalog scope.
+            // Rendering a single premium consolidated row is 100% efficient and clear.
+            htmlBuffer += `
+                <tr class="row-highlight">
+                    <td>${stockDate}</td>
+                    <td>${shopCode}</td>
+                    <td>${typeBadge}</td>
+                    <td>${modesList}</td>
+                    <td style="font-weight: 800; color: var(--color-primary);">ALL DEPARTMENTS (Complete Catalog Scope)</td>
+                    <td style="font-weight: 700; color: var(--color-text-muted);">ALL GROUPS</td>
+                    <td style="font-weight: 700; color: var(--color-text-muted);">ALL SUBGROUPS</td>
+                </tr>
+            `;
+        } else if (selectedScopeDepth === 'SST') {
+            // SST Depth includes entire selected departments.
+            // Loop through selected departments (checkedDepts) and render a clean department-level summary.
+            const checkedDepts = document.querySelectorAll(".dept-node:checked");
+            checkedDepts.forEach(dNode => {
+                const deptName = dNode.getAttribute("data-name");
+                htmlBuffer += `
+                    <tr class="row-highlight">
+                        <td>${stockDate}</td>
+                        <td>${shopCode}</td>
+                        <td>${typeBadge}</td>
+                        <td>${modesList}</td>
+                        <td style="font-weight: 800; color: var(--color-text-main);">${deptName}</td>
+                        <td style="font-weight: 700; color: var(--color-text-muted);">ALL GROUPS</td>
+                        <td style="font-weight: 700; color: var(--color-text-muted);">ALL SUBGROUPS</td>
+                    </tr>
+                `;
             });
         } else {
+            // Fine-grained Group/Subgroup scope
             const checkedDepts = document.querySelectorAll(".dept-node:checked");
 
             checkedDepts.forEach(dNode => {
