@@ -263,6 +263,9 @@ body {
     flex-direction: column;
     gap: 0.25rem;
     margin-bottom: 2rem;
+    text-align: center;
+    align-items: center;
+    width: 100%;
 }
 
 .workspace-title {
@@ -310,6 +313,7 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     width: 100%;
+    align-items: center;
 }
 
 .step-content.hidden {
@@ -1743,6 +1747,8 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     width: 100%;
+    max-width: 896px;
+    margin: 0 auto;
 }
 
 .details-card {
@@ -1883,6 +1889,9 @@ body {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.75rem;
+    width: 100%;
+    max-width: 896px;
+    margin: 0 auto;
 }
 
 .checklist-card {
