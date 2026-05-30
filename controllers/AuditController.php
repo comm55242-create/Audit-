@@ -40,6 +40,16 @@ class AuditController {
         $codes = isset($data['codes']) ? $data['codes'] : [];
         $results = AuditModel::lookupBatchItems($codes);
         echo json_encode($results);
+    }
+
+    /**
+     * Resolves dynamic shop code queries from remote MST_SHOP table.
+     */
+    public function handleShopLookup() {
+        header('Content-Type: application/json; charset=utf-8');
+        $shop_code = isset($_GET['shop_code']) ? trim($_GET['shop_code']) : '';
+        $result = AuditModel::lookupShopCode($shop_code);
+        echo json_encode($result);
         exit;
     }
 

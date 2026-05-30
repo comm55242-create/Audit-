@@ -239,6 +239,41 @@ class AuditModel {
             oci_free_statement($insertStmt);
             throw new Exception("Insert Failed: " . $e['message']);
         }
+
+    /**
+     * Look up shop details in the remote MST_SHOP database link table.
+     */
+    public static function lookupShopCode($shop_code) {
+        $conn = Database::getConnection();
+        $code = strtoupper(trim($shop_code));
+        if (empty($code)) {
+            return ['status' => 'error', 'message' => 'Shop code is empty.'];
+        }
+
+        $sql = "SELECT TRIM(VC_SHOP_DESC) AS VC_SHOP_DESC 
+                FROM POS.MST_SHOP@DB_LINK_SHOP 
+                WHERE UPPER(TRIM(VC_SHOP_CODE)) = :shop_code";
+
+        $stmt = oci_parse($conn, $sql);
+        oci_bind_by_name($stmt, ':shop_code', $code);
+
+        if ($stmt && @oci_execute($stmt)) {
+            if ($row = oci_fetch_array($stmt, OCI_ASSOC)) {
+                $desc = isset($row['VC_SHOP_DESC']) ? trim($row['VC_SHOP_DESC']) : 'UNKNOWN SHOP';
+                oci_free_statement($stmt);
+                return [
+                    'status' => 'success',
+                    'shop_code' => $code,
+                    'shop_desc' => $desc
+                ];
+            }
+        }
+        
+        if ($stmt) oci_free_statement($stmt);
+        return [
+            'status' => 'not_found',
+            'message' => 'Shop Code not registered.'
+        ];
     }
 
     /**

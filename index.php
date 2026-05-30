@@ -60,6 +60,11 @@ try {
             $controller->handleLookup();
             break;
 
+        case 'audit/shop-lookup':
+            $controller = new AuditController();
+            $controller->handleShopLookup();
+            break;
+
         case 'audit/save':
             $controller = new AuditController();
             $controller->handleSave();

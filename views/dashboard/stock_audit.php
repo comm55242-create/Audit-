@@ -21,6 +21,7 @@
         <div class="form-field">
             <label class="form-label">Shop Code</label>
             <input type="text" id="setupShopCode" oninput="validateShopCodeField()" class="form-input" placeholder="e.g. SC001" required style="text-transform: uppercase;">
+            <div id="shopCodeDescContainer" class="hidden" style="margin-top: 0.5rem; border-radius: 12px; padding: 0.75rem 1rem; font-size: 13px; font-weight: 700; transition: var(--transition-fast); display: flex; align-items: center; gap: 0.5rem;"></div>
         </div>
     </div>
 </div>
@@ -423,6 +424,8 @@
     let selectedScopeDepth = "Dept";
     let isSetupSubmitted = localStorage.getItem("melcom_stock_audit_submitted") === "true";
     let selectedItemwiseItems = [];
+    let isShopCodeConfirmed = false;
+    let shopLookupTimeout = null;
 
     window.addEventListener("DOMContentLoaded", () => {
         renderCheckboxDepts();
@@ -639,7 +642,84 @@
     function validateShopCodeField() {
         const input = document.getElementById("setupShopCode");
         input.value = input.value.toUpperCase();
-        validateActiveStepForm();
+        
+        const code = input.value.trim();
+        const descContainer = document.getElementById("shopCodeDescContainer");
+        
+        // Clear any active debounce timer
+        if (shopLookupTimeout) clearTimeout(shopLookupTimeout);
+        
+        if (code.length < 2) {
+            isShopCodeConfirmed = false;
+            descContainer.classList.add("hidden");
+            descContainer.style.display = "none";
+            validateActiveStepForm();
+            return;
+        }
+        
+        // Show "checking..." state in descContainer
+        descContainer.classList.remove("hidden");
+        descContainer.style.display = "flex";
+        descContainer.style.background = "#f8fafc";
+        descContainer.style.border = "1px solid #e2e8f0";
+        descContainer.style.color = "#64748b";
+        descContainer.innerHTML = `
+            <svg class="animate-spin" style="width: 16px; height: 16px; color: #64748b; flex-shrink: 0; animation: spin 1s linear infinite;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18" />
+            </svg>
+            <span>Checking Shop Code...</span>
+        `;
+        
+        // Disable next button immediately during lookup to prevent bypass
+        document.getElementById("btnGlobalNext").disabled = true;
+        isShopCodeConfirmed = false;
+        
+        // Debounce lookup by 400ms to avoid DB load during quick typing
+        shopLookupTimeout = setTimeout(() => {
+            fetch(`index.php?route=audit/shop-lookup&shop_code=${encodeURIComponent(code)}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    isShopCodeConfirmed = true;
+                    descContainer.style.background = "#ecfdf5";
+                    descContainer.style.border = "1px solid #a7f3d0";
+                    descContainer.style.color = "#065f46";
+                    descContainer.innerHTML = `
+                        <svg style="width: 16px; height: 16px; color: #10b981; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span style="letter-spacing: 0.02em;">${data.shop_desc}</span>
+                    `;
+                } else {
+                    isShopCodeConfirmed = false;
+                    descContainer.style.background = "#fef2f2";
+                    descContainer.style.border = "1px solid #fecaca";
+                    descContainer.style.color = "#991b1b";
+                    descContainer.innerHTML = `
+                        <svg style="width: 16px; height: 16px; color: #ef4444; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>Shop Code not registered. Please verify code.</span>
+                    `;
+                }
+                validateActiveStepForm();
+            })
+            .catch(err => {
+                isShopCodeConfirmed = false;
+                descContainer.style.background = "#fef2f2";
+                descContainer.style.border = "1px solid #fecaca";
+                descContainer.style.color = "#991b1b";
+                descContainer.innerHTML = `
+                    <svg style="width: 16px; height: 16px; color: #ef4444; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Connection error: Could not query MST_SHOP.</span>
+                `;
+                validateActiveStepForm();
+            });
+        }, 400);
     }
 
     function handleTypeCardClick(type) {
@@ -1042,8 +1122,7 @@
         let isValid = false;
 
         if (activeStep === 3) {
-            const code = document.getElementById("setupShopCode").value.trim();
-            isValid = (code.length >= 2);
+            isValid = isShopCodeConfirmed;
         } else if (activeStep === 4) {
             isValid = (selectedType !== "");
         } else if (activeStep === 5) {
