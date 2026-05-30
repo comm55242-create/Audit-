@@ -37,8 +37,33 @@ class OtpModel {
                 $clean_phone = trim($phone);
                 $otp_num = intval($code);
                 $clean_email = trim($email);
-                $machine_name = 'IT';
-                $machine_ip = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '123456';
+
+                // 1. Resolve client laptop IP address robustly
+                $ip = '127.0.0.1';
+                if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+                    $ip = $_SERVER['HTTP_CLIENT_IP'];
+                } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                    $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+                } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+                    $ip = $_SERVER['REMOTE_ADDR'];
+                }
+                $machine_ip = substr(trim($ip), 0, 30);
+
+                // 2. Resolve client laptop host name robustly via reverse DNS lookup
+                $laptop_name = 'IT';
+                if ($ip !== '127.0.0.1' && $ip !== '::1') {
+                    $resolved = @gethostbyaddr($ip);
+                    if ($resolved && $resolved !== $ip) {
+                        $parts = explode('.', $resolved);
+                        $laptop_name = $parts[0];
+                    }
+                } else {
+                    $laptop_name = @gethostname(); // Local server machine name fallback
+                }
+                if (empty($laptop_name)) {
+                    $laptop_name = 'IT';
+                }
+                $machine_name = substr(strtoupper(trim($laptop_name)), 0, 30);
                 
                 oci_bind_by_name($stmt, ':phone', $clean_phone);
                 oci_bind_by_name($stmt, ':totp', $otp_num);
