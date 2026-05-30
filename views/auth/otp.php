@@ -2,12 +2,15 @@
 // ==========================================================================
 // MELCOM AUDIT SYSTEM - OTP VIEW
 // Dedicated Split-Screen OTP Verification with step tracker.
+// Optimized for 6-digit remote database link dispatch validation.
 // ==========================================================================
 
 require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../../models/OtpModel.php';
 
-$otp_code = isset($_SESSION['otp_code']) ? $_SESSION['otp_code'] : 'XXXX';
-$otp_mode = isset($_SESSION['otp_mode']) ? $_SESSION['otp_mode'] : 'mock';
+$display_otp = OtpModel::DISPLAY_OTP_ON_SCREEN;
+$otp_code = isset($_SESSION['otp_code']) ? $_SESSION['otp_code'] : 'XXXXXX';
+$display_code = $display_otp ? $otp_code : '******';
 $timeLeft = isset($_SESSION['otp_expiry']) ? ($_SESSION['otp_expiry'] - time()) : 120;
 if ($timeLeft < 0) $timeLeft = 0;
 ?>
@@ -45,7 +48,7 @@ if ($timeLeft < 0) $timeLeft = 0;
             <div class="auth-otp-form-area">
                 <div id="otpInputRow" class="otp-row" style="display: flex; gap: 0.75rem; align-items: center;">
                     <div class="otp-input-group" style="display: flex; gap: 0.5rem; flex: 1;">
-                        <input type="text" id="otpInput" class="otp-input" placeholder="OTP" maxlength="4" oninput="toggleConfirmBtnState()" <?php echo $timeLeft > 0 ? '' : 'disabled'; ?> style="flex: 1;">
+                        <input type="text" id="otpInput" class="otp-input" placeholder="6-Digit OTP" maxlength="6" oninput="toggleConfirmBtnState()" <?php echo $timeLeft > 0 ? '' : 'disabled'; ?> style="flex: 1; text-align: center; letter-spacing: 0.15em; font-size: 15px; font-weight: 800;">
                         <button type="button" id="btnConfirmOtp" class="btn-confirm-disabled" onclick="confirmOtpCode()" disabled style="flex-shrink: 0; min-width: 100px;">
                             Confirm
                         </button>
@@ -55,13 +58,13 @@ if ($timeLeft < 0) $timeLeft = 0;
                     </button>
                 </div>
 
-                <!-- Simulated OTP alert popup box -->
-                <div id="simulatedOtpAlert" class="otp-alert <?php echo ($otp_mode === 'mock' && $timeLeft > 0) ? '' : 'hidden'; ?>" style="margin-top: 1rem;">
+                <!-- Simulated OTP alert popup box (Displays code if screen toggle is enabled) -->
+                <div id="simulatedOtpAlert" class="otp-alert <?php echo ($display_otp && $timeLeft > 0) ? '' : 'hidden'; ?>" style="margin-top: 1rem;">
                     <div class="otp-alert-info">
                         <span class="label">Simulated OTP:</span>
-                        <span id="otpCodePlaceholder" class="code"><?php echo htmlspecialchars($otp_code); ?></span>
+                        <span id="otpCodePlaceholder" class="code"><?php echo htmlspecialchars($display_code); ?></span>
                     </div>
-                    <span class="otp-alert-badge">Mock Mode</span>
+                    <span class="otp-alert-badge">Verification Mode</span>
                 </div>
 
                 <!-- OTP countdown timer display -->
@@ -84,7 +87,7 @@ if ($timeLeft < 0) $timeLeft = 0;
     function toggleConfirmBtnState() {
         const val = document.getElementById("otpInput").value.trim();
         const btn = document.getElementById("btnConfirmOtp");
-        if (val.length === 4 && secondsLeft > 0) {
+        if (val.length === 6 && secondsLeft > 0) {
             btn.disabled = false;
             btn.className = "btn btn-primary";
         } else {
@@ -140,7 +143,7 @@ if ($timeLeft < 0) $timeLeft = 0;
 
     function confirmOtpCode() {
         const val = document.getElementById("otpInput").value.trim();
-        if (val.length !== 4) return;
+        if (val.length !== 6) return;
 
         fetch(`index.php?route=otp/verify&code=${encodeURIComponent(val)}`)
         .then(res => res.json())
@@ -170,7 +173,7 @@ if ($timeLeft < 0) $timeLeft = 0;
                 secondsLeft = data.expires_in || 120;
                 
                 const alertEl = document.getElementById("simulatedOtpAlert");
-                if (data.mode === 'mock') {
+                if (data.display) {
                     document.getElementById("otpCodePlaceholder").innerText = data.code;
                     alertEl.classList.remove("hidden");
                 } else {

@@ -2,169 +2,111 @@
 // ==========================================================================
 // MELCOM AUDIT SYSTEM - OTP MODEL
 // Decouples all ERP URLs, mock timers, and handles generate/confirm operations.
+// Integrates with remote shop database STK_OTP@DB_LINK_SHOP.
 // ==========================================================================
 
 class OtpModel {
-    const ERP_OTP_URL = 'http://mock-erp.melcomgroup.com/api/v1/send-otp';
-    const ERP_CONFIRM_URL = 'http://mock-erp.melcomgroup.com/api/v1/verify-otp';
     const OTP_EXPIRY_SECONDS = 120;
 
-    /**
-     * Detects if the ERP endpoint is configured for real production use.
-     */
-    public static function isRealErpActive() {
-        $url = trim(self::ERP_OTP_URL);
-        if (empty($url)) return false;
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) return false;
-        if (stripos($url, 'mock') !== false || stripos($url, 'melcom-erp.local') !== false) {
-            return false;
-        }
-        return true;
-    }
+    // Toggle whether to display the OTP on screen (set to true for manual testing/simulated view, false to hide it)
+    const DISPLAY_OTP_ON_SCREEN = true; 
 
     /**
-     * Generates a 4-digit code and dispatches it via ERP API or local fallback mock.
+     * Generates a 6-digit code and dispatches it via remote STK_OTP@DB_LINK_SHOP insertion.
      */
     public static function generateOtp($phone, $email) {
-        $isReal = self::isRealErpActive();
-        if ($isReal) {
-            $postData = json_encode([
-                'phone' => $phone,
-                'email' => $email,
-                'expires_in' => self::OTP_EXPIRY_SECONDS
-            ]);
+        require_once __DIR__ . '/Database.php';
 
-            $ch = @curl_init(self::ERP_OTP_URL);
-            if ($ch) {
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Accept: application/json'
-                ]);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-                $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
-
-                if ($httpCode >= 200 && $httpCode < 300) {
-                    $resData = json_decode($response, true);
-                    $_SESSION['erp_otp_session'] = isset($resData['otp_session']) ? $resData['otp_session'] : 'active';
-                    $_SESSION['otp_mode'] = 'real';
-                    $_SESSION['otp_expiry'] = time() + self::OTP_EXPIRY_SECONDS;
-
-                    return [
-                        'status' => 'success',
-                        'expires_in' => self::OTP_EXPIRY_SECONDS,
-                        'mode' => 'real',
-                        'message' => 'OTP has been dispatched via Melcom ERP API.'
-                    ];
-                } else {
-                    return self::triggerSimulatedOtp($phone, $email, 'ERP API Error code ' . $httpCode);
-                }
-            } else {
-                return self::triggerSimulatedOtp($phone, $email, 'cURL resource unavailable');
-            }
-        } else {
-            return self::triggerSimulatedOtp($phone, $email);
-        }
-    }
-
-    /**
-     * Creates local simulated OTP code and returns it.
-     */
-    private static function triggerSimulatedOtp($phone, $email, $fallbackReason = '') {
-        $code = (string)rand(1000, 9000);
+        // 1. Generate a six-digit OTP code
+        $code = (string)rand(100000, 999999);
         $_SESSION['otp_code'] = $code;
         $_SESSION['otp_expiry'] = time() + self::OTP_EXPIRY_SECONDS;
-        $_SESSION['otp_mode'] = 'mock';
+        $_SESSION['otp_mode'] = 'real';
 
-        $response = [
-            'status' => 'success',
-            'expires_in' => self::OTP_EXPIRY_SECONDS,
-            'mode' => 'mock',
-            'code' => $code,
-            'message' => 'Simulated OTP generated successfully.'
-        ];
+        $dbStatus = 'unattempted';
+        $dbError = '';
 
-        if (!empty($fallbackReason)) {
-            $response['fallback_warning'] = $fallbackReason;
+        // 2. Insert into remote shop database link
+        try {
+            $conn = Database::getConnection();
+            if ($conn) {
+                $sql = "INSERT INTO STK_OTP@DB_LINK_SHOP (PHONE_NO, TOTP, TEMAIL, VC_MACHINE_NAME, VC_MACHINE_IP) 
+                        VALUES (:phone, :totp, :email, :machine_name, :machine_ip)";
+                $stmt = oci_parse($conn, $sql);
+                
+                $clean_phone = trim($phone);
+                $otp_num = intval($code);
+                $clean_email = trim($email);
+                $machine_name = 'IT';
+                $machine_ip = isset($_SERVER['REMOTE_ADDR']) ? trim($_SERVER['REMOTE_ADDR']) : '123456';
+                
+                oci_bind_by_name($stmt, ':phone', $clean_phone);
+                oci_bind_by_name($stmt, ':totp', $otp_num);
+                oci_bind_by_name($stmt, ':email', $clean_email);
+                oci_bind_by_name($stmt, ':machine_name', $machine_name);
+                oci_bind_by_name($stmt, ':machine_ip', $machine_ip);
+                
+                $exec = @oci_execute($stmt);
+                if ($exec) {
+                    $commit = oci_parse($conn, "COMMIT");
+                    oci_execute($commit);
+                    oci_free_statement($commit);
+                    $dbStatus = 'success';
+                } else {
+                    $e = oci_error($stmt);
+                    $dbStatus = 'failed';
+                    $dbError = isset($e['message']) ? $e['message'] : 'Oracle execution failed';
+                }
+                oci_free_statement($stmt);
+            } else {
+                $dbStatus = 'failed';
+                $dbError = 'Database connection unavailable';
+            }
+        } catch (Exception $e) {
+            $dbStatus = 'failed';
+            $dbError = $e->getMessage();
         }
 
-        return $response;
+        return [
+            'status' => 'success',
+            'expires_in' => self::OTP_EXPIRY_SECONDS,
+            'mode' => 'real',
+            'code' => self::DISPLAY_OTP_ON_SCREEN ? $code : '******',
+            'display' => self::DISPLAY_OTP_ON_SCREEN,
+            'db_status' => $dbStatus,
+            'db_error' => $dbError,
+            'message' => $dbStatus === 'success' 
+                ? 'OTP generated and sent to phone number and Gmail successfully.' 
+                : 'OTP generated in fallback/simulated mode due to database issue.'
+        ];
     }
 
     /**
-     * Validates the 4-digit user-entered code against the active session.
+     * Validates the 6-digit user-entered code against the active session.
      */
     public static function confirmOtp($code) {
-        $mode = isset($_SESSION['otp_mode']) ? $_SESSION['otp_mode'] : 'mock';
+        $storedOtp = isset($_SESSION['otp_code']) ? $_SESSION['otp_code'] : '';
+        $expiryTime = isset($_SESSION['otp_expiry']) ? $_SESSION['otp_expiry'] : 0;
 
-        if ($mode === 'real' && self::isRealErpActive()) {
-            $postData = json_encode([
-                'code' => $code,
-                'otp_session' => isset($_SESSION['erp_otp_session']) ? $_SESSION['erp_otp_session'] : ''
-            ]);
+        if (empty($storedOtp) || time() > $expiryTime) {
+            return [
+                'status' => 'error',
+                'message' => 'OTP has expired! Please request a new code.'
+            ];
+        }
 
-            $ch = @curl_init(self::ERP_CONFIRM_URL);
-            if ($ch) {
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Accept: application/json'
-                ]);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-                $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
-
-                $resData = json_decode($response, true);
-                $isVerified = ($httpCode >= 200 && $httpCode < 300 && isset($resData['verified']) && $resData['verified'] == true);
-
-                if ($isVerified) {
-                    return [
-                        'status' => 'success',
-                        'message' => 'OTP verified successfully via ERP!'
-                    ];
-                } else {
-                    return [
-                        'status' => 'error',
-                        'message' => 'Invalid or expired OTP code!'
-                    ];
-                }
-            } else {
-                return [
-                    'status' => 'error',
-                    'message' => 'Verification service temporarily unavailable.'
-                ];
-            }
+        if ($code === $storedOtp) {
+            unset($_SESSION['otp_code']);
+            unset($_SESSION['otp_expiry']);
+            return [
+                'status' => 'success',
+                'message' => 'OTP verified successfully!'
+            ];
         } else {
-            $storedOtp = isset($_SESSION['otp_code']) ? $_SESSION['otp_code'] : '';
-            $expiryTime = isset($_SESSION['otp_expiry']) ? $_SESSION['otp_expiry'] : 0;
-
-            if (empty($storedOtp) || time() > $expiryTime) {
-                return [
-                    'status' => 'error',
-                    'message' => 'OTP has expired! Please request a new code.'
-                ];
-            }
-
-            if ($code === $storedOtp) {
-                unset($_SESSION['otp_code']);
-                unset($_SESSION['otp_expiry']);
-                return [
-                    'status' => 'success',
-                    'message' => 'Simulated OTP verified successfully!'
-                ];
-            } else {
-                return [
-                    'status' => 'error',
-                    'message' => 'Invalid OTP code! Please try again.'
-                ];
-            }
+            return [
+                'status' => 'error',
+                'message' => 'Invalid OTP code! Please try again.'
+            ];
         }
     }
 }

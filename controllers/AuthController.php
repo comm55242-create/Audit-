@@ -59,8 +59,8 @@ class AuthController {
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'OTP generated successfully.',
-                    'code' => isset($_SESSION['otp_code']) ? $_SESSION['otp_code'] : '',
-                    'mode' => isset($_SESSION['otp_mode']) ? $_SESSION['otp_mode'] : 'mock',
+                    'code' => $otpRes['code'],
+                    'mode' => $otpRes['mode'],
                     'expires_in' => $otpRes['expires_in']
                 ]);
                 exit;
