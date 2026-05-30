@@ -85,49 +85,55 @@ unset($_SESSION['login_error']);
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
 
-        <!-- Step Tracker: Step 1 Done, Step 2 Active -->
-        <div class="auth-step-tracker" style="margin-bottom: 1.5rem; padding-bottom: 1rem;">
-            <div class="auth-step-dot done">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-            </div>
-            <div class="auth-step-line done"></div>
-            <div class="auth-step-dot current">2</div>
-            <div class="auth-step-line pending"></div>
-            <div class="auth-step-dot pending">3</div>
+        <!-- Top Circle Badge (Green Gradient) -->
+        <div class="otp-badge-circle">
+            <svg class="otp-badge-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
         </div>
 
-        <!-- OTP Heading -->
-        <h2 class="auth-otp-heading" style="font-size: 1.35rem; margin-bottom: 0.25rem;">OTP Verification</h2>
-        <p class="auth-otp-subtitle" style="font-size: 0.8rem; margin-bottom: 1.5rem;">Confirm security credentials before audit initialization</p>
+        <!-- Heading & Muted Subtitle -->
+        <h2 class="otp-title-new">Enter verification code</h2>
+        <p class="otp-subtitle-new">We've sent a 6-digit security code to <strong id="otpEmailDisplay" style="color: #0f172a;">auditor@melcomdc.com</strong></p>
 
-        <!-- OTP Form Area -->
-        <div class="auth-otp-form-area">
-            <div id="otpInputRow" class="otp-row" style="display: flex; gap: 0.75rem; align-items: center;">
-                <div class="otp-input-group" style="display: flex; gap: 0.5rem; flex: 1;">
-                    <input type="text" id="otpInput" class="otp-input" placeholder="6-Digit OTP" maxlength="6" oninput="toggleConfirmBtnState()" style="flex: 1; padding: 0.7rem; border-radius: 12px; border: 1px solid var(--color-border); font-size: 15px; font-weight: 800; text-align: center; letter-spacing: 0.15em;">
-                    <button type="button" id="btnConfirmOtp" class="btn-confirm-disabled" onclick="confirmOtpCode()" disabled style="flex-shrink: 0; min-width: 90px; padding: 0.7rem 1.25rem; font-weight: 700; border-radius: 12px; font-size: 13px;">
-                        Confirm
-                    </button>
-                </div>
-                <button type="button" id="btnResendOtp" class="btn-otp-action" onclick="resendOtpCode()" style="display: none; flex-shrink: 0; min-width: 100px; padding: 0.7rem 1.25rem; font-weight: 700; border-radius: 12px; font-size: 13px;">
-                    Resend OTP
-                </button>
-            </div>
+        <!-- 6 Digit Input Group -->
+        <div class="otp-digit-container">
+            <input type="text" class="otp-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="0" autocomplete="off" placeholder="•">
+            <input type="text" class="otp-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="1" autocomplete="off" placeholder="•">
+            <input type="text" class="otp-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="2" autocomplete="off" placeholder="•">
+            <input type="text" class="otp-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="3" autocomplete="off" placeholder="•">
+            <input type="text" class="otp-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="4" autocomplete="off" placeholder="•">
+            <input type="text" class="otp-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="5" autocomplete="off" placeholder="•">
+        </div>
 
-            <!-- Simulated OTP alert popup box (in mock mode) -->
-            <div id="simulatedOtpAlert" class="otp-alert hidden" style="margin-top: 1rem; padding: 0.75rem; border-radius: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700;">
-                <div class="otp-alert-info" style="display: flex; gap: 0.35rem;">
-                    <span class="label" style="opacity: 0.85;">Simulated OTP:</span>
-                    <span id="otpCodePlaceholder" class="code" style="letter-spacing: 0.05em; color: var(--color-primary); font-weight: 900;">XXXX</span>
-                </div>
-                <span class="otp-alert-badge" style="background: var(--color-primary); color: #ffffff; font-size: 9px; padding: 2px 6px; border-radius: 6px; text-transform: uppercase;">Mock Mode</span>
-            </div>
+        <!-- Resend Link -->
+        <div class="otp-resend-row">
+            <span>Didn't get a code?</span>
+            <button type="button" id="btnResendOtp" class="otp-resend-btn" onclick="resendOtpCode()">Click to resend</button>
+        </div>
 
-            <!-- OTP countdown timer display -->
-            <div id="otpTimerContainer" class="otp-timer-wrapper" style="margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 13px; font-weight: 700; color: var(--color-text-muted);">
-                <svg style="width:16px;height:16px;color:var(--color-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>Code expires in: <span id="otpCountdown" style="color: var(--color-danger); min-width: 35px; display: inline-block;">02:00</span></span>
+        <!-- Simulated OTP alert popup box (in mock mode) -->
+        <div id="simulatedOtpAlert" class="otp-alert hidden" style="margin-top: 0.5rem; margin-bottom: 0.5rem; width: 100%;">
+            <div class="otp-alert-info">
+                <span class="label">Simulated OTP:</span>
+                <span id="otpCodePlaceholder" class="code" style="color: var(--color-primary); font-weight: 900;">XXXXXX</span>
             </div>
+            <span class="otp-alert-badge">Mock Mode</span>
+        </div>
+
+        <!-- OTP countdown timer display -->
+        <div id="otpTimerContainer" class="otp-timer-wrapper" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+            <svg style="width:16px;height:16px;color:var(--color-primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Code expires in: <span id="otpCountdown" style="color: var(--color-danger); min-width: 35px; display: inline-block;">02:00</span></span>
+        </div>
+
+        <!-- Divider Line -->
+        <hr class="otp-divider">
+
+        <!-- Footer Actions Side-by-Side (AlignUI-styled) -->
+        <div class="otp-footer-buttons">
+            <button type="button" class="btn-otp-cancel" onclick="closeOtpModal()">Cancel</button>
+            <button type="button" id="btnConfirmOtp" class="btn-otp-verify" onclick="confirmOtpCode()" disabled>Verify</button>
         </div>
     </div>
 </div>
@@ -184,15 +190,83 @@ unset($_SESSION['login_error']);
     }
 
     /**
+     * Helper to read the combined 6-digit code from the separate boxes.
+     */
+    function getCombinedOtpValue() {
+        let code = "";
+        document.querySelectorAll(".otp-digit-input").forEach(input => {
+            code += input.value.trim();
+        });
+        return code;
+    }
+
+    /**
+     * Setup 6-box input listeners for focus movement, numeric filtering, backspacing, and pasting.
+     */
+    document.addEventListener("DOMContentLoaded", () => {
+        const inputs = document.querySelectorAll(".otp-digit-input");
+        inputs.forEach((input, idx) => {
+            // Typing input
+            input.addEventListener("input", (e) => {
+                const val = e.target.value;
+                e.target.value = val.replace(/[^0-9]/g, ""); // strip non-numeric
+                
+                if (e.target.value.length === 1) {
+                    if (idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                }
+                toggleConfirmBtnState();
+            });
+
+            // Backspace/delete key
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Backspace") {
+                    if (input.value === "") {
+                        if (idx > 0) {
+                            inputs[idx - 1].focus();
+                            inputs[idx - 1].value = "";
+                            toggleConfirmBtnState();
+                        }
+                    } else {
+                        input.value = "";
+                        toggleConfirmBtnState();
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            // Paste 6-digit code
+            input.addEventListener("paste", (e) => {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData("text").trim();
+                if (/^\d{6}$/.test(pasted)) {
+                    for (let i = 0; i < 6; i++) {
+                        inputs[i].value = pasted[i];
+                    }
+                    inputs[5].focus();
+                    toggleConfirmBtnState();
+                }
+            });
+        });
+    });
+
+    /**
      * Opens the integrated OTP verification modal and initializes timer.
      */
     function openOtpModal(data) {
         const modal = document.getElementById("otpModalBackdrop");
-        const input = document.getElementById("otpInput");
+        const inputs = document.querySelectorAll(".otp-digit-input");
+        const emailEl = document.getElementById("loginEmail");
         
-        // Reset modal fields
-        input.value = "";
-        input.disabled = false;
+        // Dynamically update the subtitle email
+        document.getElementById("otpEmailDisplay").innerText = emailEl ? emailEl.value.trim() : "your account";
+        
+        // Reset all inputs
+        inputs.forEach(input => {
+            input.value = "";
+            input.disabled = false;
+        });
         toggleConfirmBtnState();
 
         // Render mock alerts if applicable
@@ -215,8 +289,8 @@ unset($_SESSION['login_error']);
         // Start live OTP countdown
         startTimer();
         
-        // Auto-focus input
-        setTimeout(() => input.focus(), 150);
+        // Auto-focus first input
+        setTimeout(() => inputs[0].focus(), 150);
     }
 
     /**
@@ -234,14 +308,12 @@ unset($_SESSION['login_error']);
      * Toggle the status of the OTP Submit button depending on length.
      */
     function toggleConfirmBtnState() {
-        const val = document.getElementById("otpInput").value.trim();
+        const val = getCombinedOtpValue();
         const btn = document.getElementById("btnConfirmOtp");
         if (val.length === 6 && secondsLeft > 0) {
             btn.disabled = false;
-            btn.className = "btn btn-primary";
         } else {
             btn.disabled = true;
-            btn.className = "btn-confirm-disabled";
         }
     }
 
@@ -282,25 +354,26 @@ unset($_SESSION['login_error']);
      * Handles expired code updates immediately inside the popup.
      */
     function handleExpiry() {
-        document.getElementById("otpInput").disabled = true;
-        document.getElementById("otpInput").value = "";
+        document.querySelectorAll(".otp-digit-input").forEach(input => {
+            input.disabled = true;
+            input.value = "";
+        });
         
         const btnConfirm = document.getElementById("btnConfirmOtp");
         btnConfirm.disabled = true;
-        btnConfirm.className = "btn-confirm-disabled";
         
         document.getElementById("otpTimerContainer").style.display = "none";
         document.getElementById("simulatedOtpAlert").style.display = "none";
-        document.getElementById("btnResendOtp").style.display = "block";
+        document.getElementById("btnResendOtp").style.display = "inline-block";
         
         alert("The OTP code has expired! Please click Resend OTP to request a new code.");
     }
 
     /**
-     * Verifies the 4-digit code using the backend API.
+     * Verifies the 6-digit code using the backend API.
      */
     function confirmOtpCode() {
-        const val = document.getElementById("otpInput").value.trim();
+        const val = getCombinedOtpValue();
         if (val.length !== 6) return;
 
         const btnConfirm = document.getElementById("btnConfirmOtp");
@@ -312,20 +385,21 @@ unset($_SESSION['login_error']);
         })
         .then(res => res.json())
         .then(data => {
-            btnConfirm.innerText = "Confirm";
+            btnConfirm.innerText = "Verify";
             if (data.status === 'success') {
                 if (timerInterval) clearInterval(timerInterval);
                 alert("Security Credentials Confirmed!");
                 location.href = "index.php?route=dashboard";
             } else {
                 alert("Verification Failed: " + data.message);
-                document.getElementById("otpInput").value = "";
+                document.querySelectorAll(".otp-digit-input").forEach(input => input.value = "");
+                document.querySelectorAll(".otp-digit-input")[0].focus();
                 toggleConfirmBtnState();
             }
         })
         .catch(err => {
             btnConfirm.disabled = false;
-            btnConfirm.innerText = "Confirm";
+            btnConfirm.innerText = "Verify";
             alert("Connection error: Could not verify OTP code.");
         });
     }
@@ -352,22 +426,24 @@ unset($_SESSION['login_error']);
                     alertEl.style.display = "none";
                 }
 
-                const input = document.getElementById("otpInput");
-                input.disabled = false;
-                input.value = "";
-                input.focus();
+                const inputs = document.querySelectorAll(".otp-digit-input");
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    input.value = "";
+                });
+                inputs[0].focus();
                 
                 toggleConfirmBtnState();
                 startTimer();
                 alert("A new OTP code has been dispatched successfully.");
             } else {
                 alert("Resend Failed: " + data.message);
-                document.getElementById("btnResendOtp").style.display = "block";
+                document.getElementById("btnResendOtp").style.display = "inline-block";
             }
         })
         .catch(err => {
             alert("Connection error: Could not resend OTP.");
-            document.getElementById("btnResendOtp").style.display = "block";
+            document.getElementById("btnResendOtp").style.display = "inline-block";
         });
     }
 </script>

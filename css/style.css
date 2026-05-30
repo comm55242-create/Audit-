@@ -1698,16 +1698,20 @@ body {
 
 .otp-modal-card {
     background: #ffffff;
-    border-radius: 24px;
+    border-radius: 28px;
     width: 100%;
-    max-width: 400px;
-    padding: 2.25rem 2rem;
+    max-width: 480px; /* Expanded width to comfortably fit 6 digits */
+    padding: 3rem 2.5rem 2rem 2.5rem;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     transform: translateY(20px) scale(0.95);
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     border: 1px solid rgba(241, 245, 249, 0.6);
     opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .otp-modal-backdrop.open .otp-modal-card {
@@ -1729,6 +1733,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 10;
 }
 
 .otp-modal-close:hover {
@@ -1739,6 +1744,154 @@ body {
 .otp-modal-close svg {
     width: 20px;
     height: 20px;
+}
+
+/* --- PREMIUM ALIGNUI-STYLE OTP COMPONENTS (GREEN THEMING) --- */
+.otp-badge-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981 0%, #006D44 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 8px 20px -6px rgba(16, 185, 129, 0.4);
+    color: #ffffff;
+}
+
+.otp-badge-icon {
+    width: 30px;
+    height: 30px;
+    stroke-width: 2.2;
+}
+
+.otp-title-new {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
+}
+
+.otp-subtitle-new {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.5;
+    max-width: 340px;
+    margin-bottom: 2rem;
+}
+
+.otp-digit-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.otp-digit-input {
+    width: 52px;
+    height: 60px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    background-color: #f8fafc;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    transition: all 0.15s ease-in-out;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
+}
+
+.otp-digit-input:focus {
+    border-color: #10b981;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    transform: translateY(-2px);
+}
+
+.otp-resend-row {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.otp-resend-btn {
+    background: none;
+    border: none;
+    font-weight: 700;
+    color: #006D44;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: var(--transition-fast);
+}
+
+.otp-resend-btn:hover {
+    color: #10b981;
+}
+
+.otp-divider {
+    width: calc(100% + 5rem);
+    margin: 1.5rem -2.5rem;
+    border: 0;
+    border-top: 1px solid #f1f5f9;
+}
+
+.otp-footer-buttons {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.btn-otp-cancel {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: 1.5px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-otp-cancel:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.btn-otp-verify {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    background: #006D44;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: 0 4px 12px rgba(0, 109, 68, 0.15);
+}
+
+.btn-otp-verify:hover {
+    background: #005634;
+    box-shadow: 0 6px 16px rgba(0, 109, 68, 0.25);
+}
+
+.btn-otp-verify:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* --- 19. DETAILS & CHECKLIST ENHANCEMENTS --- */
