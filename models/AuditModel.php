@@ -296,33 +296,33 @@ class AuditModel {
                 $stats['status'] = 'ONLINE';
                 $stats['host'] = 'localhost';
 
-                // 1. Departments
-                $query = "SELECT DISTINCT DEPT FROM DEPTS WHERE DEPT IS NOT NULL ORDER BY DEPT";
+                // 1. Departments (using DEPT_CODE from remote view)
+                $query = "SELECT DISTINCT TRIM(DEPT_CODE) AS DEPT_CODE FROM VW_STK_DEPT@DB_LINK_SHOP WHERE DEPT_CODE IS NOT NULL ORDER BY DEPT_CODE";
                 $stmt = @oci_parse($conn, $query);
                 if ($stmt && @oci_execute($stmt)) {
                     while ($row = oci_fetch_array($stmt, OCI_ASSOC)) {
-                        $stats['depts'][] = trim($row['DEPT']);
+                        $stats['depts'][] = trim($row['DEPT_CODE']);
                     }
                 }
                 if ($stmt) @oci_free_statement($stmt);
 
-                // 2. Groups
-                $query_groups = "SELECT DISTINCT VC_GROUP FROM VC_GROUPS WHERE VC_GROUP IS NOT NULL ORDER BY VC_GROUP";
+                // 2. Groups (using VC_GROUP_CODE from remote view)
+                $query_groups = "SELECT DISTINCT TRIM(VC_GROUP_CODE) AS VC_GROUP_CODE FROM VW_STK_DEPT@DB_LINK_SHOP WHERE VC_GROUP_CODE IS NOT NULL ORDER BY VC_GROUP_CODE";
                 $stmt_groups = @oci_parse($conn, $query_groups);
                 if ($stmt_groups && @oci_execute($stmt_groups)) {
                     while ($row = oci_fetch_array($stmt_groups, OCI_ASSOC)) {
-                        $stats['groups'][] = trim($row['VC_GROUP']);
+                        $stats['groups'][] = trim($row['VC_GROUP_CODE']);
                     }
                 }
                 if ($stmt_groups) @oci_free_statement($stmt_groups);
 
-                // 3. Subgroups
-                $query_subs = "SELECT DISTINCT VC_SUBGROUP, VC_GROUP FROM VC_SUBGROUPS WHERE VC_SUBGROUP IS NOT NULL ORDER BY VC_GROUP, VC_SUBGROUP";
+                // 3. Subgroups (using VC_SUB_GROUP_CODE mapped to VC_GROUP_CODE from remote view)
+                $query_subs = "SELECT DISTINCT TRIM(VC_GROUP_CODE) AS VC_GROUP_CODE, TRIM(VC_SUB_GROUP_CODE) AS VC_SUB_GROUP_CODE FROM VW_STK_DEPT@DB_LINK_SHOP WHERE VC_GROUP_CODE IS NOT NULL AND VC_SUB_GROUP_CODE IS NOT NULL ORDER BY VC_GROUP_CODE, VC_SUB_GROUP_CODE";
                 $stmt_subs = @oci_parse($conn, $query_subs);
                 if ($stmt_subs && @oci_execute($stmt_subs)) {
                     while ($row = oci_fetch_array($stmt_subs, OCI_ASSOC)) {
-                        $grp = trim($row['VC_GROUP']);
-                        $sub = trim($row['VC_SUBGROUP']);
+                        $grp = trim($row['VC_GROUP_CODE']);
+                        $sub = trim($row['VC_SUB_GROUP_CODE']);
                         if (!isset($stats['subgroups'][$grp])) {
                             $stats['subgroups'][$grp] = [];
                         }

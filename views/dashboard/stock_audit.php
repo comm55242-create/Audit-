@@ -93,7 +93,7 @@
             <span class="input-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </span>
-            <input type="text" id="searchDepartmentsInput" class="form-input has-icon" placeholder="Quick search departments..." oninput="handleSearchDepartmentsInput(this)">
+            <input type="text" id="searchDepartmentsInput" class="form-input has-icon" placeholder="Quick search department codes..." oninput="handleSearchDepartmentsInput(this)">
         </div>
 
         <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; background-color: #f8fafc; border: 1px solid var(--color-border); border-radius: 12px; padding: 0.5rem 0.875rem;">
