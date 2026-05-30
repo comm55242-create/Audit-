@@ -239,6 +239,7 @@ class AuditModel {
             oci_free_statement($insertStmt);
             throw new Exception("Insert Failed: " . $e['message']);
         }
+    }
 
     /**
      * Look up shop details in the remote MST_SHOP database link table.
