@@ -104,7 +104,7 @@ unset($_SESSION['login_error']);
         <div class="auth-otp-form-area">
             <div id="otpInputRow" class="otp-row" style="display: flex; gap: 0.75rem; align-items: center;">
                 <div class="otp-input-group" style="display: flex; gap: 0.5rem; flex: 1;">
-                    <input type="text" id="otpInput" class="otp-input" placeholder="OTP" maxlength="4" oninput="toggleConfirmBtnState()" style="flex: 1; padding: 0.7rem; border-radius: 12px; border: 1px solid var(--color-border); font-size: 15px; font-weight: 800; text-align: center; letter-spacing: 0.2em;">
+                    <input type="text" id="otpInput" class="otp-input" placeholder="6-Digit OTP" maxlength="6" oninput="toggleConfirmBtnState()" style="flex: 1; padding: 0.7rem; border-radius: 12px; border: 1px solid var(--color-border); font-size: 15px; font-weight: 800; text-align: center; letter-spacing: 0.15em;">
                     <button type="button" id="btnConfirmOtp" class="btn-confirm-disabled" onclick="confirmOtpCode()" disabled style="flex-shrink: 0; min-width: 90px; padding: 0.7rem 1.25rem; font-weight: 700; border-radius: 12px; font-size: 13px;">
                         Confirm
                     </button>
@@ -197,7 +197,7 @@ unset($_SESSION['login_error']);
 
         // Render mock alerts if applicable
         const alertEl = document.getElementById("simulatedOtpAlert");
-        if (data.mode === 'mock') {
+        if (data.display) {
             document.getElementById("otpCodePlaceholder").innerText = data.code;
             alertEl.classList.remove("hidden");
             alertEl.style.display = "flex";
@@ -236,7 +236,7 @@ unset($_SESSION['login_error']);
     function toggleConfirmBtnState() {
         const val = document.getElementById("otpInput").value.trim();
         const btn = document.getElementById("btnConfirmOtp");
-        if (val.length === 4 && secondsLeft > 0) {
+        if (val.length === 6 && secondsLeft > 0) {
             btn.disabled = false;
             btn.className = "btn btn-primary";
         } else {
@@ -301,7 +301,7 @@ unset($_SESSION['login_error']);
      */
     function confirmOtpCode() {
         const val = document.getElementById("otpInput").value.trim();
-        if (val.length !== 4) return;
+        if (val.length !== 6) return;
 
         const btnConfirm = document.getElementById("btnConfirmOtp");
         btnConfirm.disabled = true;
@@ -345,7 +345,7 @@ unset($_SESSION['login_error']);
                 secondsLeft = data.expires_in || 120;
                 
                 const alertEl = document.getElementById("simulatedOtpAlert");
-                if (data.mode === 'mock') {
+                if (data.display) {
                     document.getElementById("otpCodePlaceholder").innerText = data.code;
                     alertEl.style.display = "flex";
                 } else {
