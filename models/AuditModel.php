@@ -170,7 +170,7 @@ class AuditModel {
         $group_list = array_filter(array_map('trim', explode(',', $groups)));
         $subgroup_list = array_filter(array_map('trim', explode(',', $subgroups)));
 
-        // Select and insert records matching column definitions of MASTER_ITEM, calling native MAKESS.GET_SHOP_STOCK with no table joins
+        // Select and insert records matching column definitions of MASTER_ITEM, with no table joins and zero stock fallback to avoid invalid DB link functions
         $select_query = "SELECT DISTINCT 
                             TRIM(A.ITEM_CODE) AS ITEM_CODE, 
                             SUBSTR(TRIM(A.ITEM_NAME), 1, 100) AS ITEM_NAME, 
@@ -179,7 +179,7 @@ class AuditModel {
                             A.PRICE, 
                             SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT, 
                             :shop_code AS SHOP_CODE, 
-                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS CURR_STOCK, 
+                            0 AS CURR_STOCK, 
                             NVL(A.CH_PI, 'N') AS CH_PI, 
                             NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
                             SUBSTR(TRIM(A.GROUPS), 1, 50) AS VC_GROUP, 
@@ -187,7 +187,7 @@ class AuditModel {
                             SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
                             A.ITEM_CODE AS VC_ITEM_CODE,
                             :shop_code AS VC_SHOP_CODE,
-                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS STOCK_QYT
+                            0 AS STOCK_QYT
                          FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
 
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
@@ -534,7 +534,7 @@ class AuditModel {
                             A.PRICE, 
                             SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT, 
                             :shop_code AS SHOP_CODE, 
-                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS CURR_STOCK, 
+                            0 AS CURR_STOCK, 
                             NVL(A.CH_PI, 'N') AS CH_PI, 
                             NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
                             SUBSTR(TRIM(A.GROUPS), 1, 50) AS VC_GROUP, 
@@ -542,7 +542,7 @@ class AuditModel {
                             SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
                             A.ITEM_CODE AS VC_ITEM_CODE,
                             :shop_code AS VC_SHOP_CODE,
-                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS STOCK_QYT
+                            0 AS STOCK_QYT
                           FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
 
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
