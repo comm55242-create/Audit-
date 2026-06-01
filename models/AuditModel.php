@@ -249,9 +249,11 @@ class AuditModel {
             throw new Exception("PL/SQL parsing failed: " . $e['message']);
         }
 
-        foreach ($bind_params as $placeholder => $val) {
-            oci_bind_by_name($bulkStmt, $placeholder, $bind_params[$placeholder]);
+        // Correct OCI8 reference binding loop using by-reference variables to prevent reference collision
+        foreach ($bind_params as $placeholder => &$val) {
+            oci_bind_by_name($bulkStmt, $placeholder, $val);
         }
+        unset($val);
 
         $bulkExec = @oci_execute($bulkStmt);
         if (!$bulkExec) {
@@ -590,9 +592,11 @@ class AuditModel {
             throw new Exception("Oracle SQL parsing failed: " . $e['message']);
         }
 
-        foreach ($bind_params as $placeholder => $val) {
-            oci_bind_by_name($stmt, $placeholder, $bind_params[$placeholder]);
+        // Correct OCI8 reference binding loop using by-reference variables to prevent reference collision
+        foreach ($bind_params as $placeholder => &$val) {
+            oci_bind_by_name($stmt, $placeholder, $val);
         }
+        unset($val);
 
         $results = [];
         $exec = @oci_execute($stmt);
