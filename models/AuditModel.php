@@ -193,33 +193,65 @@ class AuditModel {
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
         $bind_params = [':shop_code' => substr($shop_code, 0, 10)];
 
-        // Apply dynamic department, group, and subgroup filters
+        // Apply dynamic department, group, and subgroup filters hierarchically
         if ($audit_type !== 'PI') {
-            if (!empty($dept_list)) {
-                $placeholders = [];
-                for ($i = 0; $i < count($dept_list); $i++) {
-                    $placeholders[] = ':dept' . $i;
-                    $bind_params[':dept' . $i] = $dept_list[$i];
+            $dept_filters = [];
+            $bind_counter = 0;
+
+            foreach ($dept_list as $dCode) {
+                // Find all checked groups for this department
+                $dGroups = [];
+                foreach ($group_list as $gStr) {
+                    $gParts = explode('|', $gStr);
+                    if (count($gParts) === 2 && $gParts[0] === $dCode) {
+                        $dGroups[] = $gParts[1];
+                    }
                 }
-                $where_clauses[] = "TRIM(A.DEPT_CODE) IN (" . implode(', ', $placeholders) . ")";
+
+                if (empty($dGroups)) {
+                    // No groups selected for this department: fetch all items for this department
+                    $pName = ':dept_' . $bind_counter++;
+                    $bind_params[$pName] = $dCode;
+                    $dept_filters[] = "(TRIM(A.DEPT_CODE) = $pName)";
+                } else {
+                    // Groups are selected for this department: build group filters
+                    $group_filters = [];
+                    foreach ($dGroups as $gCode) {
+                        // Find all checked subgroups for this group under this department
+                        $gSubgroups = [];
+                        foreach ($subgroup_list as $sStr) {
+                            $sParts = explode('|', $sStr);
+                            if (count($sParts) === 3 && $sParts[0] === $dCode && $sParts[1] === $gCode) {
+                                $gSubgroups[] = $sParts[2];
+                            }
+                        }
+
+                        $gPlaceholder = ':grp_' . $bind_counter++;
+                        $bind_params[$gPlaceholder] = $gCode;
+
+                        if (empty($gSubgroups)) {
+                            // No subgroups selected for this group: fetch all items in this group
+                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder)";
+                        } else {
+                            // Subgroups are selected: filter by group AND subgroups IN list
+                            $sub_placeholders = [];
+                            foreach ($gSubgroups as $sCode) {
+                                $sPlaceholder = ':sub_' . $bind_counter++;
+                                $bind_params[$sPlaceholder] = $sCode;
+                                $sub_placeholders[] = $sPlaceholder;
+                            }
+                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder AND TRIM(A.SUB_GROUP) IN (" . implode(', ', $sub_placeholders) . "))";
+                        }
+                    }
+
+                    $dPlaceholder = ':dept_' . $bind_counter++;
+                    $bind_params[$dPlaceholder] = $dCode;
+                    $dept_filters[] = "(TRIM(A.DEPT_CODE) = $dPlaceholder AND (" . implode(' OR ', $group_filters) . "))";
+                }
             }
 
-            if (!empty($group_list)) {
-                $placeholders = [];
-                for ($i = 0; $i < count($group_list); $i++) {
-                    $placeholders[] = ':grp' . $i;
-                    $bind_params[':grp' . $i] = $group_list[$i];
-                }
-                $where_clauses[] = "TRIM(A.GROUPS) IN (" . implode(', ', $placeholders) . ")";
-            }
-
-            if (!empty($subgroup_list)) {
-                $placeholders = [];
-                for ($i = 0; $i < count($subgroup_list); $i++) {
-                    $placeholders[] = ':sub' . $i;
-                    $bind_params[':sub' . $i] = $subgroup_list[$i];
-                }
-                $where_clauses[] = "TRIM(A.SUB_GROUP) IN (" . implode(', ', $placeholders) . ")";
+            if (!empty($dept_filters)) {
+                $where_clauses[] = "(" . implode(' OR ', $dept_filters) . ")";
             }
         }
 
@@ -550,32 +582,65 @@ class AuditModel {
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
         $bind_params = [':shop_code' => substr($shop_code, 0, 10)];
 
+        // Apply dynamic department, group, and subgroup filters hierarchically
         if ($audit_type !== 'PI') {
-            if (!empty($dept_list)) {
-                $placeholders = [];
-                for ($i = 0; $i < count($dept_list); $i++) {
-                    $placeholders[] = ':dept' . $i;
-                    $bind_params[':dept' . $i] = $dept_list[$i];
+            $dept_filters = [];
+            $bind_counter = 0;
+
+            foreach ($dept_list as $dCode) {
+                // Find all checked groups for this department
+                $dGroups = [];
+                foreach ($group_list as $gStr) {
+                    $gParts = explode('|', $gStr);
+                    if (count($gParts) === 2 && $gParts[0] === $dCode) {
+                        $dGroups[] = $gParts[1];
+                    }
                 }
-                $where_clauses[] = "TRIM(A.DEPT_CODE) IN (" . implode(', ', $placeholders) . ")";
+
+                if (empty($dGroups)) {
+                    // No groups selected for this department: fetch all items for this department
+                    $pName = ':dept_' . $bind_counter++;
+                    $bind_params[$pName] = $dCode;
+                    $dept_filters[] = "(TRIM(A.DEPT_CODE) = $pName)";
+                } else {
+                    // Groups are selected for this department: build group filters
+                    $group_filters = [];
+                    foreach ($dGroups as $gCode) {
+                        // Find all checked subgroups for this group under this department
+                        $gSubgroups = [];
+                        foreach ($subgroup_list as $sStr) {
+                            $sParts = explode('|', $sStr);
+                            if (count($sParts) === 3 && $sParts[0] === $dCode && $sParts[1] === $gCode) {
+                                $gSubgroups[] = $sParts[2];
+                            }
+                        }
+
+                        $gPlaceholder = ':grp_' . $bind_counter++;
+                        $bind_params[$gPlaceholder] = $gCode;
+
+                        if (empty($gSubgroups)) {
+                            // No subgroups selected for this group: fetch all items in this group
+                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder)";
+                        } else {
+                            // Subgroups are selected: filter by group AND subgroups IN list
+                            $sub_placeholders = [];
+                            foreach ($gSubgroups as $sCode) {
+                                $sPlaceholder = ':sub_' . $bind_counter++;
+                                $bind_params[$sPlaceholder] = $sCode;
+                                $sub_placeholders[] = $sPlaceholder;
+                            }
+                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder AND TRIM(A.SUB_GROUP) IN (" . implode(', ', $sub_placeholders) . "))";
+                        }
+                    }
+
+                    $dPlaceholder = ':dept_' . $bind_counter++;
+                    $bind_params[$dPlaceholder] = $dCode;
+                    $dept_filters[] = "(TRIM(A.DEPT_CODE) = $dPlaceholder AND (" . implode(' OR ', $group_filters) . "))";
+                }
             }
 
-            if (!empty($group_list)) {
-                $placeholders = [];
-                for ($i = 0; $i < count($group_list); $i++) {
-                    $placeholders[] = ':grp' . $i;
-                    $bind_params[':grp' . $i] = $group_list[$i];
-                }
-                $where_clauses[] = "TRIM(A.GROUPS) IN (" . implode(', ', $placeholders) . ")";
-            }
-
-            if (!empty($subgroup_list)) {
-                $placeholders = [];
-                for ($i = 0; $i < count($subgroup_list); $i++) {
-                    $placeholders[] = ':sub' . $i;
-                    $bind_params[':sub' . $i] = $subgroup_list[$i];
-                }
-                $where_clauses[] = "TRIM(A.SUB_GROUP) IN (" . implode(', ', $placeholders) . ")";
+            if (!empty($dept_filters)) {
+                $where_clauses[] = "(" . implode(' OR ', $dept_filters) . ")";
             }
         }
 

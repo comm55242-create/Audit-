@@ -1192,8 +1192,15 @@
             subgroups = Array.from(uniqueSubs);
         } else {
             document.querySelectorAll(".dept-node:checked").forEach(n => depts.push(n.value));
-            document.querySelectorAll(".group-node:checked").forEach(n => groups.push(n.value));
-            document.querySelectorAll(".subgroup-node:checked").forEach(n => subgroups.push(n.value));
+            document.querySelectorAll(".group-node:checked").forEach(n => {
+                const deptId = n.getAttribute("data-deptid");
+                groups.push(`${deptId}|${n.value}`);
+            });
+            document.querySelectorAll(".subgroup-node:checked").forEach(n => {
+                const groupNode = Array.from(document.querySelectorAll(".group-node")).find(g => g.value === n.getAttribute("data-groupid"));
+                const deptId = groupNode ? groupNode.getAttribute("data-deptid") : "";
+                subgroups.push(`${deptId}|${n.getAttribute("data-groupid")}|${n.value}`);
+            });
         }
 
         tableBody.innerHTML = `<tr><td colspan="16" style="text-align: center; padding: 2rem; font-weight: bold; color: var(--color-text-muted);">
@@ -1293,8 +1300,15 @@
             subgroups = Array.from(uniqueSubs);
         } else {
             document.querySelectorAll(".dept-node:checked").forEach(n => depts.push(n.value));
-            document.querySelectorAll(".group-node:checked").forEach(n => groups.push(n.value));
-            document.querySelectorAll(".subgroup-node:checked").forEach(n => subgroups.push(n.value));
+            document.querySelectorAll(".group-node:checked").forEach(n => {
+                const deptId = n.getAttribute("data-deptid");
+                groups.push(`${deptId}|${n.value}`);
+            });
+            document.querySelectorAll(".subgroup-node:checked").forEach(n => {
+                const groupNode = Array.from(document.querySelectorAll(".group-node")).find(g => g.value === n.getAttribute("data-groupid"));
+                const deptId = groupNode ? groupNode.getAttribute("data-deptid") : "";
+                subgroups.push(`${deptId}|${n.getAttribute("data-groupid")}|${n.value}`);
+            });
         }
 
         const formData = new FormData();
