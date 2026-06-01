@@ -170,7 +170,7 @@ class AuditModel {
         $group_list = array_filter(array_map('trim', explode(',', $groups)));
         $subgroup_list = array_filter(array_map('trim', explode(',', $subgroups)));
 
-        // Select and insert records matching column definitions of MASTER_ITEM, joining Stock Summary and VW_STK_DEPT for codes
+        // Select and insert records matching column definitions of MASTER_ITEM, calling native MAKESS.GET_SHOP_STOCK with no table joins
         $select_query = "SELECT DISTINCT 
                             TRIM(A.ITEM_CODE) AS ITEM_CODE, 
                             SUBSTR(TRIM(A.ITEM_NAME), 1, 100) AS ITEM_NAME, 
@@ -178,25 +178,17 @@ class AuditModel {
                             NULL AS IMAGE, 
                             A.PRICE, 
                             SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT, 
-                            NVL(TRIM(S.VC_SHOP_CODE), :shop_code) AS SHOP_CODE, 
-                            NVL(S.NU_BALANCE_QTY, 0) AS CURR_STOCK, 
+                            :shop_code AS SHOP_CODE, 
+                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS CURR_STOCK, 
                             NVL(A.CH_PI, 'N') AS CH_PI, 
                             NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
-                            SUBSTR(TRIM(D.VC_GROUP_CODE), 1, 50) AS VC_GROUP, 
-                            SUBSTR(TRIM(D.VC_SUB_GROUP_CODE), 1, 50) AS VC_SUBGROUP,
+                            SUBSTR(TRIM(A.GROUPS), 1, 50) AS VC_GROUP, 
+                            SUBSTR(TRIM(A.SUB_GROUP), 1, 50) AS VC_SUBGROUP,
                             SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
-                            NVL(TRIM(S.VC_ITEM_CODE), A.ITEM_CODE) AS VC_ITEM_CODE,
-                            NVL(TRIM(S.VC_SHOP_CODE), :shop_code) AS VC_SHOP_CODE,
-                            NVL(S.NU_BALANCE_QTY, 0) AS STOCK_QYT
-                         FROM VS_ITEM_AUDIT@DB_LINK_SHOP A
-                         LEFT OUTER JOIN VW_STK_DEPT@DB_LINK_SHOP D
-                           ON TRIM(D.DEPT_CODE) = TRIM(A.DEPT_CODE) 
-                          AND TRIM(UPPER(D.GROUPS)) = TRIM(UPPER(A.GROUPS)) 
-                          AND TRIM(UPPER(D.SUB_GROUP)) = TRIM(UPPER(A.SUB_GROUP))
-                         LEFT OUTER JOIN POS.SHOP_STOCK_SUMMARY@DB_LINK_SHOP S
-                           ON S.VC_ITEM_CODE = A.ITEM_CODE
-                          AND S.VC_COMP_CODE = '01'
-                          AND S.VC_SHOP_CODE = :shop_code";
+                            A.ITEM_CODE AS VC_ITEM_CODE,
+                            :shop_code AS VC_SHOP_CODE,
+                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS STOCK_QYT
+                         FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
 
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
         $bind_params = [':shop_code' => substr($shop_code, 0, 10)];
@@ -218,7 +210,7 @@ class AuditModel {
                     $placeholders[] = ':grp' . $i;
                     $bind_params[':grp' . $i] = $group_list[$i];
                 }
-                $where_clauses[] = "TRIM(D.VC_GROUP_CODE) IN (" . implode(', ', $placeholders) . ")";
+                $where_clauses[] = "TRIM(A.GROUPS) IN (" . implode(', ', $placeholders) . ")";
             }
 
             if (!empty($subgroup_list)) {
@@ -227,7 +219,7 @@ class AuditModel {
                     $placeholders[] = ':sub' . $i;
                     $bind_params[':sub' . $i] = $subgroup_list[$i];
                 }
-                $where_clauses[] = "TRIM(D.VC_SUB_GROUP_CODE) IN (" . implode(', ', $placeholders) . ")";
+                $where_clauses[] = "TRIM(A.SUB_GROUP) IN (" . implode(', ', $placeholders) . ")";
             }
         }
 
@@ -470,24 +462,24 @@ class AuditModel {
                             ];
                         }
 
-                        if (!isset($tree[$dept_code]['groups'][$group_code])) {
-                            $tree[$dept_code]['groups'][$group_code] = [
-                                'id' => $group_code,
+                        if (!isset($tree[$dept_code]['groups'][$group_desc])) {
+                            $tree[$dept_code]['groups'][$group_desc] = [
+                                'id' => $group_desc,
                                 'name' => $group_desc,
                                 'subgroups' => []
                             ];
                         }
 
                         $sub_exists = false;
-                        foreach ($tree[$dept_code]['groups'][$group_code]['subgroups'] as $existing_sub) {
-                            if ($existing_sub['id'] === $sub_code) {
+                        foreach ($tree[$dept_code]['groups'][$group_desc]['subgroups'] as $existing_sub) {
+                            if ($existing_sub['id'] === $sub_desc) {
                                 $sub_exists = true;
                                 break;
                             }
                         }
                         if (!$sub_exists) {
-                            $tree[$dept_code]['groups'][$group_code]['subgroups'][] = [
-                                'id' => $sub_code,
+                            $tree[$dept_code]['groups'][$group_desc]['subgroups'][] = [
+                                'id' => $sub_desc,
                                 'name' => $sub_desc
                             ];
                         }
@@ -496,7 +488,7 @@ class AuditModel {
                     $json_tree = [];
                     foreach ($tree as $dCode => $dData) {
                         $groups_list = [];
-                        foreach ($dData['groups'] as $gCode => $gData) {
+                        foreach ($dData['groups'] as $gDesc => $gData) {
                             $groups_list[] = $gData;
                         }
                         $dData['groups'] = $groups_list;
@@ -541,25 +533,17 @@ class AuditModel {
                             NULL AS IMAGE,
                             A.PRICE, 
                             SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT, 
-                            NVL(TRIM(S.VC_SHOP_CODE), :shop_code) AS SHOP_CODE, 
-                            NVL(S.NU_BALANCE_QTY, 0) AS CURR_STOCK, 
+                            :shop_code AS SHOP_CODE, 
+                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS CURR_STOCK, 
                             NVL(A.CH_PI, 'N') AS CH_PI, 
                             NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
-                            SUBSTR(TRIM(D.VC_GROUP_CODE), 1, 50) AS VC_GROUP, 
-                            SUBSTR(TRIM(D.VC_SUB_GROUP_CODE), 1, 50) AS VC_SUBGROUP,
+                            SUBSTR(TRIM(A.GROUPS), 1, 50) AS VC_GROUP, 
+                            SUBSTR(TRIM(A.SUB_GROUP), 1, 50) AS VC_SUBGROUP,
                             SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
-                            NVL(TRIM(S.VC_ITEM_CODE), A.ITEM_CODE) AS VC_ITEM_CODE,
-                            NVL(TRIM(S.VC_SHOP_CODE), :shop_code) AS VC_SHOP_CODE,
-                            NVL(S.NU_BALANCE_QTY, 0) AS STOCK_QYT
-                         FROM VS_ITEM_AUDIT@DB_LINK_SHOP A
-                         LEFT OUTER JOIN VW_STK_DEPT@DB_LINK_SHOP D
-                           ON TRIM(D.DEPT_CODE) = TRIM(A.DEPT_CODE) 
-                          AND TRIM(UPPER(D.GROUPS)) = TRIM(UPPER(A.GROUPS)) 
-                          AND TRIM(UPPER(D.SUB_GROUP)) = TRIM(UPPER(A.SUB_GROUP))
-                         LEFT OUTER JOIN POS.SHOP_STOCK_SUMMARY@DB_LINK_SHOP S
-                           ON S.VC_ITEM_CODE = A.ITEM_CODE
-                          AND S.VC_COMP_CODE = '01'
-                          AND S.VC_SHOP_CODE = :shop_code";
+                            A.ITEM_CODE AS VC_ITEM_CODE,
+                            :shop_code AS VC_SHOP_CODE,
+                            NVL(MAKESS.GET_SHOP_STOCK@DB_LINK_SHOP('01', :shop_code, A.ITEM_CODE), 0) AS STOCK_QYT
+                          FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
 
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
         $bind_params = [':shop_code' => substr($shop_code, 0, 10)];
@@ -580,7 +564,7 @@ class AuditModel {
                     $placeholders[] = ':grp' . $i;
                     $bind_params[':grp' . $i] = $group_list[$i];
                 }
-                $where_clauses[] = "TRIM(D.VC_GROUP_CODE) IN (" . implode(', ', $placeholders) . ")";
+                $where_clauses[] = "TRIM(A.GROUPS) IN (" . implode(', ', $placeholders) . ")";
             }
 
             if (!empty($subgroup_list)) {
@@ -589,7 +573,7 @@ class AuditModel {
                     $placeholders[] = ':sub' . $i;
                     $bind_params[':sub' . $i] = $subgroup_list[$i];
                 }
-                $where_clauses[] = "TRIM(D.VC_SUB_GROUP_CODE) IN (" . implode(', ', $placeholders) . ")";
+                $where_clauses[] = "TRIM(A.SUB_GROUP) IN (" . implode(', ', $placeholders) . ")";
             }
         }
 
