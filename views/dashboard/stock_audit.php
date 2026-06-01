@@ -1048,6 +1048,13 @@
             return;
         }
 
+        // Preserve previously checked groups to prevent overwriting user selection when toggling departments
+        const checkedGroupsKeys = new Set();
+        document.querySelectorAll(".group-node:checked").forEach(n => {
+            const deptId = n.getAttribute("data-deptid");
+            checkedGroupsKeys.add(`${deptId}|${n.value}`);
+        });
+
         const autoSelect = document.getElementById("toggleAutoSelectAllChildren").checked;
         let html = "";
 
@@ -1057,7 +1064,8 @@
             
             if (dept) {
                 dept.groups.forEach(group => {
-                    const isChecked = autoSelect;
+                    const key = `${deptId}|${group.id}`;
+                    const isChecked = autoSelect || checkedGroupsKeys.has(key);
                     html += `
                         <label class="tree-node-label">
                             <input type="checkbox" class="group-node" value="${group.id}" data-deptid="${deptId}" data-name="${group.name}" onchange="handleGroupCheckboxChange(this)" ${isChecked ? 'checked' : ''}>
@@ -1093,6 +1101,14 @@
             return;
         }
 
+        // Preserve previously checked subgroups to prevent overwriting when groups are added/removed
+        const checkedSubgroupsKeys = new Set();
+        document.querySelectorAll(".subgroup-node:checked").forEach(n => {
+            const deptId = n.getAttribute("data-deptid");
+            const groupId = n.getAttribute("data-groupid");
+            checkedSubgroupsKeys.add(`${deptId}|${groupId}|${n.value}`);
+        });
+
         const autoSelect = document.getElementById("toggleAutoSelectAllChildren").checked;
         let html = "";
 
@@ -1105,10 +1121,11 @@
                 const group = dept.groups.find(g => g.id === groupId);
                 if (group) {
                     group.subgroups.forEach(sub => {
-                        const isChecked = autoSelect;
+                        const key = `${deptId}|${groupId}|${sub.id}`;
+                        const isChecked = autoSelect || checkedSubgroupsKeys.has(key);
                         html += `
                             <label class="tree-node-label">
-                                <input type="checkbox" class="subgroup-node" value="${sub.id}" data-groupid="${groupId}" data-name="${sub.name}" onchange="validateActiveStepForm()" ${isChecked ? 'checked' : ''}>
+                                <input type="checkbox" class="subgroup-node" value="${sub.id}" data-deptid="${deptId}" data-groupid="${groupId}" data-name="${sub.name}" onchange="validateActiveStepForm()" ${isChecked ? 'checked' : ''}>
                                 <span class="tree-node-text">${sub.name}</span>
                             </label>
                         `;
@@ -1197,9 +1214,9 @@
                 groups.push(`${deptId}|${n.value}`);
             });
             document.querySelectorAll(".subgroup-node:checked").forEach(n => {
-                const groupNode = Array.from(document.querySelectorAll(".group-node")).find(g => g.value === n.getAttribute("data-groupid"));
-                const deptId = groupNode ? groupNode.getAttribute("data-deptid") : "";
-                subgroups.push(`${deptId}|${n.getAttribute("data-groupid")}|${n.value}`);
+                const deptId = n.getAttribute("data-deptid");
+                const groupId = n.getAttribute("data-groupid");
+                subgroups.push(`${deptId}|${groupId}|${n.value}`);
             });
         }
 
@@ -1305,9 +1322,9 @@
                 groups.push(`${deptId}|${n.value}`);
             });
             document.querySelectorAll(".subgroup-node:checked").forEach(n => {
-                const groupNode = Array.from(document.querySelectorAll(".group-node")).find(g => g.value === n.getAttribute("data-groupid"));
-                const deptId = groupNode ? groupNode.getAttribute("data-deptid") : "";
-                subgroups.push(`${deptId}|${n.getAttribute("data-groupid")}|${n.value}`);
+                const deptId = n.getAttribute("data-deptid");
+                const groupId = n.getAttribute("data-groupid");
+                subgroups.push(`${deptId}|${groupId}|${n.value}`);
             });
         }
 
