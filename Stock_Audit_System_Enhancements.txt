@@ -1,0 +1,93 @@
+Stock Take Audit Templates & Checklists
+1. Stock Take Information Sheet
+
+Sl. No.ParticularsDetails1Store Name2Store Code3Store Manager Name4Store Manager Contact Number5Operations Manager Name6Operations Manager Contact Number7Audit Lead8Auditor (HO)9Audit Team Count10Operations Team Count11Audit Period12Zone Details
+
+2. Audit Staff Attendance Sheet
+
+Sl. No.Staff NameRole in AuditSign In TimeSign Out TimeSignature12345
+3. Zone Tracker
+
+
+
+
+
+
+Sl. No.
+
+
+Zone Name/N umber
+
+
+
+Assigne d Auditor
+
+
+Assigne d Store Staff
+
+
+Scan Start Time
+
+
+Scan Completi on TimeZone Status (Pending
+/In Progress
+/Complet ed)
+
+
+
+
+Remarks
+
+
+
+
+
+Sl. No.
+
+
+Zone Name/N umber
+
+
+
+Assigne d Auditor
+
+
+Assigne d Store Staff
+
+
+Scan Start Time
+
+
+Scan Completi on TimeZone Status (Pending
+/In Progress
+/Complet ed)
+
+
+
+
+Remarks12345
+4. Scan Control Sheet
+
+
+Sl. No.Scanner IDUser NameScan CountLast Sync TimePending Upload CountDevice Status
+Remarks12345
+5. Pre-Stock Take Checklist Workflow
+
+
+Sl. No.
+ActivityStatus (Pending/Complete d)
+RemarksaInwards Transactions (Warehouse/STST/ Direct Supply etc.)bOutwards Transactions (Warehouse/STST/ Direct Supply/Damage/Ex piry etc.)cNegative Inventory
+
+Sl. No.
+ActivityStatus (Pending/Complete d)
+RemarksUpdationdFixed Assets / Consumption / Sampling (Record Corrections in System)eOthers (e.g. Item billed but pending for delivery)
+6. Mandatory Report Alert Checklist
+
+Sl.
+No.Report NameAvailable (Yes/No)Verified ByRemarks1Sales Report of Audit Period2Closing Book Stock Report (Before Start of Stock Take)3Damage Report of Audit Period4Expiry Report of Audit Period5Negative Inventory Report6Fixed Assets Report7Non-Moving Stock Report8Gift Vouchers Report9Managers PI Report of Audit Period10Adjustment Report (After Closure of Stock Take)11Opening Book Stock Report (After Closure of Stock Take)
+7. Audit Summary & Sign-Off
+
+ParticularsDetailsAudit Completion DateTotal Zones CoveredTotal Scans CompletedVariance Identified
+ParticularsDetailsMajor ObservationsCorrective Actions RequiredFinal Audit StatusSign-Off
+
+NameDesignationSignatureDateStore ManagerOperations ManagerAudit LeadHO Representative

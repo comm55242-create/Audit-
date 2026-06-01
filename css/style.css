@@ -695,16 +695,16 @@ body {
 .table-wrapper {
     border: 1px solid var(--color-border);
     border-radius: 16px;
-    overflow: hidden;
+    overflow: auto; /* Enables horizontal and vertical scrolling naturally */
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    max-width: 1152px; /* Expanded max-w-6xl for wider viewports */
-    max-height: 420px;
-    overflow-y: auto;
+    max-width: 100%;
+    max-height: 520px; /* Make the table viewport taller so the user can see more data well */
     width: 100%;
 }
 
 .summary-table {
     width: 100%;
+    min-width: 1900px; /* Forces full display of all 16 columns just like the print view */
     text-align: left;
     font-size: 12px;
     border-collapse: collapse;
@@ -721,11 +721,12 @@ body {
 
 .summary-table th {
     padding: 0.875rem 1.5rem;
-    font-size: 9px;
+    font-size: 9.5px;
     font-weight: 900;
     text-transform: uppercase;
     color: var(--color-text-light);
     letter-spacing: 0.1em;
+    white-space: nowrap; /* Keep header text on a single line */
 }
 
 .summary-table tbody {
@@ -743,6 +744,7 @@ body {
 
 .summary-table td {
     padding: 0.875rem 1.5rem;
+    white-space: nowrap; /* Keep cell data readable without ugly multi-line wraps */
 }
 
 /* Summary table row highlighting */
@@ -2110,6 +2112,96 @@ body {
     border-color: var(--color-primary);
     outline: none;
 }
+
+.sync-summary-card {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin: 0 auto 1.25rem;
+    max-width: 720px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    animation: fadeIn 0.4s ease-out;
+}
+
+
+.sync-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sync-summary-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.sync-summary-title-stack {
+    display: flex;
+    flex-direction: column;
+}
+
+.sync-summary-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #064e3b;
+    line-height: 1.2;
+}
+
+.sync-summary-subtitle {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-top: 0.15rem;
+}
+
+.sync-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.sync-summary-item {
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sync-summary-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.sync-summary-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-light);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+    display: block;
+}
+
+.sync-summary-value {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--color-text-main);
+}
+
 
 
 

@@ -15,6 +15,14 @@ $db_groups = $stats['groups'];
 $db_subgroups = $stats['subgroups'];
 $db_error = $stats['error'];
 
+if ($db_status !== 'ONLINE') {
+    throw new Exception("Melcom Audit System Database is Offline: Could not establish a secure connection to the Oracle database. Ensure the listener is active and network configurations are correct.\nDiagnostic error: " . $db_error);
+}
+
+if (empty($stats['tree'])) {
+    throw new Exception("Melcom Audit System Configuration Error: Oracle view VW_STK_DEPT@DB_LINK_SHOP returned 0 departments. Ensure the remote database link is correctly synchronized and active.");
+}
+
 $email = isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : 'auditor@melcomdc.com';
 ?>
 

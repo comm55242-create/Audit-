@@ -83,5 +83,41 @@ class AuditController {
             exit;
         }
     }
+
+    /**
+     * Handles retrieving scoped items for dynamic Step 8 summary/preview.
+     */
+    public function handlePreviewItems() {
+        header('Content-Type: application/json; charset=utf-8');
+        $params = [
+            'audit_type' => isset($_GET['audit_type']) ? $_GET['audit_type'] : '',
+            'depts' => isset($_GET['depts']) ? $_GET['depts'] : '',
+            'groups' => isset($_GET['groups']) ? $_GET['groups'] : '',
+            'subgroups' => isset($_GET['subgroups']) ? $_GET['subgroups'] : '',
+            'shop_code' => isset($_GET['shop_code']) ? $_GET['shop_code'] : ''
+        ];
+        try {
+            $results = AuditModel::getScopedItemsPreview($params);
+            echo json_encode($results);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
+     * Retrieves the sync summary stats from MASTER_ITEM.
+     */
+    public function handleGetSummary() {
+        header('Content-Type: application/json; charset=utf-8');
+        try {
+            $summary = AuditModel::getSyncSummary();
+            echo json_encode($summary);
+            exit;
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            exit;
+        }
+    }
 }
 ?>

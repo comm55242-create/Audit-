@@ -70,6 +70,17 @@ try {
             $controller->handleSave();
             break;
 
+        case 'audit/preview-items':
+            $controller = new AuditController();
+            $controller->handlePreviewItems();
+            break;
+
+        case 'audit/summary':
+            $controller = new AuditController();
+            $controller->handleGetSummary();
+            break;
+
+
         default:
             $controller = new DashboardController();
             $controller->show();

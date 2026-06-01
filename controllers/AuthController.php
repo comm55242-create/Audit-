@@ -51,29 +51,40 @@ class AuthController {
         $_SESSION['temp_email'] = $validation['email'];
 
         // Dispatch OTP token
-        $otpRes = OtpModel::generateOtp($validation['phone'], $validation['email']);
-        if ($otpRes['status'] === 'success') {
-            $_SESSION['otp_pending'] = true;
-            if ($isAjax) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode([
-                    'status' => 'success',
-                    'message' => 'OTP generated successfully.',
-                    'code' => $otpRes['code'],
-                    'mode' => $otpRes['mode'],
-                    'expires_in' => $otpRes['expires_in']
-                ]);
+        try {
+            $otpRes = OtpModel::generateOtp($validation['phone'], $validation['email']);
+            if ($otpRes['status'] === 'success') {
+                $_SESSION['otp_pending'] = true;
+                if ($isAjax) {
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'OTP generated successfully.',
+                        'code' => $otpRes['code'],
+                        'mode' => $otpRes['mode'],
+                        'expires_in' => $otpRes['expires_in']
+                    ]);
+                    exit;
+                }
+                header("Location: index.php?route=otp");
+                exit;
+            } else {
+                if ($isAjax) {
+                    header('Content-Type: application/json; charset=utf-8');
+                    echo json_encode(['status' => 'error', 'message' => $otpRes['message']]);
+                    exit;
+                }
+                $_SESSION['login_error'] = $otpRes['message'];
+                header("Location: index.php?route=login");
                 exit;
             }
-            header("Location: index.php?route=otp");
-            exit;
-        } else {
+        } catch (Exception $e) {
             if ($isAjax) {
                 header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['status' => 'error', 'message' => $otpRes['message']]);
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
                 exit;
             }
-            $_SESSION['login_error'] = $otpRes['message'];
+            $_SESSION['login_error'] = $e->getMessage();
             header("Location: index.php?route=login");
             exit;
         }
@@ -134,8 +145,12 @@ class AuthController {
             exit;
         }
 
-        $otpRes = OtpModel::generateOtp($phone, $email);
-        echo json_encode($otpRes);
+        try {
+            $otpRes = OtpModel::generateOtp($phone, $email);
+            echo json_encode($otpRes);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
         exit;
     }
 

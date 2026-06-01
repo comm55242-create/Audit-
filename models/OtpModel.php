@@ -23,74 +23,68 @@ class OtpModel {
         $_SESSION['otp_expiry'] = time() + self::OTP_EXPIRY_SECONDS;
         $_SESSION['otp_mode'] = 'real';
 
-        $dbStatus = 'unattempted';
-        $dbError = '';
-
         // 2. Insert into remote shop database link
-        try {
-            $conn = Database::getConnection();
-            if ($conn) {
-                $sql = "INSERT INTO STK_OTP@DB_LINK_SHOP (PHONE_NO, TOTP, TEMAIL, VC_MACHINE_NAME, VC_MACHINE_IP) 
-                        VALUES (:phone, :totp, :email, :machine_name, :machine_ip)";
-                $stmt = oci_parse($conn, $sql);
-                
-                $clean_phone = trim($phone);
-                $otp_num = intval($code);
-                $clean_email = trim($email);
-
-                // 1. Resolve client laptop IP address robustly
-                $ip = '127.0.0.1';
-                if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-                    $ip = $_SERVER['HTTP_CLIENT_IP'];
-                } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                    $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-                } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
-                    $ip = $_SERVER['REMOTE_ADDR'];
-                }
-                $machine_ip = substr(trim($ip), 0, 30);
-
-                // 2. Resolve client laptop host name robustly via reverse DNS lookup
-                $laptop_name = 'IT';
-                if ($ip !== '127.0.0.1' && $ip !== '::1') {
-                    $resolved = @gethostbyaddr($ip);
-                    if ($resolved && $resolved !== $ip) {
-                        $parts = explode('.', $resolved);
-                        $laptop_name = $parts[0];
-                    }
-                } else {
-                    $laptop_name = @gethostname(); // Local server machine name fallback
-                }
-                if (empty($laptop_name)) {
-                    $laptop_name = 'IT';
-                }
-                $machine_name = substr(strtoupper(trim($laptop_name)), 0, 30);
-                
-                oci_bind_by_name($stmt, ':phone', $clean_phone);
-                oci_bind_by_name($stmt, ':totp', $otp_num);
-                oci_bind_by_name($stmt, ':email', $clean_email);
-                oci_bind_by_name($stmt, ':machine_name', $machine_name);
-                oci_bind_by_name($stmt, ':machine_ip', $machine_ip);
-                
-                $exec = @oci_execute($stmt);
-                if ($exec) {
-                    $commit = oci_parse($conn, "COMMIT");
-                    oci_execute($commit);
-                    oci_free_statement($commit);
-                    $dbStatus = 'success';
-                } else {
-                    $e = oci_error($stmt);
-                    $dbStatus = 'failed';
-                    $dbError = isset($e['message']) ? $e['message'] : 'Oracle execution failed';
-                }
-                oci_free_statement($stmt);
-            } else {
-                $dbStatus = 'failed';
-                $dbError = 'Database connection unavailable';
-            }
-        } catch (Exception $e) {
-            $dbStatus = 'failed';
-            $dbError = $e->getMessage();
+        $conn = Database::getConnection();
+        if (!$conn) {
+            throw new Exception("Database connection unavailable for OTP dispatch.");
         }
+        
+        $sql = "INSERT INTO STK_OTP@DB_LINK_SHOP (PHONE_NO, TOTP, TEMAIL, VC_MACHINE_NAME, VC_MACHINE_IP) 
+                VALUES (:phone, :totp, :email, :machine_name, :machine_ip)";
+        $stmt = oci_parse($conn, $sql);
+        if (!$stmt) {
+            $e = oci_error($conn);
+            throw new Exception("Oracle SQL parsing failed for OTP: " . $e['message']);
+        }
+        
+        $clean_phone = trim($phone);
+        $otp_num = intval($code);
+        $clean_email = trim($email);
+
+        // 1. Resolve client laptop IP address robustly
+        $ip = '127.0.0.1';
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        $machine_ip = substr(trim($ip), 0, 30);
+
+        // 2. Resolve client laptop host name robustly via reverse DNS lookup
+        $laptop_name = 'IT';
+        if ($ip !== '127.0.0.1' && $ip !== '::1') {
+            $resolved = @gethostbyaddr($ip);
+            if ($resolved && $resolved !== $ip) {
+                $parts = explode('.', $resolved);
+                $laptop_name = $parts[0];
+            }
+        } else {
+            $laptop_name = @gethostname(); // Local server machine name fallback
+        }
+        if (empty($laptop_name)) {
+            $laptop_name = 'IT';
+        }
+        $machine_name = substr(strtoupper(trim($laptop_name)), 0, 30);
+        
+        oci_bind_by_name($stmt, ':phone', $clean_phone);
+        oci_bind_by_name($stmt, ':totp', $otp_num);
+        oci_bind_by_name($stmt, ':email', $clean_email);
+        oci_bind_by_name($stmt, ':machine_name', $machine_name);
+        oci_bind_by_name($stmt, ':machine_ip', $machine_ip);
+        
+        $exec = @oci_execute($stmt);
+        if (!$exec) {
+            $e = oci_error($stmt);
+            oci_free_statement($stmt);
+            throw new Exception("Oracle STK_OTP dispatch failed: " . (isset($e['message']) ? $e['message'] : 'Oracle execution failed'));
+        }
+        
+        $commit = oci_parse($conn, "COMMIT");
+        oci_execute($commit);
+        oci_free_statement($commit);
+        oci_free_statement($stmt);
 
         return [
             'status' => 'success',
@@ -98,11 +92,9 @@ class OtpModel {
             'mode' => 'real',
             'code' => self::DISPLAY_OTP_ON_SCREEN ? $code : '******',
             'display' => self::DISPLAY_OTP_ON_SCREEN,
-            'db_status' => $dbStatus,
-            'db_error' => $dbError,
-            'message' => $dbStatus === 'success' 
-                ? 'OTP generated and sent to phone number and Gmail successfully.' 
-                : 'OTP generated in fallback/simulated mode due to database issue.'
+            'db_status' => 'success',
+            'db_error' => '',
+            'message' => 'OTP generated and sent to phone number and Gmail successfully.'
         ];
     }
 

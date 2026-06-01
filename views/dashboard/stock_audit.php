@@ -131,6 +131,12 @@
                     <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllGroups(false)">Deselect All</button>
                 </div>
             </div>
+            <div class="input-icon-wrapper" style="margin-bottom: 0.5rem; width: 100%;">
+                <span class="input-icon" style="font-size: 11px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;color:var(--color-text-light);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+                <input type="text" id="searchGroupsInput" class="form-input has-icon" style="padding: 0.25rem 0.5rem 0.25rem 1.75rem; font-size: 11px; height: 28px; border-radius: 8px;" placeholder="Search groups..." oninput="handleSearchGroupsInput(this)">
+            </div>
             <div id="groupsColumnList" class="tree-column-list">
                 <span class="tree-node-text disabled-msg">Select departments in Step 6 to populate groups.</span>
             </div>
@@ -144,6 +150,12 @@
                     <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllSubgroups(true)">Select All</button>
                     <button type="button" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllSubgroups(false)">Deselect All</button>
                 </div>
+            </div>
+            <div class="input-icon-wrapper" style="margin-bottom: 0.5rem; width: 100%;">
+                <span class="input-icon" style="font-size: 11px;">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;color:var(--color-text-light);"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+                <input type="text" id="searchSubgroupsInput" class="form-input has-icon" style="padding: 0.25rem 0.5rem 0.25rem 1.75rem; font-size: 11px; height: 28px; border-radius: 8px;" placeholder="Search subgroups..." oninput="handleSearchSubgroupsInput(this)">
             </div>
             <div id="subgroupsColumnList" class="tree-column-list">
                 <span class="tree-node-text disabled-msg">Select active groups to populate subgroups.</span>
@@ -166,24 +178,76 @@
         <span>Successfully Submitted</span>
     </div>
 
+    <!-- Premium Sync Summary Card -->
+    <div id="syncSummaryCard" class="sync-summary-card hidden">
+        <div class="sync-summary-header">
+            <div class="sync-summary-icon">
+                <svg style="width:20px;height:20px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="sync-summary-title-stack">
+                <span class="sync-summary-title">Item Master Sync Successfully</span>
+                <span class="sync-summary-title" style="margin-top: 0.15rem;">Shop Stock Sync Successfully</span>
+                <span class="sync-summary-subtitle">Live local synchronization statistics updated from the secure master database</span>
+            </div>
+        </div>
+        <div class="sync-summary-grid">
+            <div class="sync-summary-item">
+                <span class="sync-summary-label">No. of Items</span>
+                <span id="syncNoOfItems" class="sync-summary-value">0</span>
+            </div>
+            <div class="sync-summary-item">
+                <span class="sync-summary-label">Total Qty</span>
+                <span id="syncTotalQty" class="sync-summary-value">0</span>
+            </div>
+            <div class="sync-summary-item">
+                <span class="sync-summary-label">Total Value</span>
+                <span id="syncTotalValue" class="sync-summary-value">GH₵ 0.00</span>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Unified HTML Table in full tabular form with column headers at the top -->
     <div class="table-wrapper">
         <table class="summary-table">
             <thead>
                 <tr>
-                    <th>Stock Date</th>
+                    <th>Item Code</th>
+                    <th>Item Name</th>
+                    <th>Barcode</th>
+                    <th>Image</th>
+                    <th>Price</th>
+                    <th>Dept</th>
                     <th>Shop Code</th>
-                    <th>Audit Type</th>
-                    <th>Mode</th>
-                    <th>Department</th>
-                    <th>Group</th>
-                    <th>Subgroup</th>
+                    <th>Curr Stock</th>
+                    <th>CH PI</th>
+                    <th>CH Status</th>
+                    <th>VC Group</th>
+                    <th>VC Subgroup</th>
+                    <th>VC Unit</th>
+                    <th>VC Item Code</th>
+                    <th>VC Shop Code</th>
+                    <th>Stock Qyt</th>
                 </tr>
             </thead>
             <tbody id="summaryTableBody">
-                <!-- Javascript inserts rows dynamically -->
+                <!-- Dynamically populated by compileSummaryData() -->
             </tbody>
         </table>
+    </div>
+
+    <!-- Inline Verification Toggle Box added below the table -->
+    <div class="verification-box" style="margin-top: 1.5rem; margin-bottom: 0.5rem;" id="inlineVerificationBox">
+        <label class="switch">
+            <input type="checkbox" id="verificationApproveToggle" onchange="handleVerificationApprovalChange()">
+            <span class="slider"></span>
+        </label>
+        <div class="verification-text-stack">
+            <span class="verification-title">Verify Configuration</span>
+            <span class="verification-desc">I hereby confirm that all selected audit scopes, physical credentials, departments, groups, and subgroups have been thoroughly checked and are correct.</span>
+        </div>
     </div>
 </div>
 
@@ -220,58 +284,21 @@
 <!-- POPUPS, DIALOGS, MODALS -->
 <!-- ============================================== -->
 
-<!-- Premium Custom Confirmation Alert Dialog modal (Wide review layout) -->
+<!-- Premium Confirmation Modal -->
 <div id="confirmSubmitModal" class="modal-backdrop hidden">
-    <div class="modal-card-fullscreen">
-        <div style="display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.75rem; margin-bottom: 0.25rem;">
-            <div class="modal-icon-circle" style="width: 42px; height: 42px; font-size: 20px; background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; margin: 0;">?</div>
-            <div style="display: flex; flex-direction: column;">
-                <h3 class="modal-title" style="font-size: 1.125rem;">Review & Verify Setup</h3>
-                <p class="modal-desc" style="font-size: 12px; margin: 0;">Please review your selected audit configuration scope before submitting.</p>
+    <div class="modal-card" style="max-width: 480px; padding: 2.25rem 2rem; border-radius: 24px; border: 1px solid var(--color-border); box-shadow: var(--shadow-lg); background-color: #ffffff;">
+        <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #d97706;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
-            <!-- Premium Forest-Green View Detailed Report Button in header -->
-            <button type="button" onclick="printSetupSheet(false)" class="btn btn-secondary" style="margin-left: auto; padding: 0.5rem 1rem; font-size: 11px; font-weight: 800; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.35rem; height: auto;">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 2.5; color: var(--color-primary);"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                <span>View Detailed Report</span>
-            </button>
-        </div>
-        
-        <!-- Table Preview Grid inside Modal -->
-        <div class="modal-table-wrapper" style="margin-top: 0.25rem;">
-            <table class="summary-table" style="margin: 0; width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Stock Date</th>
-                        <th>Shop Code</th>
-                        <th>Audit Type</th>
-                        <th>Mode</th>
-                        <th>Department</th>
-                        <th>Group</th>
-                        <th>Subgroup</th>
-                    </tr>
-                </thead>
-                <tbody id="modalSummaryTableBody">
-                    <!-- Cloned rows inserted here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Verification toggle with user-requested feedback implemented -->
-        <div class="verification-box">
-            <label class="switch">
-                <input type="checkbox" id="verificationApproveToggle" onchange="handleVerificationApprovalChange()">
-                <span class="slider"></span>
-            </label>
-            <div class="verification-text-stack">
-                <span class="verification-title">Verify Configuration</span>
-                <span class="verification-desc">I hereby confirm that all selected audit scopes, physical credentials, departments, groups, and subgroups have been thoroughly checked and are 100% correct.</span>
+            <div class="modal-info-stack" style="text-align: left;">
+                <h3 class="modal-title" style="font-size: 1.2rem; font-weight: 900; color: var(--color-text-main); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: -0.01em;">Confirm Setup Finalization</h3>
+                <p class="modal-desc" style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin: 0;">Are you absolutely sure you want to finalize this stock audit setup? This will truncate the local <strong>MASTER_ITEM</strong> table and copy the scoped master items from the remote view. This transaction cannot be undone.</p>
             </div>
         </div>
-
-        <!-- Side-by-side action buttons -->
-        <div style="display: flex; gap: 1rem; width: 100%; margin-top: 0.5rem; justify-content: flex-end;">
-            <button type="button" onclick="closeConfirmModal()" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; height: auto;">Cancel</button>
-            <button type="button" id="btnFinalDbSubmit" onclick="executeFinalSubmit()" class="btn btn-disabled" disabled style="padding: 0.75rem 2rem; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; height: auto;">Submit</button>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-secondary" onclick="hideConfirmSubmitModal()" style="height: 38px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="confirmSetupAndSubmit()" style="height: 38px; border-radius: 12px; font-weight: 800; font-size: 13px; background-color: var(--color-primary); cursor: pointer;">Confirm & Save</button>
         </div>
     </div>
 </div>
@@ -293,136 +320,14 @@
 <!-- ACTIVE WIZARD ENGINE SCRIPTS -->
 <!-- ============================================== -->
 <script>
-    const deptsData = <?php
-    if ($db_status === 'ONLINE' && !empty($db_depts)) {
-        $jsDepts = [];
-        $deptCounter = 1;
-        
-        foreach ($db_depts as $deptName) {
-            $deptId = 'D' . $deptCounter;
-            $deptGroups = [];
-            $groupCounter = 1;
-            
-            if (!empty($db_groups)) {
-                foreach ($db_groups as $groupName) {
-                    $groupId = 'G' . $deptCounter . '_' . $groupCounter;
-                    
-                    $subList = [];
-                    if (isset($db_subgroups[$groupName])) {
-                        $subCounter = 1;
-                        foreach ($db_subgroups[$groupName] as $subName) {
-                            $subList[] = [
-                                'id' => 'S' . $deptCounter . '_' . $groupCounter . '_' . $subCounter,
-                                'name' => $subName
-                            ];
-                            $subCounter++;
-                        }
-                    }
-                    
-                    if (empty($subList)) {
-                        $subList[] = [
-                            'id' => 'S' . $deptCounter . '_' . $groupCounter . '_1',
-                            'name' => 'All Subgroups'
-                        ];
-                    }
-                    
-                    $deptGroups[] = [
-                        'id' => $groupId,
-                        'name' => $groupName,
-                        'subgroups' => $subList
-                    ];
-                    $groupCounter++;
-                }
-            }
-            
-            $jsDepts[] = [
-                'id' => $deptId,
-                'name' => $deptName,
-                'groups' => $deptGroups
-            ];
-            $deptCounter++;
-        }
-        echo json_encode($jsDepts);
-    } else {
-        // High fidelity offline-ready categories fallback
-        $mockDepts = [
-            [
-                'id' => 'D1',
-                'name' => 'Groceries & Provisions',
-                'groups' => [
-                    [
-                        'id' => 'G1',
-                        'name' => 'Beverages',
-                        'subgroups' => [
-                            ['id' => 'S1', 'name' => 'Soft Drinks'],
-                            ['id' => 'S2', 'name' => 'Fruit Juices'],
-                            ['id' => 'S3', 'name' => 'Energy Drinks']
-                        ]
-                    ],
-                    [
-                        'id' => 'G2',
-                        'name' => 'Canned Foods',
-                        'subgroups' => [
-                            ['id' => 'S4', 'name' => 'Canned Fish'],
-                            ['id' => 'S5', 'name' => 'Canned Vegetables']
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'id' => 'D2',
-                'name' => 'Electronics & Tech',
-                'groups' => [
-                    [
-                        'id' => 'G3',
-                        'name' => 'Computers',
-                        'subgroups' => [
-                            ['id' => 'S6', 'name' => 'Laptops'],
-                            ['id' => 'S7', 'name' => 'Desktop PCs']
-                        ]
-                    ],
-                    [
-                        'id' => 'G4',
-                        'name' => 'Home Appliances',
-                        'subgroups' => [
-                            ['id' => 'S8', 'name' => 'Refrigerators'],
-                            ['id' => 'S9', 'name' => 'Microwaves']
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'id' => 'D3',
-                'name' => 'Apparel & Fashion',
-                'groups' => [
-                    [
-                        'id' => 'G5',
-                        'name' => 'Menswear',
-                        'subgroups' => [
-                            ['id' => 'S10', 'name' => 'Shirts & T-shirts'],
-                            ['id' => 'S11', 'name' => 'Trousers & Jeans']
-                        ]
-                    ],
-                    [
-                        'id' => 'G6',
-                        'name' => 'Footwear',
-                        'subgroups' => [
-                            ['id' => 'S12', 'name' => 'Running Sneakers'],
-                            ['id' => 'S13', 'name' => 'Formal Leather Shoes']
-                        ]
-                    ]
-                ]
-            ]
-        ];
-        echo json_encode($mockDepts);
-    }
-    ?>;
+    const deptsData = <?php echo json_encode($stats['tree']); ?>;
 
     let activeStep = 3; // Starts directly at Shop Setup (Step 3) since authenticated
     let selectedType = "";
     let selectedMode = [];
     let selectedScopeDepth = "Dept";
-    let isSetupSubmitted = localStorage.getItem("melcom_stock_audit_submitted") === "true";
+    let isSetupSubmitted = false; // Always starts fresh for new setup session
+    localStorage.removeItem("melcom_stock_audit_submitted"); // Clear old setup submissions upon new load
     let selectedItemwiseItems = [];
     let isShopCodeConfirmed = false;
     let shopLookupTimeout = null;
@@ -431,6 +336,24 @@
         renderCheckboxDepts();
         updateWizardState();
     });
+
+    /**
+     * Controls the confirmation modal popups.
+     */
+    function showConfirmSubmitModal() {
+        const modal = document.getElementById("confirmSubmitModal");
+        if (modal) modal.classList.remove("hidden");
+    }
+
+    function hideConfirmSubmitModal() {
+        const modal = document.getElementById("confirmSubmitModal");
+        if (modal) modal.classList.add("hidden");
+    }
+
+    function confirmSetupAndSubmit() {
+        hideConfirmSubmitModal();
+        submitSetupData();
+    }
 
     /**
      * Displays the premium full-screen loading overlay with custom messages.
@@ -484,39 +407,70 @@
             btnBack.style.visibility = "hidden";
         } else {
             btnBack.style.visibility = "visible";
-        }
-
-        // Configure Step 8 action bars
+        }        // Configure Step 8 action bars
         if (activeStep === 8) {
+            const vBox = document.getElementById("inlineVerificationBox");
             if (isSetupSubmitted) {
+                if (vBox) vBox.classList.add("hidden");
                 btnExport.classList.remove("hidden");
                 btnPrint.classList.remove("hidden");
-                if (successMsg) successMsg.classList.remove("hidden");
+                if (successMsg) successMsg.classList.add("hidden");
                 
+                const tableWrapper = document.querySelector("#panelStep-8 .table-wrapper");
+                if (tableWrapper) {
+                    tableWrapper.style.maxHeight = "230px";
+                    tableWrapper.style.marginTop = "0.5rem";
+                }
+
                 btnNextText.innerText = "Setup Saved";
                 btnNextIcon.innerHTML = `<svg style="width:14px;height:14px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
                 btnNext.className = "btn badge-saved";
                 btnNext.disabled = true;
+
+                fetchAndRenderSyncSummary();
             } else {
+                if (vBox) vBox.classList.remove("hidden");
                 btnExport.classList.add("hidden");
                 btnPrint.classList.add("hidden");
                 if (successMsg) successMsg.classList.add("hidden");
+                const syncCard = document.getElementById("syncSummaryCard");
+                if (syncCard) syncCard.classList.add("hidden");
 
-                btnNextText.innerText = "Continue";
-                btnNextIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/>`;
-                btnNext.className = "btn btn-primary";
-                btnNext.disabled = false;
+                const tableWrapper = document.querySelector("#panelStep-8 .table-wrapper");
+                if (tableWrapper) {
+                    tableWrapper.style.maxHeight = "420px";
+                    tableWrapper.style.marginTop = "0";
+                }
+
+
+                btnNextText.innerText = "Confirm & Submit";
+                btnNextIcon.innerHTML = `<svg style="width:14px;height:14px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>`;
+                
+                // Enforce default toggle state and update global button status
+                const toggle = document.getElementById("verificationApproveToggle");
+                if (toggle && !toggle.checked) {
+                    btnNext.disabled = true;
+                    btnNext.className = "btn btn-disabled";
+                } else {
+                    btnNext.disabled = false;
+                    btnNext.className = "btn btn-primary";
+                }
             }
         } else {
+            const vBox = document.getElementById("inlineVerificationBox");
+            if (vBox) vBox.classList.add("hidden");
             btnExport.classList.add("hidden");
             btnPrint.classList.add("hidden");
             if (successMsg) successMsg.classList.add("hidden");
+            const syncCard = document.getElementById("syncSummaryCard");
+            if (syncCard) syncCard.classList.add("hidden");
 
             btnNextText.innerText = "Next";
             btnNextIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/>`;
             validateActiveStepForm();
         }
     }
+
 
     function updateSidebar(step) {
         const totalSteps = 8;
@@ -577,7 +531,7 @@
 
     function handleNavigationNext() {
         if (activeStep === 8) {
-            showConfirmModal();
+            showConfirmSubmitModal();
             return;
         }
 
@@ -766,6 +720,10 @@
     function toggleAllGroups(checked) {
         const checkboxes = document.querySelectorAll(".group-node");
         checkboxes.forEach(chk => {
+            const label = chk.closest('.tree-node-label');
+            if (label && label.style.display === "none") {
+                return;
+            }
             chk.checked = checked;
         });
         renderSubgroupsSegmentColumnList();
@@ -775,6 +733,10 @@
     function toggleAllSubgroups(checked) {
         const checkboxes = document.querySelectorAll(".subgroup-node");
         checkboxes.forEach(chk => {
+            const label = chk.closest('.tree-node-label');
+            if (label && label.style.display === "none") {
+                return;
+            }
             chk.checked = checked;
         });
         validateActiveStepForm();
@@ -994,10 +956,10 @@
         let html = "";
         deptsData.forEach(dept => {
             html += `
-                <div class="tree-column dept-tree-block" data-name="${dept.name.toUpperCase()}">
+                <div class="tree-column dept-tree-block" data-name="${dept.id} - ${dept.name.toUpperCase()}">
                     <label class="tree-node-label" style="background-color: #f8fafc; border-color: var(--color-border);">
                         <input type="checkbox" class="dept-node" value="${dept.id}" data-name="${dept.name}" onchange="handleDeptCheckboxChange(this)">
-                        <span class="tree-node-text" style="font-weight: 800; color: var(--color-text-main); font-size: 13px;">${dept.name}</span>
+                        <span class="tree-node-text" style="font-weight: 800; color: var(--color-text-main); font-size: 13px;">[${dept.id}] ${dept.name}</span>
                     </label>
                 </div>
             `;
@@ -1014,6 +976,40 @@
                 b.style.display = "flex";
             } else {
                 b.style.display = "none";
+            }
+        });
+    }
+
+    function handleSearchGroupsInput(input) {
+        const q = input.value.trim().toUpperCase();
+        const labels = document.querySelectorAll("#groupsColumnList .tree-node-label");
+        labels.forEach(l => {
+            const chk = l.querySelector("input.group-node");
+            if (chk) {
+                const name = chk.getAttribute("data-name").toUpperCase();
+                const id = chk.value.toUpperCase();
+                if (name.includes(q) || id.includes(q)) {
+                    l.style.display = "flex";
+                } else {
+                    l.style.display = "none";
+                }
+            }
+        });
+    }
+
+    function handleSearchSubgroupsInput(input) {
+        const q = input.value.trim().toUpperCase();
+        const labels = document.querySelectorAll("#subgroupsColumnList .tree-node-label");
+        labels.forEach(l => {
+            const chk = l.querySelector("input.subgroup-node");
+            if (chk) {
+                const name = chk.getAttribute("data-name").toUpperCase();
+                const id = chk.value.toUpperCase();
+                if (name.includes(q) || id.includes(q)) {
+                    l.style.display = "flex";
+                } else {
+                    l.style.display = "none";
+                }
             }
         });
     }
@@ -1045,6 +1041,10 @@
         if (checkedDepts.length === 0) {
             container.innerHTML = `<span class="tree-node-text disabled-msg">Select departments in Step 6 to populate groups.</span>`;
             document.getElementById("subgroupsColumnList").innerHTML = `<span class="tree-node-text disabled-msg">Select active groups to populate subgroups.</span>`;
+            const searchG = document.getElementById("searchGroupsInput");
+            if (searchG) searchG.value = "";
+            const searchS = document.getElementById("searchSubgroupsInput");
+            if (searchS) searchS.value = "";
             return;
         }
 
@@ -1069,6 +1069,10 @@
         });
 
         container.innerHTML = html;
+        const searchInput = document.getElementById("searchGroupsInput");
+        if (searchInput && searchInput.value.trim() !== "") {
+            handleSearchGroupsInput(searchInput);
+        }
         renderSubgroupsSegmentColumnList();
     }
 
@@ -1084,6 +1088,8 @@
         const checkedGroups = document.querySelectorAll(".group-node:checked");
         if (checkedGroups.length === 0) {
             container.innerHTML = `<span class="tree-node-text disabled-msg">Select active groups to populate subgroups.</span>`;
+            const searchS = document.getElementById("searchSubgroupsInput");
+            if (searchS) searchS.value = "";
             return;
         }
 
@@ -1112,6 +1118,10 @@
         });
 
         container.innerHTML = html;
+        const searchInput = document.getElementById("searchSubgroupsInput");
+        if (searchInput && searchInput.value.trim() !== "") {
+            handleSearchSubgroupsInput(searchInput);
+        }
     }
 
     // -------------------------------------------------------------
@@ -1156,134 +1166,87 @@
     // -------------------------------------------------------------
     function compileSummaryData() {
         const tableBody = document.getElementById("summaryTableBody");
-        
-        const stockDate = document.getElementById("setupDate").value;
-        const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
-        
-        const typeBadge = selectedType === 'PI' ? '<span class="badge-pi">PI</span>' : '<span class="badge-sst">SST</span>';
-        const modesList = selectedMode.join(", ");
+        if (!tableBody) return;
 
-        let htmlBuffer = "";
+        let depts = [];
+        let groups = [];
+        let subgroups = [];
 
-        if (selectedType === 'PI') {
-            // PI (Perpetual Inventory) includes the ENTIRE catalog scope.
-            // Rendering a single premium consolidated row is 100% efficient and clear.
-            htmlBuffer += `
-                <tr class="row-highlight">
-                    <td>${stockDate}</td>
-                    <td>${shopCode}</td>
-                    <td>${typeBadge}</td>
-                    <td>${modesList}</td>
-                    <td style="font-weight: 800; color: var(--color-primary);">ALL DEPARTMENTS (Complete Catalog Scope)</td>
-                    <td style="font-weight: 700; color: var(--color-text-muted);">ALL GROUPS</td>
-                    <td style="font-weight: 700; color: var(--color-text-muted);">ALL SUBGROUPS</td>
-                </tr>
-            `;
-        } else if (selectedScopeDepth === 'SST') {
-            // SST Depth includes entire selected departments.
-            // Loop through selected departments (checkedDepts) and render a clean department-level summary.
-            const checkedDepts = document.querySelectorAll(".dept-node:checked");
-            checkedDepts.forEach(dNode => {
-                const deptName = dNode.getAttribute("data-name");
-                htmlBuffer += `
-                    <tr class="row-highlight">
-                        <td>${stockDate}</td>
-                        <td>${shopCode}</td>
-                        <td>${typeBadge}</td>
-                        <td>${modesList}</td>
-                        <td style="font-weight: 800; color: var(--color-text-main);">${deptName}</td>
-                        <td style="font-weight: 700; color: var(--color-text-muted);">ALL GROUPS</td>
-                        <td style="font-weight: 700; color: var(--color-text-muted);">ALL SUBGROUPS</td>
-                    </tr>
-                `;
+        if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
+            const uniqueDepts = new Set();
+            const uniqueGroups = new Set();
+            const uniqueSubs = new Set();
+            
+            deptsData.forEach(dept => {
+                uniqueDepts.add(dept.id);
+                dept.groups.forEach(group => {
+                    uniqueGroups.add(group.id);
+                    group.subgroups.forEach(sub => {
+                        uniqueSubs.add(sub.id);
+                    });
+                });
             });
+            
+            depts = Array.from(uniqueDepts);
+            groups = Array.from(uniqueGroups);
+            subgroups = Array.from(uniqueSubs);
         } else {
-            // Fine-grained Group/Subgroup scope
-            const checkedDepts = document.querySelectorAll(".dept-node:checked");
+            document.querySelectorAll(".dept-node:checked").forEach(n => depts.push(n.value));
+            document.querySelectorAll(".group-node:checked").forEach(n => groups.push(n.value));
+            document.querySelectorAll(".subgroup-node:checked").forEach(n => subgroups.push(n.value));
+        }
 
-            checkedDepts.forEach(dNode => {
-                const deptId = dNode.value;
-                const deptName = dNode.getAttribute("data-name");
+        tableBody.innerHTML = `<tr><td colspan="16" style="text-align: center; padding: 2rem; font-weight: bold; color: var(--color-text-muted);">
+            <div class="loading-spinner" style="width: 24px; height: 24px; border-width: 3px; display: inline-block; margin-right: 0.5rem; vertical-align: middle;"></div>
+            Retrieving scoped items from Master Items view...
+        </td></tr>`;
 
-                const checkedGroups = document.querySelectorAll(`.group-node[data-deptid="${deptId}"]:checked`);
-                if (checkedGroups.length === 0) {
+        const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
+        const url = `index.php?route=audit/preview-items&audit_type=${encodeURIComponent(selectedType)}&depts=${encodeURIComponent(depts.join(','))}&groups=${encodeURIComponent(groups.join(','))}&subgroups=${encodeURIComponent(subgroups.join(','))}&shop_code=${encodeURIComponent(shopCode)}`;
+
+        fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            let htmlBuffer = "";
+            if (data && data.status === 'error') {
+                htmlBuffer = `<tr><td colspan="16" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">Scoping Compilation Failed: ${data.message}</td></tr>`;
+            } else if (data && data.length > 0) {
+                data.forEach(item => {
                     htmlBuffer += `
                         <tr class="row-highlight">
-                            <td>${stockDate}</td>
-                            <td>${shopCode}</td>
-                            <td>${typeBadge}</td>
-                            <td>${modesList}</td>
-                            <td>${deptName}</td>
-                            <td>All Groups</td>
-                            <td>All Subgroups</td>
+                            <td style="font-family: monospace; font-weight: bold; color: var(--color-primary);">${item.ITEM_CODE}</td>
+                            <td style="font-weight: 700; color: var(--color-text-main);">${item.ITEM_NAME}</td>
+                            <td style="font-family: monospace; color: var(--color-text-muted);">${item.BARCODE}</td>
+                            <td>${item.IMAGE || 'N/A'}</td>
+                            <td>GHS ${item.PRICE.toFixed(2)}</td>
+                            <td>${item.DEPT}</td>
+                            <td>${item.SHOP_CODE}</td>
+                            <td style="font-weight: bold; color: var(--color-text-main);">${item.CURR_STOCK}</td>
+                            <td>${item.CH_PI || 'N'}</td>
+                            <td>${item.CH_STATUS || 'Y'}</td>
+                            <td>${item.VC_GROUP}</td>
+                            <td>${item.VC_SUBGROUP}</td>
+                            <td style="font-weight: bold; color: var(--color-text-muted);">${item.VC_UNIT || 'N/A'}</td>
+                            <td style="font-family: monospace;">${item.VC_ITEM_CODE || 'N/A'}</td>
+                            <td>${item.VC_SHOP_CODE || 'N/A'}</td>
+                            <td style="font-weight: bold; color: var(--color-primary);">${item.STOCK_QYT || '0'}</td>
                         </tr>
                     `;
-                } else {
-                    checkedGroups.forEach(gNode => {
-                        const groupId = gNode.value;
-                        const groupName = gNode.getAttribute("data-name");
-
-                        const checkedSubs = document.querySelectorAll(`.subgroup-node[data-groupid="${groupId}"]:checked`);
-                        if (checkedSubs.length === 0) {
-                            htmlBuffer += `
-                                <tr class="row-highlight">
-                                    <td>${stockDate}</td>
-                                    <td>${shopCode}</td>
-                                    <td>${typeBadge}</td>
-                                    <td>${modesList}</td>
-                                    <td>${deptName}</td>
-                                    <td>${groupName}</td>
-                                    <td>All Subgroups</td>
-                                </tr>
-                            `;
-                        } else {
-                            checkedSubs.forEach(sNode => {
-                                const subName = sNode.getAttribute("data-name");
-                                htmlBuffer += `
-                                    <tr class="row-highlight">
-                                        <td>${stockDate}</td>
-                                        <td>${shopCode}</td>
-                                        <td>${typeBadge}</td>
-                                        <td>${modesList}</td>
-                                        <td>${deptName}</td>
-                                        <td>${groupName}</td>
-                                        <td>${subName}</td>
-                                    </tr>
-                                `;
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-        tableBody.innerHTML = htmlBuffer;
-    }
-
-    function showConfirmModal() {
-        const summaryBody = document.getElementById("summaryTableBody");
-        const modalSummaryBody = document.getElementById("modalSummaryTableBody");
-        if (summaryBody && modalSummaryBody) {
-            modalSummaryBody.innerHTML = summaryBody.innerHTML;
-        }
-
-        const toggle = document.getElementById("verificationApproveToggle");
-        if (toggle) {
-            toggle.checked = false;
-        }
-        handleVerificationApprovalChange();
-
-        document.getElementById("confirmSubmitModal").classList.remove("hidden");
-    }
-
-    function closeConfirmModal() {
-        document.getElementById("confirmSubmitModal").classList.add("hidden");
+                });
+            } else {
+                htmlBuffer = `<tr><td colspan="16" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">No matching items found in the MASTER_ITEM scope.</td></tr>`;
+            }
+            tableBody.innerHTML = htmlBuffer;
+        })
+        .catch(err => {
+            tableBody.innerHTML = `<tr><td colspan="16" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">Network Error: Failed to connect to scope compiler.</td></tr>`;
+        });
     }
 
     function handleVerificationApprovalChange() {
         const toggle = document.getElementById("verificationApproveToggle");
-        const btnSubmit = document.getElementById("btnFinalDbSubmit");
-        if (!toggle || !btnSubmit) return;
+        const btnSubmit = document.getElementById("btnGlobalNext");
+        if (!toggle || !btnSubmit || activeStep !== 8 || isSetupSubmitted) return;
 
         if (toggle.checked) {
             btnSubmit.disabled = false;
@@ -1292,11 +1255,6 @@
             btnSubmit.disabled = true;
             btnSubmit.className = "btn btn-disabled";
         }
-    }
-
-    function executeFinalSubmit() {
-        closeConfirmModal();
-        submitSetupData();
     }
 
     // -------------------------------------------------------------
@@ -1321,11 +1279,11 @@
             const uniqueSubs = new Set();
             
             deptsData.forEach(dept => {
-                uniqueDepts.add(dept.name);
+                uniqueDepts.add(dept.id);
                 dept.groups.forEach(group => {
-                    uniqueGroups.add(group.name);
+                    uniqueGroups.add(group.id);
                     group.subgroups.forEach(sub => {
-                        uniqueSubs.add(sub.name);
+                        uniqueSubs.add(sub.id);
                     });
                 });
             });
@@ -1334,9 +1292,9 @@
             groups = Array.from(uniqueGroups);
             subgroups = Array.from(uniqueSubs);
         } else {
-            document.querySelectorAll(".dept-node:checked").forEach(n => depts.push(n.getAttribute("data-name")));
-            document.querySelectorAll(".group-node:checked").forEach(n => groups.push(n.getAttribute("data-name")));
-            document.querySelectorAll(".subgroup-node:checked").forEach(n => subgroups.push(n.getAttribute("data-name")));
+            document.querySelectorAll(".dept-node:checked").forEach(n => depts.push(n.value));
+            document.querySelectorAll(".group-node:checked").forEach(n => groups.push(n.value));
+            document.querySelectorAll(".subgroup-node:checked").forEach(n => subgroups.push(n.value));
         }
 
         const formData = new FormData();
@@ -1387,21 +1345,27 @@
         const tableRows = [];
         const trs = document.querySelectorAll("#summaryTableBody tr");
         
-        const stockDateDefault = document.getElementById("setupDate").value;
-        const shopCodeDefault = document.getElementById("setupShopCode").value.trim().toUpperCase();
-        
         trs.forEach(tr => {
             const tds = tr.querySelectorAll("td");
-            if (tds.length === 7) {
-                const stock_date = (tds[0].innerText.trim() === "-" || tds[0].innerText.trim() === "") ? stockDateDefault : tds[0].innerText.trim();
-                const shop_code = (tds[1].innerText.trim() === "-" || tds[1].innerText.trim() === "") ? shopCodeDefault : tds[1].innerText.trim();
-                const audit_type = (tds[2].innerText.trim() === "-" || tds[2].innerText.trim() === "") ? selectedType : tds[2].innerText.trim();
-                const scanning_mode = (tds[3].innerText.trim() === "-" || tds[3].innerText.trim() === "") ? selectedMode.join(", ") : tds[3].innerText.trim();
-                const department = tds[4].innerText.trim();
-                const group = tds[5].innerText.trim();
-                const subgroup = tds[6].innerText.trim();
+            if (tds.length === 16) {
+                const item_code = tds[0].innerText.trim();
+                const item_name = tds[1].innerText.trim();
+                const barcode = tds[2].innerText.trim();
+                const image = tds[3].innerText.trim();
+                const price = tds[4].innerText.trim();
+                const dept = tds[5].innerText.trim();
+                const shop_code = tds[6].innerText.trim();
+                const curr_stock = tds[7].innerText.trim();
+                const ch_pi = tds[8].innerText.trim();
+                const ch_status = tds[9].innerText.trim();
+                const vc_group = tds[10].innerText.trim();
+                const vc_subgroup = tds[11].innerText.trim();
+                const vc_unit = tds[12].innerText.trim();
+                const vc_item_code = tds[13].innerText.trim();
+                const vc_shop_code = tds[14].innerText.trim();
+                const stock_qyt = tds[15].innerText.trim();
                 
-                tableRows.push({ stock_date, shop_code, audit_type, scanning_mode, department, group, subgroup });
+                tableRows.push({ item_code, item_name, barcode, image, price, dept, shop_code, curr_stock, ch_pi, ch_status, vc_group, vc_subgroup, vc_unit, vc_item_code, vc_shop_code, stock_qyt });
             }
         });
 
@@ -1449,9 +1413,28 @@
         inputMode.value = selectedMode.join(", ");
         form.appendChild(inputMode);
 
+        const inputTotalItems = document.createElement("input");
+        inputTotalItems.type = "hidden";
+        inputTotalItems.name = "total_items";
+        inputTotalItems.value = document.getElementById("syncNoOfItems").innerText.trim();
+        form.appendChild(inputTotalItems);
+
+        const inputTotalQty = document.createElement("input");
+        inputTotalQty.type = "hidden";
+        inputTotalQty.name = "total_qty";
+        inputTotalQty.value = document.getElementById("syncTotalQty").innerText.trim();
+        form.appendChild(inputTotalQty);
+
+        const inputTotalValue = document.createElement("input");
+        inputTotalValue.type = "hidden";
+        inputTotalValue.name = "total_value";
+        inputTotalValue.value = document.getElementById("syncTotalValue").innerText.trim();
+        form.appendChild(inputTotalValue);
+
         document.body.appendChild(form);
         form.submit();
         document.body.removeChild(form);
+
     }
 
     // -------------------------------------------------------------
@@ -1466,16 +1449,25 @@
         
         trs.forEach(tr => {
             const tds = tr.querySelectorAll("td");
-            if (tds.length === 7) {
-                const stock_date = (tds[0].innerText.trim() === "-" || tds[0].innerText.trim() === "") ? stockDateDefault : tds[0].innerText.trim();
-                const shop_code = (tds[1].innerText.trim() === "-" || tds[1].innerText.trim() === "") ? shopCodeDefault : tds[1].innerText.trim();
-                const audit_type = (tds[2].innerText.trim() === "-" || tds[2].innerText.trim() === "") ? selectedType : tds[2].innerText.trim();
-                const scanning_mode = (tds[3].innerText.trim() === "-" || tds[3].innerText.trim() === "") ? selectedMode.join(", ") : tds[3].innerText.trim();
-                const department = tds[4].innerText.trim();
-                const group = tds[5].innerText.trim();
-                const subgroup = tds[6].innerText.trim();
+            if (tds.length === 16) {
+                const item_code = tds[0].innerText.trim();
+                const item_name = tds[1].innerText.trim();
+                const barcode = tds[2].innerText.trim();
+                const image = tds[3].innerText.trim();
+                const price = tds[4].innerText.trim();
+                const dept = tds[5].innerText.trim();
+                const shop_code = tds[6].innerText.trim();
+                const curr_stock = tds[7].innerText.trim();
+                const ch_pi = tds[8].innerText.trim();
+                const ch_status = tds[9].innerText.trim();
+                const vc_group = tds[10].innerText.trim();
+                const vc_subgroup = tds[11].innerText.trim();
+                const vc_unit = tds[12].innerText.trim();
+                const vc_item_code = tds[13].innerText.trim();
+                const vc_shop_code = tds[14].innerText.trim();
+                const stock_qyt = tds[15].innerText.trim();
                 
-                tableRows.push({ stock_date, shop_code, audit_type, scanning_mode, department, group, subgroup });
+                tableRows.push({ item_code, item_name, barcode, image, price, dept, shop_code, curr_stock, ch_pi, ch_status, vc_group, vc_subgroup, vc_unit, vc_item_code, vc_shop_code, stock_qyt });
             }
         });
 
@@ -1486,16 +1478,24 @@
 
         let rowsHtml = "";
         tableRows.forEach(row => {
-            const typeText = row.audit_type.replace(/<[^>]*>/g, '');
             rowsHtml += `
                 <tr>
-                    <td>${row.stock_date}</td>
+                    <td style="font-family: monospace; font-weight: bold;">${row.item_code}</td>
+                    <td style="font-weight: bold;">${row.item_name}</td>
+                    <td style="font-family: monospace;">${row.barcode}</td>
+                    <td>${row.image || 'N/A'}</td>
+                    <td>${row.price}</td>
+                    <td>${row.dept}</td>
                     <td>${row.shop_code}</td>
-                    <td>${typeText}</td>
-                    <td>${row.scanning_mode}</td>
-                    <td>${row.department}</td>
-                    <td>${row.group}</td>
-                    <td>${row.subgroup}</td>
+                    <td style="font-weight: bold;">${row.curr_stock}</td>
+                    <td>${row.ch_pi}</td>
+                    <td>${row.ch_status}</td>
+                    <td>${row.vc_group}</td>
+                    <td>${row.vc_subgroup}</td>
+                    <td style="font-weight: bold;">${row.vc_unit || 'N/A'}</td>
+                    <td style="font-family: monospace;">${row.vc_item_code || 'N/A'}</td>
+                    <td>${row.vc_shop_code || 'N/A'}</td>
+                    <td style="font-weight: bold;">${row.stock_qyt || '0'}</td>
                 </tr>
             `;
         });
@@ -1527,7 +1527,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Print Audit Setup - ${shopCode}</title>
+    <title>Print Scoped Master Items - ${shopCode}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
         body {
@@ -1653,7 +1653,7 @@
             <div class="logo-circle">M</div>
             <div class="brand-text-wrapper">
                 <h1 class="brand-title">MELCOM</h1>
-                <p class="brand-subtitle">Audit Setup System</p>
+                <p class="brand-subtitle">Audit Scoped Master Items</p>
             </div>
         </div>
         <div class="meta-info">
@@ -1661,17 +1661,26 @@
             <span>Audit Date: <strong>${stockDateDefault}</strong></span>
         </div>
     </div>
-    <div class="report-title">Setup Configuration Report</div>
+    <div class="report-title">Setup Scoped Items Configuration Report</div>
     <table>
         <thead>
             <tr>
-                <th>Stock Date</th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Barcode</th>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Dept</th>
                 <th>Shop Code</th>
-                <th>Audit Type</th>
-                <th>Mode</th>
-                <th>Department</th>
-                <th>Group</th>
-                <th>Subgroup</th>
+                <th>Curr Stock</th>
+                <th>CH PI</th>
+                <th>CH Status</th>
+                <th>VC Group</th>
+                <th>VC Subgroup</th>
+                <th>VC Unit</th>
+                <th>VC Item Code</th>
+                <th>VC Shop Code</th>
+                <th>Stock Qyt</th>
             </tr>
         </thead>
         <tbody>
@@ -1687,5 +1696,34 @@
 </html>
         `);
         printWindow.document.close();
+    }
+
+    // -------------------------------------------------------------
+    // RETRIEVES THE COMPLETE SYNCHRONIZATION SUMMARY STATISTICS
+    // -------------------------------------------------------------
+    function fetchAndRenderSyncSummary() {
+        const syncCard = document.getElementById("syncSummaryCard");
+        if (!syncCard) return;
+
+        fetch("index.php?route=audit/summary")
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "ok") {
+                document.getElementById("syncNoOfItems").innerText = Number(data.no_of_items).toLocaleString();
+                document.getElementById("syncTotalQty").innerText = Number(data.total_qty).toLocaleString();
+                
+                // Format total value beautifully as GH₵ currency
+                const formattedValue = new Intl.NumberFormat('en-GH', {
+                    style: 'currency',
+                    currency: 'GHS'
+                }).format(data.total_value);
+                document.getElementById("syncTotalValue").innerText = formattedValue;
+                
+                syncCard.classList.remove("hidden");
+            }
+        })
+        .catch(err => {
+            console.error("Failed to fetch sync summary metrics:", err);
+        });
     }
 </script>
