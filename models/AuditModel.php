@@ -281,11 +281,10 @@ class AuditModel {
             throw new Exception("PL/SQL parsing failed: " . $e['message']);
         }
 
-        // Correct OCI8 reference binding loop using by-reference variables to prevent reference collision
-        foreach ($bind_params as $placeholder => &$val) {
-            oci_bind_by_name($bulkStmt, $placeholder, $val);
+        // Correct OCI8 binding loop using direct array element referencing to prevent variable pointer collisions
+        foreach ($bind_params as $placeholder => $val) {
+            oci_bind_by_name($bulkStmt, $placeholder, $bind_params[$placeholder]);
         }
-        unset($val);
 
         $bulkExec = @oci_execute($bulkStmt);
         if (!$bulkExec) {
@@ -657,11 +656,10 @@ class AuditModel {
             throw new Exception("Oracle SQL parsing failed: " . $e['message']);
         }
 
-        // Correct OCI8 reference binding loop using by-reference variables to prevent reference collision
-        foreach ($bind_params as $placeholder => &$val) {
-            oci_bind_by_name($stmt, $placeholder, $val);
+        // Correct OCI8 binding loop using direct array element referencing to prevent variable pointer collisions
+        foreach ($bind_params as $placeholder => $val) {
+            oci_bind_by_name($stmt, $placeholder, $bind_params[$placeholder]);
         }
-        unset($val);
 
         $results = [];
         $exec = @oci_execute($stmt);
@@ -693,7 +691,11 @@ class AuditModel {
         oci_free_statement($stmt);
 
         if (empty($results)) {
-            throw new Exception("Database Scoping Empty: No matching items found in the VS_ITEM_AUDIT view for the selected departments, groups, or subgroups.");
+            $bind_str = [];
+            foreach ($bind_params as $k => $v) {
+                $bind_str[] = "$k => '$v'";
+            }
+            throw new Exception("Database Scoping Empty: No matching items found in the VS_ITEM_AUDIT view for the selected departments, groups, or subgroups.\n\n[DIAGNOSTICS]\nQuery:\n" . $select_query . "\n\nBinds:\n" . implode(', ', $bind_str));
         }
 
         return $results;
