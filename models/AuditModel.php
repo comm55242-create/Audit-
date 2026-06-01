@@ -231,7 +231,7 @@ class AuditModel {
 
                         if (empty($gSubgroups)) {
                             // No subgroups selected for this group: fetch all items in this group
-                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder)";
+                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder)";
                         } else {
                             // Subgroups are selected: filter by group AND subgroups IN list
                             $sub_placeholders = [];
@@ -240,7 +240,7 @@ class AuditModel {
                                 $bind_params[$sPlaceholder] = $sCode;
                                 $sub_placeholders[] = $sPlaceholder;
                             }
-                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder AND TRIM(A.SUB_GROUP) IN (" . implode(', ', $sub_placeholders) . "))";
+                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder AND TRIM(A.VC_SUB_GROUP_CODE) IN (" . implode(', ', $sub_placeholders) . "))";
                         }
                     }
 
@@ -495,24 +495,24 @@ class AuditModel {
                             ];
                         }
 
-                        if (!isset($tree[$dept_code]['groups'][$group_desc])) {
-                            $tree[$dept_code]['groups'][$group_desc] = [
-                                'id' => $group_desc,
+                        if (!isset($tree[$dept_code]['groups'][$group_code])) {
+                            $tree[$dept_code]['groups'][$group_code] = [
+                                'id' => $group_code,
                                 'name' => $group_desc,
                                 'subgroups' => []
                             ];
                         }
 
                         $sub_exists = false;
-                        foreach ($tree[$dept_code]['groups'][$group_desc]['subgroups'] as $existing_sub) {
-                            if ($existing_sub['id'] === $sub_desc) {
+                        foreach ($tree[$dept_code]['groups'][$group_code]['subgroups'] as $existing_sub) {
+                            if ($existing_sub['id'] === $sub_code) {
                                 $sub_exists = true;
                                 break;
                             }
                         }
                         if (!$sub_exists) {
-                            $tree[$dept_code]['groups'][$group_desc]['subgroups'][] = [
-                                'id' => $sub_desc,
+                            $tree[$dept_code]['groups'][$group_code]['subgroups'][] = [
+                                'id' => $sub_code,
                                 'name' => $sub_desc
                             ];
                         }
@@ -619,7 +619,7 @@ class AuditModel {
 
                         if (empty($gSubgroups)) {
                             // No subgroups selected for this group: fetch all items in this group
-                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder)";
+                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder)";
                         } else {
                             // Subgroups are selected: filter by group AND subgroups IN list
                             $sub_placeholders = [];
@@ -628,7 +628,7 @@ class AuditModel {
                                 $bind_params[$sPlaceholder] = $sCode;
                                 $sub_placeholders[] = $sPlaceholder;
                             }
-                            $group_filters[] = "(TRIM(A.GROUPS) = $gPlaceholder AND TRIM(A.SUB_GROUP) IN (" . implode(', ', $sub_placeholders) . "))";
+                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder AND TRIM(A.VC_SUB_GROUP_CODE) IN (" . implode(', ', $sub_placeholders) . "))";
                         }
                     }
 
