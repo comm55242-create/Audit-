@@ -210,7 +210,7 @@
 
 
     <!-- Unified HTML Table in full tabular form with column headers at the top -->
-    <div class="table-wrapper">
+    <div class="table-wrapper" style="display: none;">
         <table class="summary-table">
             <thead>
                 <tr>
