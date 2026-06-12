@@ -1,4 +1,4 @@
-﻿<?php include('header.php'); ?>
+<?php include('header.php'); ?>
 <?php
 confirm_logged_in();
 $SHOP_CODE = $_SESSION['storecode'];
@@ -124,14 +124,17 @@ $rack_id = $_SESSION['rack_number'];
         } else {
 
           if ($item_code == $tinto) {
-            echo "<script>
-				var call = confirm('Item Code $tinto has been counted by $e_name2 with latest count of $Qty Items on $Date. Do you want to update this record?');  
-				if(call == false)
-				{
-					window.location.replace('index.php');
-				}
-				</script>";
-          }
+            ?>
+            <div class="alert alert-warning" style="margin-bottom: 15px; padding: 10px 15px; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; font-size: 13px;">
+              <button type="button" class="close" data-dismiss="alert" style="float: right; font-size: 18px; font-weight: bold; line-height: 1; color: #000; text-shadow: 0 1px 0 #fff; opacity: .2; border: none; background: transparent;">&times;</button>
+              <h5 style="margin-top: 0; margin-bottom: 8px; font-size: 14px; font-weight: bold;"><i class="glyphicon glyphicon-warning-sign"></i> Duplicate Entry Blocked!</h5>
+              <div style="line-height: 1.4;">
+                This item has <strong>already been entered</strong>.<br>
+                Item Code <strong><?php echo $tinto; ?></strong> was entered twice.
+              </div>
+            </div>
+            <?php
+          } else {
           ?>
 		<div class="container-fluid">
 			<form action="update.php?un=<?php echo $_SESSION['username']; ?>&rn=<?php echo $_SESSION['rack_number'];?>" method="post" class="form-horizontal container">
@@ -152,7 +155,9 @@ $rack_id = $_SESSION['rack_number'];
 			</div><!--form-group-->
             </form>
 		</div>
-		<?php }
+		<?php 
+          } // Ends if($item_code == $tinto) else
+        } // Ends if($i_des == '') else
 		} else { ?>
 		<?PHP if (isset($_GET['d']) == 1) { ?>
 				<div class="alert alert-success">

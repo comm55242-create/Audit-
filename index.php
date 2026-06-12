@@ -80,6 +80,10 @@ try {
             $controller->handleGetSummary();
             break;
 
+        case 'audit/bridge':
+            $controller = new AuditController();
+            $controller->handleBridge();
+            break;
 
         default:
             $controller = new DashboardController();

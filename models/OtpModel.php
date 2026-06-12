@@ -50,6 +50,15 @@ class OtpModel {
         } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
+        
+        // If accessed via localhost, try to get the actual LAN IP of the laptop
+        if ($ip === '127.0.0.1' || $ip === '::1') {
+            $lan_ip = gethostbyname(gethostname());
+            if ($lan_ip && $lan_ip !== '127.0.0.1' && $lan_ip !== '::1') {
+                $ip = $lan_ip;
+            }
+        }
+
         $machine_ip = substr(trim($ip), 0, 30);
 
         // 2. Resolve client laptop host name robustly via reverse DNS lookup

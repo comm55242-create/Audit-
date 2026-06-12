@@ -1,161 +1,591 @@
 <?php
-// ==========================================================================
-// AUDIT SETUP SYSTEM - PREMIUM STYLED EXCEL EXPORT ENGINE
-// Streams a styled, colorized Excel spreadsheet representing the active scoping,
-// placing summary metrics at the bottom and applying premium Melcom Green headers.
-// ==========================================================================
+$seen = []; 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $raw_data = isset($_POST['export_data']) ? $_POST['export_data'] : '';
-    $stock_date = isset($_POST['stock_date']) ? $_POST['stock_date'] : date('Y-m-d');
-    $shop_code = isset($_POST['shop_code']) ? strtoupper(trim($_POST['shop_code'])) : 'UNKNOWN';
-    $audit_type = isset($_POST['audit_type']) ? $_POST['audit_type'] : '';
-    $scanning_mode = isset($_POST['scanning_mode']) ? $_POST['scanning_mode'] : '';
-    
-    $total_items = isset($_POST['total_items']) ? $_POST['total_items'] : '0';
-    $total_qty = isset($_POST['total_qty']) ? $_POST['total_qty'] : '0';
-    $total_value = isset($_POST['total_value']) ? $_POST['total_value'] : 'GH₵ 0.00';
+$conn=oci_connect('SHOP','SHOP','(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521)) (CONNECT_DATA = (SERVICE_NAME = orcl) (SID = orcl)))');
+if(!$conn){
+	echo "Connection failed";
+    $err = oci_error();
+	trigger_error(htmlentities($err['message'], ENT_QUOTES), E_USER_ERROR);	
+}
 
-    $rows = [];
-    if (!empty($raw_data)) {
-        $rows = json_decode($raw_data, true);
-    }
 
-    // Sanitize file name representation and export as .xls for Excel HTML rendering
-    $clean_shop = preg_replace('/[^A-Za-z0-9_\-]/', '', $shop_code);
-    $filename = "audit_setup_" . $clean_shop . "_" . $stock_date . ".xls";
 
-    // Stream as Microsoft Excel Spreadsheet with UTF-8 support
-    header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Pragma: no-cache');
-    header('Expires: 0');
+if(isset($_POST['cdiscreport'])){
 
-    // Output HTML Excel structure with premium stylesheet definitions
-    echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-    echo '<head>';
-    echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-    echo '<style>';
-    echo '  table { border-collapse: collapse; font-family: "Segoe UI", Arial, sans-serif; font-size: 10pt; }';
-    echo '  th { background-color: #005028; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; font-size: 11pt; }';
-    echo '  td { border: 1px solid #e2e8f0; padding: 6px 12px; color: #334155; }';
-    echo '  .summary-header { background-color: #005028; font-weight: bold; font-size: 12pt; text-transform: uppercase; color: #ffffff; height: 32px; }';
-    echo '  .summary-label { background-color: #f8fafc; font-weight: bold; color: #475569; border: 1px solid #cbd5e1; }';
-    echo '  .summary-value { font-weight: bold; color: #0f172a; border: 1px solid #cbd5e1; }';
-    echo '  .metric-label { background-color: #f0fdf4; font-weight: bold; color: #166534; border: 1px solid #cbd5e1; }';
-    echo '  .metric-value { background-color: #f0fdf4; font-weight: bold; color: #166534; font-size: 11pt; border: 1px solid #cbd5e1; }';
-    echo '</style>';
-    echo '</head>';
-    echo '<body>';
 
-    echo '<table>';
+	session_start();
+	$cant = $_SESSION['storecode'];
 
-    // 1. Write styled premium green table headers
-    echo '<thead>';
-    echo '<tr>';
-    $headers = ['Item Code', 'Item Name', 'Barcode', 'Image', 'Price', 'Dept', 'Shop Code', 'Curr Stock', 'CH PI', 'CH Status', 'VC Group', 'VC Subgroup', 'VC Unit', 'VC Item Code', 'VC Shop Code', 'Stock Qyt'];
-    foreach ($headers as $h) {
-        echo '<th>' . htmlspecialchars($h) . '</th>';
-    }
-    echo '</tr>';
-    echo '</thead>';
+	$sql = oci_parse($conn, "SELECT ab.SHOP_CODE, ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, SUM(ab.QTY)QTY, AVG(ab.CURR_STOCK) CURR_STOCK, ab.DEPT, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+ FROM 
+  (
+    SELECT SHOP_CODE,ITEM_CODE, PRICE, ITEM_NAME, QTY, DEPT, CURR_STOCK, rack_num,user_name,SUBSTR(DATE_SYS,1,10)DATE_SYS 
+    FROM ZS_VW_AUDIT_REPORT a
+  ) ab
+  LEFT JOIN MASTER_ITEM mi ON ab.ITEM_CODE = mi.ITEM_CODE AND ab.SHOP_CODE = mi.SHOP_CODE
+  WHERE ab.SHOP_CODE = '{$cant}' 
+  GROUP BY ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.DEPT, ab.SHOP_CODE");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
 
-    // 2. Loop and write scoping rows
-    echo '<tbody>';
-    if (is_array($rows) && count($rows) > 0) {
-        foreach ($rows as $row) {
-            $item_code = isset($row['item_code']) ? $row['item_code'] : '';
-            $item_name = isset($row['item_name']) ? $row['item_name'] : '';
-            $barcode = isset($row['barcode']) ? $row['barcode'] : '';
-            $image = isset($row['image']) ? $row['image'] : 'N/A';
-            $price = isset($row['price']) ? $row['price'] : '';
-            $dept = isset($row['dept']) ? $row['dept'] : '';
-            $shop_code_val = isset($row['shop_code']) ? $row['shop_code'] : '';
-            $curr_stock = isset($row['curr_stock']) ? $row['curr_stock'] : '0';
-            $ch_pi = isset($row['ch_pi']) ? $row['ch_pi'] : 'N';
-            $ch_status = isset($row['ch_status']) ? $row['ch_status'] : 'Y';
-            $vc_group = isset($row['vc_group']) ? $row['vc_group'] : '';
-            $vc_subgroup = isset($row['vc_subgroup']) ? $row['vc_subgroup'] : '';
-            $vc_unit = isset($row['vc_unit']) ? $row['vc_unit'] : 'N/A';
-            $vc_item_code = isset($row['vc_item_code']) ? $row['vc_item_code'] : '';
-            $vc_shop_code = isset($row['vc_shop_code']) ? $row['vc_shop_code'] : '';
-            $stock_qyt = isset($row['stock_qyt']) ? $row['stock_qyt'] : '0';
+	$sqlpending = oci_parse($conn, "SELECT * FROM ZS_VW_AUDIT_PENDING");
+    oci_execute($sqlpending);
 
-            echo '<tr>';
-            // Force strict string representation to preserve leading zeros in Excel
-            echo '<td style="mso-number-format:\'@\';">' . htmlspecialchars($item_code) . '</td>';
-            echo '<td>' . htmlspecialchars($item_name) . '</td>';
-            echo '<td style="mso-number-format:\'@\';">' . htmlspecialchars($barcode) . '</td>';
-            echo '<td>' . htmlspecialchars($image) . '</td>';
-            echo '<td>' . htmlspecialchars($price) . '</td>';
-            echo '<td>' . htmlspecialchars($dept) . '</td>';
-            echo '<td>' . htmlspecialchars($shop_code_val) . '</td>';
-            echo '<td>' . htmlspecialchars($curr_stock) . '</td>';
-            echo '<td>' . htmlspecialchars($ch_pi) . '</td>';
-            echo '<td>' . htmlspecialchars($ch_status) . '</td>';
-            echo '<td>' . htmlspecialchars($vc_group) . '</td>';
-            echo '<td>' . htmlspecialchars($vc_subgroup) . '</td>';
-            echo '<td>' . htmlspecialchars($vc_unit) . '</td>';
-            echo '<td style="mso-number-format:\'@\';">' . htmlspecialchars($vc_item_code) . '</td>';
-            echo '<td>' . htmlspecialchars($vc_shop_code) . '</td>';
-            echo '<td>' . htmlspecialchars($stock_qyt) . '</td>';
-            echo '</tr>';
-        }
-    } else {
-        echo '<tr><td colspan="16" style="text-align: center;">No synced master items records found.</td></tr>';
-    }
-    echo '</tbody>';
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Consolidated_Discrepancy_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
 
-    // 3. Spacers to push summary card to the bottom
-    echo '<tr><td colspan="16" style="border: none; height: 24px;"></td></tr>';
-    echo '<tr><td colspan="16" style="border: none; height: 24px;"></td></tr>';
+	fputcsv($fp, ['SHOP_CODE','ITEM_CODE','ITEM_NAME','AUDIT_QTY','ERP_QTY','DEPT','PRICE','DIFF','DIFF VALUE', 'GROUPS', 'SUBGROUPS']);
 
-    // 4. Premium Styled Summary Card at the BOTTOM of the spreadsheet
-    echo '<tr>';
-    echo '<td colspan="16" class="summary-header" style="text-align: center; font-weight: bold; border: 1px solid #cbd5e1;">MELCOM AUDIT SYSTEM - STOCK TAKE SCOPING SUMMARY</td>';
-    echo '</tr>';
+	while ($row = oci_fetch_assoc($sql)) {
+		
+		$data = [];
+        $data['SHOP_CODE'] = $row['SHOP_CODE'];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['AUDIT_QTY'] = $row['QTY'];
+        $data['ERP_QTY'] = $row['CURR_STOCK'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF'] = $data['AUDIT_QTY'] - $data['ERP_QTY'];
+        $data['VALUE'] = $data['DIFF'] * $data['PRICE'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
 
-    echo '<tr>';
-    echo '<td colspan="4" class="summary-label">Shop Code</td>';
-    echo '<td colspan="12" class="summary-value">' . htmlspecialchars($shop_code) . '</td>';
-    echo '</tr>';
+	while ($row = oci_fetch_assoc($sqlpending)) {
+		
+		$data = [];
+        $data['SHOP_CODE'] = $row['SHOP_CODE'];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['AUDIT_QTY'] = 0;
+        $data['ERP_QTY'] = $row['CURR_STOCK'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF'] = $data['AUDIT_QTY'] - $data['ERP_QTY'];
+        $data['VALUE'] = $data['DIFF'] * $data['PRICE'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
 
-    echo '<tr>';
-    echo '<td colspan="4" class="summary-label">Stock Date</td>';
-    echo '<td colspan="12" class="summary-value">' . htmlspecialchars($stock_date) . '</td>';
-    echo '</tr>';
+	echo $name;
 
-    echo '<tr>';
-    echo '<td colspan="4" class="summary-label">Audit Type</td>';
-    echo '<td colspan="12" class="summary-value">' . htmlspecialchars($audit_type) . '</td>';
-    echo '</tr>';
+}
 
-    echo '<tr>';
-    echo '<td colspan="4" class="summary-label">Scanning Mode</td>';
-    echo '<td colspan="12" class="summary-value">' . htmlspecialchars($scanning_mode) . '</td>';
-    echo '</tr>';
+if(isset($_POST['finalreport'])){
 
-    echo '<tr>';
-    echo '<td colspan="4" class="metric-label">Total Items</td>';
-    echo '<td colspan="12" class="metric-value">' . htmlspecialchars($total_items) . '</td>';
-    echo '</tr>';
+	session_start();
+	$cant = $_SESSION['storecode'];
 
-    echo '<tr>';
-    echo '<td colspan="4" class="metric-label">Total Qty</td>';
-    echo '<td colspan="12" class="metric-value">' . htmlspecialchars($total_qty) . '</td>';
-    echo '</tr>';
+	$sql = oci_parse($conn, "SELECT a.*, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_STOCK_AUDIT_ERP_NEW a LEFT JOIN MASTER_ITEM mi ON a.VC_ITEM_CODE = mi.ITEM_CODE AND a.VC_SHOP_CODE = mi.SHOP_CODE WHERE a.VC_SHOP_CODE = '{$cant}'");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
 
-    echo '<tr>';
-    echo '<td colspan="4" class="metric-label">Total Value</td>';
-    echo '<td colspan="12" class="metric-value">' . htmlspecialchars($total_value) . '</td>';
-    echo '</tr>';
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Final_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
 
-    echo '</table>';
-    echo '</body>';
-    echo '</html>';
-    exit;
-} else {
-    header("HTTP/1.1 405 Method Not Allowed");
-    echo "Invalid Request Method.";
+	fputcsv($fp, ['SHOP_CODE','ITEM_CODE','ITEM_NAME','PRICE','AUDIT_QTY','DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		
+		$data = [];
+        $data['SHOP_CODE'] = $row['VC_SHOP_CODE'];
+        $data['ITEM_CODE'] = $row['VC_ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['QTY'] = $row['VC_AUDIT_QTY'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['provdiscreporte'])){
+
+	session_start();
+	$cant = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.USER_NAME, SUM(ab.QTY)QTY, AVG(ab.CURR_STOCK) CURR_STOCK, ab.rack_num, ab.DATE_SYS, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+-- (select SUM(QTY)  FROM ZS_VW_AUDIT_REPORT aa WHERE aa.ITEM_CODE = ab.ITEM_CODE GROUP BY ITEM_CODE ) TOTAL_COUNT_QTY
+ FROM 
+  (
+    SELECT SHOP_CODE,ITEM_CODE, PRICE, ITEM_NAME, QTY, CURR_STOCK, rack_num,user_name,SUBSTR(DATE_SYS,1,10)DATE_SYS 
+    FROM ZS_VW_AUDIT_REPORT a
+  ) ab
+  LEFT JOIN MASTER_ITEM mi ON ab.ITEM_CODE = mi.ITEM_CODE AND ab.SHOP_CODE = mi.SHOP_CODE
+  WHERE ab.SHOP_CODE = '{$cant}' 
+  GROUP BY ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.USER_NAME, ab.rack_num, ab.DATE_SYS");
+
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Provisional_Discrepancy_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','AUDIT_QTY','ERP_QTY','DIFF','DIFF VALUE'/*, 'PRECENTAGE'*/, 'DATE', 'USER', 'RACK', 'GROUPS', 'SUBGROUPS']);
+
+	while ($trica = oci_fetch_assoc($sql)) {
+
+		// print_r($trica);
+
+		$tinto = $trica['ITEM_CODE'];
+        $item_name = $trica['ITEM_NAME'];
+        $item_price = $trica['PRICE'];
+        $qty = $trica['QTY'];
+        
+        $user = $trica['USER_NAME'];
+        $rack = $trica['RACK_NUM'];
+
+        // $ttCountQty = $trica['TOTAL_COUNT_QTY'];
+        $shop_qty = $trica['CURR_STOCK'] != 0 ? $trica['CURR_STOCK'] : 1;
+        $diff = intval($qty) - intval($shop_qty);
+        $diff_val = $item_price * $diff;
+        // $perc = abs(($diff/intval($shop_qty))*100);
+        $Date = $trica['DATE_SYS'];
+        $group = isset($trica['VC_GROUP']) ? $trica['VC_GROUP'] : '';
+        $subgroup = isset($trica['VC_SUBGROUP']) ? $trica['VC_SUBGROUP'] : '';
+		
+		$data = [$tinto, $item_name, $item_price, $qty, $shop_qty,  $diff, $diff_val/*, $perc*/, $Date, $user, $rack, $group, $subgroup];
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['auditfirstrount'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT a.ITEM_CODE, a.ITEM_NAME, a.PRICE, a.RACK_NUM, a.USER_NAME, a.QTY, a.DATE_SYS, a.DEPT, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_REPORT a LEFT JOIN MASTER_ITEM mi ON a.ITEM_CODE = mi.ITEM_CODE AND a.SHOP_CODE = mi.SHOP_CODE WHERE a.SHOP_CODE = '{$SHOP_CODE}'");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Audit_first_round_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM CODE','ITEM NAME','PRICE','RACK','USER', 'QTY', 'DATE/TIME', 'DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['tobescannede'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, ITEM_NAME, PRICE, CURR_STOCK, DEPT, VC_GROUP, VC_SUBGROUP FROM MASTER_ITEM WHERE SHOP_CODE = '{$SHOP_CODE}' AND CURR_STOCK <> 0 AND CH_PI = 'N' ORDER BY DEPT");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Items_to_be_scanned_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','ERP_QTY','DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['zerostocke'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, ITEM_NAME, PRICE, CURR_STOCK, DEPT, VC_GROUP, VC_SUBGROUP FROM MASTER_ITEM WHERE SHOP_CODE = '{$SHOP_CODE}' AND CURR_STOCK = 0 AND CH_PI = 'N' ORDER BY DEPT");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Items_without_stock_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','ERP_QTY','DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['allitemse'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, ITEM_NAME, PRICE, CURR_STOCK, DEPT, VC_GROUP, VC_SUBGROUP FROM MASTER_ITEM ORDER BY DEPT");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'All_items_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','ERP_QTY','DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['notallowede'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, ITEM_NAME, PRICE, CURR_STOCK, DEPT, VC_GROUP, VC_SUBGROUP FROM MASTER_ITEM WHERE CH_PI = 'Y' ORDER BY DEPT ");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Items_not_allowed_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','ERP_QTY','DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['categorye'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+	$category = $_POST['cat'];
+
+	$n = str_replace(' ', '_',str_replace('&', 'AND', $category));
+
+	$sql = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, ITEM_NAME, PRICE, CURR_STOCK, DEPT, VC_GROUP, VC_SUBGROUP FROM MASTER_ITEM WHERE SHOP_CODE = '{$SHOP_CODE}' AND DEPT = '{$category}' AND CURR_STOCK <>0 AND CH_PI = 'N' ORDER BY ITEM_CODE");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = $n.'_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','ERP_QTY','DEPT', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['uploadedreporte'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT t.VC_ITEM_CODE, t.VC_SHOP_CODE, t.NU_QTY, mi.VC_GROUP, mi.VC_SUBGROUP FROM  POS.TEMP_DT_STOCK_ADJUSTMENT@db_link_shop t LEFT JOIN MASTER_ITEM mi ON t.VC_ITEM_CODE = mi.ITEM_CODE AND t.vc_shop_code = mi.SHOP_CODE WHERE t.vc_shop_code = '{$SHOP_CODE}' ");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Uploaded_items_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM CODE','SHOP CODE','QTY', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['pendingalle'])){
+
+	
+	$sql = oci_parse($conn, "SELECT ITEM_CODE, ITEM_NAME, DEPT, (PRICE * CURR_STOCK) As value, VC_GROUP, VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'All_pending_items_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','DEPT','VALUE', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['pendingdepte'])){
+
+	session_start();
+	$SHOP_CODE = $_SESSION['storecode'];
+	$category = $_POST['cat'];
+
+	$n = str_replace(' ', '_',str_replace('&', 'AND', $category));
+
+	$sql = oci_parse($conn, "SELECT ITEM_CODE, ITEM_NAME, DEPT, (PRICE * CURR_STOCK) As value, VC_GROUP, VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING WHERE DEPT = '{$category}'");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = $n.'_report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','DEPT','VALUE', 'GROUPS', 'SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		$row['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $row['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        unset($row['VC_GROUP']);
+        unset($row['VC_SUBGROUP']);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['recountingreport'])){
+
+	session_start();
+	$cant = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT ab.SHOP_CODE, ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, SUM(ab.QTY)QTY, AVG(ab.CURR_STOCK) CURR_STOCK, ab.DEPT, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+ FROM 
+  (
+    SELECT SHOP_CODE,ITEM_CODE, PRICE, ITEM_NAME, QTY, DEPT, CURR_STOCK, rack_num,user_name,SUBSTR(DATE_SYS,1,10)DATE_SYS 
+    FROM ZS_VW_AUDIT_REPORT a
+  ) ab
+  LEFT JOIN MASTER_ITEM mi ON ab.ITEM_CODE = mi.ITEM_CODE AND ab.SHOP_CODE = mi.SHOP_CODE
+  WHERE ab.SHOP_CODE = '{$cant}' 
+  GROUP BY ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.DEPT, ab.SHOP_CODE");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$sqlpending = oci_parse($conn, "SELECT p.*, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE");
+    oci_execute($sqlpending);
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Recounting_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PHYSICAL_QTY','PRICE','DIFF QTY','DIFF VALUE','DEPT','GROUPS','SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PHYSICAL_QTY'] = '';
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF QTY'] = $row['QTY'] - $row['CURR_STOCK'];
+        $data['DIFF VALUE'] = $data['DIFF QTY'] * $data['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	while ($row = oci_fetch_assoc($sqlpending)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PHYSICAL_QTY'] = '';
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF QTY'] = 0 - $row['CURR_STOCK'];
+        $data['DIFF VALUE'] = $data['DIFF QTY'] * $data['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['variancereport'])){
+
+	session_start();
+	$cant = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT ab.SHOP_CODE, ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, SUM(ab.QTY)QTY, AVG(ab.CURR_STOCK) CURR_STOCK, ab.DEPT, ab.rack_num, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+ FROM 
+  (
+    SELECT SHOP_CODE,ITEM_CODE, PRICE, ITEM_NAME, QTY, DEPT, CURR_STOCK, rack_num,user_name,SUBSTR(DATE_SYS,1,10)DATE_SYS 
+    FROM ZS_VW_AUDIT_REPORT a
+  ) ab
+  LEFT JOIN MASTER_ITEM mi ON ab.ITEM_CODE = mi.ITEM_CODE AND ab.SHOP_CODE = mi.SHOP_CODE
+  WHERE ab.SHOP_CODE = '{$cant}' 
+  GROUP BY ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.DEPT, ab.SHOP_CODE, ab.rack_num");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$sqlpending = oci_parse($conn, "SELECT p.*, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE");
+    oci_execute($sqlpending);
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Variance_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','AUDIT_QTY','ERP_QTY','PRICE','DIFF','DIFF VALUE','DEPT','GROUPS','SUBGROUPS','ZONES']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['AUDIT_QTY'] = $row['QTY'];
+        $data['ERP_QTY'] = $row['CURR_STOCK'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF'] = $data['AUDIT_QTY'] - $data['ERP_QTY'];
+        $data['DIFF VALUE'] = $data['DIFF'] * $data['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        $data['ZONES'] = isset($row['RACK_NUM']) ? $row['RACK_NUM'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	while ($row = oci_fetch_assoc($sqlpending)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['AUDIT_QTY'] = 0;
+        $data['ERP_QTY'] = $row['CURR_STOCK'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF'] = $data['AUDIT_QTY'] - $data['ERP_QTY'];
+        $data['DIFF VALUE'] = $data['DIFF'] * $data['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        $data['ZONES'] = '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	echo $name;
+
 }
 ?>

@@ -15,7 +15,7 @@
     <div class="shop-setup-grid">
         <div class="form-field">
             <label class="form-label">Stock Date</label>
-            <input type="date" id="setupDate" class="form-input" value="<?php echo date('Y-m-d'); ?>" required style="height: 38px; padding: 0.375rem 0.75rem;">
+            <input type="date" id="setupDate" class="form-input" value="<?php echo date('Y-m-d'); ?>" readonly required style="height: 38px; padding: 0.375rem 0.75rem; background-color: #f8fafc; cursor: not-allowed; color: #64748b;">
         </div>
 
         <div class="form-field">
@@ -89,6 +89,10 @@
 
     <!-- Search Input & Auto-Select toggle section -->
     <div style="display: flex; gap: 1rem; align-items: center; width: 100%; max-width: 1152px; margin-bottom: 0.75rem;">
+        <div style="display: flex; gap: 0.35rem; flex-shrink: 0;">
+            <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllDepartments(true)">Select All</button>
+            <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; height: auto;" onclick="toggleAllDepartments(false)">Deselect All</button>
+        </div>
         <div class="input-icon-wrapper" style="flex: 1;">
             <span class="input-icon">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -110,20 +114,15 @@
     </div>
 </div>
 
-<!-- STEP 7: GROUPS & SUBGROUPS SELECTION (SST Only) -->
+<!-- STEP 7: GROUPS SELECTION (SST Only) -->
 <div id="panelStep-7" class="step-content hidden">
     <div class="workspace-header">
-        <h2 class="workspace-title">Groups & Subgroups</h2>
-        <p class="workspace-subtitle">Filter specific scoping categories for SST parameters</p>
+        <h2 class="workspace-title">Groups</h2>
+        <p class="workspace-subtitle">Select the active groups for your audit scope</p>
     </div>
 
-    <!-- (Scoping Depth toggle removed) -->
-
-    <!-- Main dynamic categorization grids (Visible only when scoping depth is segment-specific) -->
-    <div id="sstCategoriesGrid" class="tree-container" style="max-height: 380px;">
-        
-        <!-- Column 1: Groups Checklist -->
-        <div class="tree-column">
+    <div class="tree-container" id="groupsTreeContainer">
+        <div class="tree-column" style="grid-column: span 3;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--color-border);">
                 <span class="tree-column-header" style="margin-bottom: 0;">Active Groups Selection</span>
                 <div style="display: flex; gap: 0.35rem;">
@@ -141,9 +140,18 @@
                 <span class="tree-node-text disabled-msg">Select departments in Step 6 to populate groups.</span>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Column 2: Subgroups Checklist -->
-        <div class="tree-column" style="grid-column: span 2;">
+<!-- STEP 8: SUBGROUPS SELECTION (SST Only) -->
+<div id="panelStep-8" class="step-content hidden">
+    <div class="workspace-header">
+        <h2 class="workspace-title">Subgroups</h2>
+        <p class="workspace-subtitle">Select the active subgroups for your audit scope</p>
+    </div>
+
+    <div class="tree-container" id="subgroupsTreeContainer">
+        <div class="tree-column" style="grid-column: span 3;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--color-border);">
                 <span class="tree-column-header" style="margin-bottom: 0;">Active Subgroups Selection</span>
                 <div style="display: flex; gap: 0.35rem;">
@@ -161,12 +169,11 @@
                 <span class="tree-node-text disabled-msg">Select active groups to populate subgroups.</span>
             </div>
         </div>
-
     </div>
 </div>
 
-<!-- STEP 8: SUMMARY & EXPORT -->
-<div id="panelStep-8" class="step-content hidden">
+<!-- STEP 9: SUMMARY & EXPORT -->
+<div id="panelStep-9" class="step-content hidden">
     <div class="workspace-header">
         <h2 class="workspace-title">Summary & Export</h2>
         <p class="workspace-subtitle">Confirm parameters structured inside the initialization table</p>
@@ -178,33 +185,104 @@
         <span>Successfully Submitted</span>
     </div>
 
-    <!-- Premium Sync Summary Card -->
-    <div id="syncSummaryCard" class="sync-summary-card hidden">
-        <div class="sync-summary-header">
-            <div class="sync-summary-icon">
-                <svg style="width:20px;height:20px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    <!-- Premium Sync Summary Card (Redesigned) -->
+    <div id="syncSummaryCard" class="sync-summary-card hidden" style="width: 100%; margin: 0 auto; background: #ffffff; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div style="background-color: var(--color-primary); color: #ffffff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg style="width:22px;height:22px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
             </div>
-            <div class="sync-summary-title-stack">
-                <span class="sync-summary-title">Item Master Sync Successfully</span>
-                <span class="sync-summary-title" style="margin-top: 0.15rem;">Shop Stock Sync Successfully</span>
-                <span class="sync-summary-subtitle">Live local synchronization statistics updated from the secure master database</span>
+            <div style="display: flex; flex-direction: column;">
+                <span style="color: var(--color-text-main); font-weight: 800; font-size: 15px;">Total Information Summary</span>
+                <span style="font-size: 11.5px; color: var(--color-text-muted);">Key overview of all data</span>
             </div>
         </div>
-        <div class="sync-summary-grid">
-            <div class="sync-summary-item">
-                <span class="sync-summary-label">No. of Items</span>
-                <span id="syncNoOfItems" class="sync-summary-value">0</span>
+
+        <div style="display: flex; justify-content: space-between; gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Total Records (Items) -->
+            <div style="flex: 1; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                </div>
+                <span style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 0.5rem; font-weight: 500;">Total No. of Items</span>
+                <span id="syncNoOfItems" style="font-size: 24px; font-weight: 800; color: var(--color-primary);">0</span>
             </div>
-            <div class="sync-summary-item">
-                <span class="sync-summary-label">Total Qty</span>
-                <span id="syncTotalQty" class="sync-summary-value">0</span>
+            
+            <!-- Total QTY -->
+            <div style="flex: 1; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                </div>
+                <span style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 0.5rem; font-weight: 500;">Total Qty</span>
+                <span id="syncTotalQty" style="font-size: 24px; font-weight: 800; color: var(--color-primary);">0</span>
             </div>
-            <div class="sync-summary-item">
-                <span class="sync-summary-label">Total Value</span>
-                <span id="syncTotalValue" class="sync-summary-value">GH₵ 0.00</span>
+
+            <!-- Total Prices -->
+            <div style="flex: 1; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <span style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 0.5rem; font-weight: 500;">Total Prices</span>
+                <span id="syncTotalValue" style="font-size: 24px; font-weight: 800; color: var(--color-primary);">GHâ‚µ 0.00</span>
             </div>
+        </div>
+
+        <!-- System Status list (No progress bars) -->
+        <div style="border: 1px solid var(--color-border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+            
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg style="width: 18px; height: 18px;" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-5a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1zm0-4a1 1 0 112 0v3a1 1 0 11-2 0V7z"/></svg>
+                </div>
+                <div style="font-size: 13px; font-weight: 800; color: var(--color-text-main); flex-shrink: 0; text-transform: uppercase;">ITEM MASTER SYNCED SUCCESSFULLY</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg style="width: 18px; height: 18px;" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-5a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1zm0-4a1 1 0 112 0v3a1 1 0 11-2 0V7z"/></svg>
+                </div>
+                <div style="font-size: 13px; font-weight: 800; color: var(--color-text-main); flex-shrink: 0; text-transform: uppercase;">SHOP STOCK SYNCED SUCCESSFULLY</div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg style="width: 18px; height: 18px;" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-5a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1zm0-4a1 1 0 112 0v3a1 1 0 11-2 0V7z"/></svg>
+                </div>
+                <div style="font-size: 13px; font-weight: 800; color: var(--color-text-main); flex-shrink: 0; text-transform: uppercase;">BARCODE SYNCED SUCCESSFULLY</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Dynamic Department Breakdown Card (Redesigned) -->
+    <div id="syncDeptBreakdownCard" class="sync-summary-card hidden" style="width: 100%; margin: 1.5rem auto 0 auto; background: #ffffff; border: 1px solid var(--color-border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div style="background-color: var(--color-primary); color: #ffffff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg style="width:20px;height:20px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="color: var(--color-text-main); font-weight: 800; font-size: 15px;">Department Information Summary</span>
+                <span style="font-size: 11.5px; color: var(--color-text-muted);">Overview of data by department</span>
+            </div>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <th style="text-align: left; padding: 1rem 0.5rem; font-size: 12px; color: var(--color-primary); font-weight: 600;">Department</th>
+                        <th style="text-align: right; padding: 1rem 0.5rem; font-size: 12px; color: var(--color-primary); font-weight: 600;">Total No. of Items</th>
+                        <th style="text-align: right; padding: 1rem 0.5rem; font-size: 12px; color: var(--color-primary); font-weight: 600;">Total Qty</th>
+                        <th style="text-align: right; padding: 1rem 0.5rem; font-size: 12px; color: var(--color-primary); font-weight: 600;">Total Prices</th>
+                    </tr>
+                </thead>
+                <tbody id="syncDeptBreakdownGrid">
+                    <!-- Populated dynamically by fetchAndRenderSyncSummary() -->
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -217,19 +295,18 @@
                     <th>Item Code</th>
                     <th>Item Name</th>
                     <th>Barcode</th>
-                    <th>Image</th>
                     <th>Price</th>
+                    <th>Effect Date</th>
                     <th>Dept</th>
-                    <th>Shop Code</th>
-                    <th>Curr Stock</th>
+                    <th>Dept Code</th>
+                    <th>Group</th>
+                    <th>Group Code</th>
+                    <th>Sub Group</th>
+                    <th>Sub Group Code</th>
+                    <th>Pack Size</th>
                     <th>CH PI</th>
                     <th>CH Status</th>
-                    <th>VC Group</th>
-                    <th>VC Subgroup</th>
                     <th>VC Unit</th>
-                    <th>VC Item Code</th>
-                    <th>VC Shop Code</th>
-                    <th>Stock Qyt</th>
                 </tr>
             </thead>
             <tbody id="summaryTableBody">
@@ -249,6 +326,18 @@
             <span class="verification-desc">I hereby confirm that all selected audit scopes, physical credentials, departments, groups, and subgroups have been thoroughly checked and are correct.</span>
         </div>
     </div>
+
+    <!-- Selected Hierarchy List added here -->
+    <div id="selectedHierarchyList" style="margin-top: 1.5rem; display: none; background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+            <h3 style="font-size: 14px; font-weight: 800; color: var(--color-text-main); margin: 0;">Selected Configuration Hierarchy</h3>
+            <button type="button" onclick="printHierarchyList()" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 11px;">
+                <svg style="width:12px;height:12px;margin-right:0.35rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print Scope
+            </button>
+        </div>
+        <div id="hierarchyListContent" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+    </div>
 </div>
 
 <!-- CARD FOOTER ACTIONS PANEL -->
@@ -260,16 +349,16 @@
     </button>
 
     <div style="display: flex; align-items: center;">
-        <!-- Export CSV Button (Visible on Step 8 only after submit) -->
-        <button type="button" id="btnExportCsv" onclick="exportSetupToCsv()" class="btn btn-secondary hidden" style="margin-right: 1rem; border-color: var(--color-success); color: var(--color-success); display: inline-flex; align-items: center; gap: 0.35rem; height: auto;">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"/></svg>
-            <span>Export CSV</span>
+        <!-- Print Summary Button (Visible on Step 9 only after submit) -->
+        <button type="button" id="btnPrintSetup" onclick="printSummaryCards()" class="btn btn-secondary hidden" style="margin-right: 0.5rem;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            <span>Print Summary</span>
         </button>
 
-        <!-- Print Setup Button (Visible on Step 8 only after submit) -->
-        <button type="button" id="btnPrintSetup" onclick="printSetupSheet()" class="btn btn-secondary hidden" style="margin-right: 1rem;">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            <span>Print Setup</span>
+        <!-- Check_list Button (Visible on Step 9 only after submit) -->
+        <button type="button" id="btnGoChecklist" onclick="switchTab('details')" class="btn btn-secondary hidden" style="margin-right: 1rem; border-color: var(--color-primary); color: var(--color-primary);">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            <span>Check_list</span>
         </button>
 
         <!-- Next / Continue Button -->
@@ -330,6 +419,7 @@
     localStorage.removeItem("melcom_stock_audit_submitted"); // Clear old setup submissions upon new load
     let selectedItemwiseItems = [];
     let isShopCodeConfirmed = false;
+    let confirmedShopDesc = "";
     let shopLookupTimeout = null;
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -380,8 +470,8 @@
     // CORE NAVIGATION CONTROLLER
     // -------------------------------------------------------------
     function updateWizardState() {
-        // Hide all active wizard panels (Steps 3-8)
-        for (let i = 3; i <= 8; i++) {
+        // Hide all active wizard panels (Steps 3-9)
+        for (let i = 3; i <= 9; i++) {
             const el = document.getElementById("panelStep-" + i);
             if (el) el.classList.add("hidden");
         }
@@ -398,25 +488,27 @@
         const btnNext = document.getElementById("btnGlobalNext");
         const btnNextText = document.getElementById("btnGlobalNextText");
         const btnNextIcon = document.getElementById("btnGlobalNextIcon");
-        const btnExport = document.getElementById("btnExportCsv");
         const btnPrint = document.getElementById("btnPrintSetup");
+        const btnGoChecklist = document.getElementById("btnGoChecklist");
         const successMsg = document.getElementById("setupSuccessMessage");
 
-        // Back button visibility (hidden on starting Step 3 and completed Step 8)
-        if (activeStep === 3 || (activeStep === 8 && isSetupSubmitted)) {
+        // Back button visibility (hidden on starting Step 3 and completed Step 9)
+        if (activeStep === 3 || (activeStep === 9 && isSetupSubmitted)) {
             btnBack.style.visibility = "hidden";
         } else {
             btnBack.style.visibility = "visible";
-        }        // Configure Step 8 action bars
-        if (activeStep === 8) {
+        }        // Configure Step 9 action bars
+        if (activeStep === 9) {
             const vBox = document.getElementById("inlineVerificationBox");
+            const hList = document.getElementById("selectedHierarchyList");
             if (isSetupSubmitted) {
                 if (vBox) vBox.classList.add("hidden");
-                btnExport.classList.remove("hidden");
+                if (hList) hList.style.display = "none";
                 btnPrint.classList.remove("hidden");
+                if (btnGoChecklist) btnGoChecklist.classList.remove("hidden");
                 if (successMsg) successMsg.classList.add("hidden");
                 
-                const tableWrapper = document.querySelector("#panelStep-8 .table-wrapper");
+                const tableWrapper = document.querySelector("#panelStep-9 .table-wrapper");
                 if (tableWrapper) {
                     tableWrapper.style.maxHeight = "230px";
                     tableWrapper.style.marginTop = "0.5rem";
@@ -430,13 +522,13 @@
                 fetchAndRenderSyncSummary();
             } else {
                 if (vBox) vBox.classList.remove("hidden");
-                btnExport.classList.add("hidden");
                 btnPrint.classList.add("hidden");
+                if (btnGoChecklist) btnGoChecklist.classList.add("hidden");
                 if (successMsg) successMsg.classList.add("hidden");
                 const syncCard = document.getElementById("syncSummaryCard");
                 if (syncCard) syncCard.classList.add("hidden");
 
-                const tableWrapper = document.querySelector("#panelStep-8 .table-wrapper");
+                const tableWrapper = document.querySelector("#panelStep-9 .table-wrapper");
                 if (tableWrapper) {
                     tableWrapper.style.maxHeight = "420px";
                     tableWrapper.style.marginTop = "0";
@@ -459,34 +551,35 @@
         } else {
             const vBox = document.getElementById("inlineVerificationBox");
             if (vBox) vBox.classList.add("hidden");
-            btnExport.classList.add("hidden");
             btnPrint.classList.add("hidden");
+            if (btnGoChecklist) btnGoChecklist.classList.add("hidden");
             if (successMsg) successMsg.classList.add("hidden");
             const syncCard = document.getElementById("syncSummaryCard");
             if (syncCard) syncCard.classList.add("hidden");
 
             btnNextText.innerText = "Next";
             btnNextIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/>`;
+            if (btnNext) btnNext.className = "btn btn-primary"; // Reset the class so it doesn't stay grayed out!
             validateActiveStepForm();
         }
     }
 
 
     function updateSidebar(step) {
-        const totalSteps = 8;
+        const totalSteps = 9;
         const isPi = (selectedType === 'PI');
         
-        // Hide Step 7 if in Complete PI, or Shop Stock-Take SST scoping
-        const hideStep7 = (isPi || (selectedType === 'SST' && selectedScopeDepth === 'SST'));
+        // Hide Steps 7 & 8 if in Complete PI, or Shop Stock-Take SST scoping
+        const hideGroupSteps = (isPi || (selectedType === 'SST' && selectedScopeDepth === 'SST'));
         
         let completedSteps = step - 1;
         if (isPi && step > 5) {
-            completedSteps = step === 8 ? 5 : step - 1;
-        } else if (hideStep7 && step > 6) {
-            completedSteps = step === 8 ? 6 : step - 1;
+            completedSteps = step === 9 ? 5 : step - 1;
+        } else if (hideGroupSteps && step > 6) {
+            completedSteps = step === 9 ? 6 : step - 1;
         }
         
-        const divisor = isPi ? 5 : (hideStep7 ? 7 : 8);
+        const divisor = isPi ? 5 : (hideGroupSteps ? 7 : 9);
         const progressPercent = Math.round((completedSteps / divisor) * 100);
         
         const barFill = document.getElementById("sidebarProgress");
@@ -501,11 +594,11 @@
             
             if (!stepMenu || !circle || !text) continue;
 
-            // Manage Steps visibility under PI mode
-            if (isPi && (i === 6 || i === 7)) {
+            // Manage Steps visibility under PI mode (hide 6, 7, 8)
+            if (isPi && (i === 6 || i === 7 || i === 8)) {
                 stepMenu.classList.add("hidden");
                 continue;
-            } else if (i === 7 && hideStep7) {
+            } else if ((i === 7 || i === 8) && hideGroupSteps) {
                 stepMenu.classList.add("hidden");
                 continue;
             } else {
@@ -515,7 +608,7 @@
             // Update CSS state classes
             if (i < step) {
                 circle.className = "step-circle completed";
-                circle.innerText = "✓";
+                circle.innerHTML = "&#10003;";
                 text.className = "step-text completed";
             } else if (i === step) {
                 circle.className = "step-circle active";
@@ -530,7 +623,7 @@
     }
 
     function handleNavigationNext() {
-        if (activeStep === 8) {
+        if (activeStep === 9) {
             showConfirmSubmitModal();
             return;
         }
@@ -539,17 +632,17 @@
 
         if (activeStep === 5) {
             if (selectedType === 'PI') {
-                targetStep = 8; // Complete PI skips Steps 6 & 7
+                targetStep = 9; // Complete PI skips Steps 6, 7 & 8
             } else {
                 targetStep = 6;
             }
         } else if (activeStep === 6 && selectedScopeDepth === 'SST') {
-            targetStep = 8; // SST depth skips Step 7 (Groups & Subgroups)
+            targetStep = 9; // SST depth skips Steps 7 & 8 (Groups & Subgroups)
         } else {
             targetStep++;
         }
         
-        if (targetStep === 8) {
+        if (targetStep === 9) {
             showLoader(
                 "Compiling Scope...",
                 "Please wait while we structure and pull your selected departments, groups, and items into the master initialization table. This may take a moment."
@@ -572,13 +665,13 @@
 
         let targetStep = activeStep;
 
-        if (activeStep === 8) {
+        if (activeStep === 9) {
             if (selectedType === 'PI') {
                 targetStep = 5;
             } else if (selectedScopeDepth === 'SST') {
                 targetStep = 6;
             } else {
-                targetStep = 7;
+                targetStep = 8;
             }
         } else if (activeStep === 6) {
             targetStep = 5;
@@ -637,6 +730,7 @@
             .then(data => {
                 if (data.status === 'success') {
                     isShopCodeConfirmed = true;
+                    confirmedShopDesc = data.shop_desc;
                     descContainer.style.background = "#ecfdf5";
                     descContainer.style.border = "1px solid #a7f3d0";
                     descContainer.style.color = "#065f46";
@@ -714,6 +808,19 @@
         if (chkItemwise.checked) selectedMode.push("Itemwise");
         if (chkScanning.checked) selectedMode.push("Scanning");
 
+        validateActiveStepForm();
+    }
+
+    function toggleAllDepartments(checked) {
+        const checkboxes = document.querySelectorAll(".dept-node");
+        checkboxes.forEach(chk => {
+            const block = chk.closest('.dept-tree-block');
+            if (block && block.style.display === "none") {
+                return;
+            }
+            chk.checked = checked;
+        });
+        renderGroupsSegmentColumnList();
         validateActiveStepForm();
     }
 
@@ -1173,6 +1280,13 @@
                 const checkedGroups = document.querySelectorAll(".group-node:checked");
                 isValid = (checkedGroups.length > 0);
             }
+        } else if (activeStep === 8) {
+            if (selectedScopeDepth === 'SST') {
+                isValid = true;
+            } else {
+                const checkedSubgroups = document.querySelectorAll(".subgroup-node:checked");
+                isValid = (checkedSubgroups.length > 0);
+            }
         }
 
         if (btnNext) btnNext.disabled = !isValid;
@@ -1220,20 +1334,91 @@
             });
         }
 
-        tableBody.innerHTML = `<tr><td colspan="16" style="text-align: center; padding: 2rem; font-weight: bold; color: var(--color-text-muted);">
+        tableBody.innerHTML = `<tr><td colspan="15" style="text-align: center; padding: 2rem; font-weight: bold; color: var(--color-text-muted);">
             <div class="loading-spinner" style="width: 24px; height: 24px; border-width: 3px; display: inline-block; margin-right: 0.5rem; vertical-align: middle;"></div>
             Retrieving scoped items from Master Items view...
         </td></tr>`;
 
-        const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
-        const url = `index.php?route=audit/preview-items&audit_type=${encodeURIComponent(selectedType)}&depts=${encodeURIComponent(depts.join(','))}&groups=${encodeURIComponent(groups.join(','))}&subgroups=${encodeURIComponent(subgroups.join(','))}&shop_code=${encodeURIComponent(shopCode)}`;
+        // Render Hierarchy List
+        const hierarchyContainer = document.getElementById("selectedHierarchyList");
+        const hierarchyContent = document.getElementById("hierarchyListContent");
+        if (hierarchyContainer && hierarchyContent) {
+            let hierHtml = "";
+            let renderedDepts = [];
 
-        fetch(url)
+            if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
+                renderedDepts = deptsData;
+            } else {
+                renderedDepts = deptsData.filter(d => depts.includes(d.id));
+            }
+
+            if (renderedDepts.length > 0) {
+                hierarchyContainer.style.display = "block";
+                renderedDepts.forEach(dept => {
+                    hierHtml += `<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 1rem;">`;
+                    hierHtml += `<div style="font-weight: 800; color: #1e293b; font-size: 13px; display: flex; align-items: center;"><svg style="width:14px;height:14px;margin-right:6px;color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg> ${dept.name} <span style="margin-left:auto; font-size: 10px; color: #64748b; background: #e2e8f0; padding: 2px 6px; border-radius: 12px;">Dept</span></div>`;
+                    
+                    let renderedGroups = [];
+                    if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
+                        renderedGroups = dept.groups;
+                    } else {
+                        const targetPrefix = `${dept.id}|`;
+                        const groupIds = groups.filter(g => g.startsWith(targetPrefix)).map(g => g.split('|')[1]);
+                        renderedGroups = dept.groups.filter(g => groupIds.includes(g.id));
+                    }
+
+                    if (renderedGroups.length > 0) {
+                        hierHtml += `<div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; padding-left: 1rem; border-left: 2px solid #cbd5e1; margin-left: 0.5rem;">`;
+                        renderedGroups.forEach(group => {
+                            hierHtml += `<div>`;
+                            hierHtml += `<div style="font-weight: 700; color: #334155; font-size: 12px; display: flex; align-items: center;"><svg style="width:12px;height:12px;margin-right:6px;color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg> ${group.name}</div>`;
+                            
+                            let renderedSubs = [];
+                            if (selectedType === 'PI' || selectedScopeDepth === 'SST') {
+                                renderedSubs = group.subgroups;
+                            } else {
+                                const targetPrefix = `${dept.id}|${group.id}|`;
+                                const subIds = subgroups.filter(s => s.startsWith(targetPrefix)).map(s => s.split('|')[2]);
+                                renderedSubs = group.subgroups.filter(s => subIds.includes(s.id));
+                            }
+
+                            if (renderedSubs.length > 0) {
+                                hierHtml += `<div style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.35rem; padding-left: 1rem;">`;
+                                renderedSubs.forEach(sub => {
+                                    hierHtml += `<span style="font-size: 10px; color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px;">${sub.name}</span>`;
+                                });
+                                hierHtml += `</div>`;
+                            }
+                            hierHtml += `</div>`;
+                        });
+                        hierHtml += `</div>`;
+                    }
+                    hierHtml += `</div>`;
+                });
+                hierarchyContent.innerHTML = hierHtml;
+            } else {
+                hierarchyContainer.style.display = "none";
+            }
+        }
+
+        const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
+        
+        const formData = new FormData();
+        formData.append("audit_type", selectedType);
+        formData.append("depts", depts.join(','));
+        formData.append("groups", groups.join(','));
+        formData.append("subgroups", subgroups.join(','));
+        formData.append("shop_code", shopCode);
+
+        fetch("index.php?route=audit/preview-items", {
+            method: "POST",
+            body: formData
+        })
         .then(res => res.json())
         .then(data => {
             let htmlBuffer = "";
             if (data && data.status === 'error') {
-                htmlBuffer = `<tr><td colspan="16" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">Scoping Compilation Failed: ${data.message}</td></tr>`;
+                htmlBuffer = `<tr><td colspan="15" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">Scoping Compilation Failed: ${data.message}</td></tr>`;
             } else if (data && data.length > 0) {
                 data.forEach(item => {
                     htmlBuffer += `
@@ -1241,36 +1426,35 @@
                             <td style="font-family: monospace; font-weight: bold; color: var(--color-primary);">${item.ITEM_CODE}</td>
                             <td style="font-weight: 700; color: var(--color-text-main);">${item.ITEM_NAME}</td>
                             <td style="font-family: monospace; color: var(--color-text-muted);">${item.BARCODE}</td>
-                            <td>${item.IMAGE || 'N/A'}</td>
                             <td>GHS ${item.PRICE.toFixed(2)}</td>
-                            <td>${item.DEPT}</td>
-                            <td>${item.SHOP_CODE}</td>
-                            <td style="font-weight: bold; color: var(--color-text-main);">${item.CURR_STOCK}</td>
+                            <td>${item.DT_EFFECT_DATE || 'N/A'}</td>
+                            <td>${item.DEPT || 'N/A'}</td>
+                            <td>${item.DEPT_CODE || 'N/A'}</td>
+                            <td>${item.GROUPS || 'N/A'}</td>
+                            <td>${item.VC_GROUP_CODE || 'N/A'}</td>
+                            <td>${item.SUB_GROUP || 'N/A'}</td>
+                            <td>${item.VC_SUB_GROUP_CODE || 'N/A'}</td>
+                            <td>${item.PACK_SIZE !== null && item.PACK_SIZE !== undefined ? Number(item.PACK_SIZE).toFixed(3) : '0.000'}</td>
                             <td>${item.CH_PI || 'N'}</td>
                             <td>${item.CH_STATUS || 'Y'}</td>
-                            <td>${item.VC_GROUP}</td>
-                            <td>${item.VC_SUBGROUP}</td>
                             <td style="font-weight: bold; color: var(--color-text-muted);">${item.VC_UNIT || 'N/A'}</td>
-                            <td style="font-family: monospace;">${item.VC_ITEM_CODE || 'N/A'}</td>
-                            <td>${item.VC_SHOP_CODE || 'N/A'}</td>
-                            <td style="font-weight: bold; color: var(--color-primary);">${item.STOCK_QYT || '0'}</td>
                         </tr>
                     `;
                 });
             } else {
-                htmlBuffer = `<tr><td colspan="16" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">No matching items found in the MASTER_ITEM scope.</td></tr>`;
+                htmlBuffer = `<tr><td colspan="15" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">No matching items found in the MASTER_ITEM scope.</td></tr>`;
             }
             tableBody.innerHTML = htmlBuffer;
         })
         .catch(err => {
-            tableBody.innerHTML = `<tr><td colspan="16" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">Network Error: Failed to connect to scope compiler.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="15" style="text-align: center; padding: 2rem; color: var(--color-danger); font-weight: bold;">Network Error: Failed to connect to scope compiler.</td></tr>`;
         });
     }
 
     function handleVerificationApprovalChange() {
         const toggle = document.getElementById("verificationApproveToggle");
         const btnSubmit = document.getElementById("btnGlobalNext");
-        if (!toggle || !btnSubmit || activeStep !== 8 || isSetupSubmitted) return;
+        if (!toggle || !btnSubmit || activeStep !== 9 || isSetupSubmitted) return;
 
         if (toggle.checked) {
             btnSubmit.disabled = false;
@@ -1279,6 +1463,109 @@
             btnSubmit.disabled = true;
             btnSubmit.className = "btn btn-disabled";
         }
+    }
+
+    function printHierarchyList() {
+        const content = document.getElementById("hierarchyListContent").innerHTML;
+        const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase() || "N/A";
+        const stockDate = document.getElementById("setupDate").value || "N/A";
+        
+        let auditData = null;
+        try {
+            auditData = JSON.parse(localStorage.getItem('melcom_stock_audit_data'));
+        } catch(e) {}
+        
+        const opsManager = auditData?.opsManager || '__________________';
+        const storeManager = auditData?.storeManager || '__________________';
+        const auditLead = auditData?.auditLead || '__________________';
+        
+        const printWindow = window.open('', '_blank', 'height=600,width=800');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Audit Configuration Scope - ${shopCode}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 2rem; color: #334155; }
+                    .print-header { text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
+                    .print-header h1 { margin: 0; font-size: 20px; color: #006D44; text-transform: uppercase; }
+                    .print-header p { margin: 8px 0 0 0; font-size: 13px; color: #64748b; font-weight: 600; }
+                    
+                    /* Normalize injected html for print */
+                    #hierarchyListContent { display: flex; flex-direction: column; gap: 1rem; }
+                    #hierarchyListContent > div { 
+                        border: 1px solid #cbd5e1 !important; 
+                        padding: 1rem !important; 
+                        border-radius: 8px !important; 
+                        page-break-inside: avoid;
+                        background: none !important;
+                    }
+                    /* Reset inline backgrounds for print clarity */
+                    span[style*="background"] { border: 1px solid #cbd5e1 !important; }
+                    
+                    /* Signature section styling */
+                    .print-signatures {
+                        margin-top: 4rem;
+                        display: flex;
+                        justify-content: space-around;
+                        page-break-inside: avoid;
+                        padding-top: 2rem;
+                    }
+                    .sig-block {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 0.5rem;
+                        text-align: center;
+                    }
+                    .sig-line {
+                        width: 200px;
+                        border-bottom: 1px solid #334155;
+                    }
+                    .sig-title {
+                        font-weight: 700;
+                        font-size: 14px;
+                        color: #1e293b;
+                        text-transform: uppercase;
+                    }
+                    
+                    @media print {
+                        body { padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-header">
+                    <h1>Stock Audit Configuration Scope</h1>
+                    <p>SHOP: ${shopCode} &nbsp;&nbsp;|&nbsp;&nbsp; DATE: ${stockDate}</p>
+                </div>
+                <div id="hierarchyListContent">
+                    ${content}
+                </div>
+                <div class="print-signatures">
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">Operations Manager<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${opsManager}</span></div>
+                    </div>
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">Store Manager<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${storeManager}</span></div>
+                    </div>
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">Audit Lead<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${auditLead}</span></div>
+                    </div>
+                </div>
+                <script>
+                    window.onload = function() {
+                        window.focus();
+                        window.print();
+                        window.setTimeout(function() { window.close(); }, 500);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     }
 
     // -------------------------------------------------------------
@@ -1350,6 +1637,7 @@
                 localStorage.setItem("melcom_stock_audit_submitted", "true");
                 localStorage.setItem("melcom_stock_audit_data", JSON.stringify({
                     shopCode: shopCode,
+                    shopName: confirmedShopDesc,
                     stockDate: stockDate,
                     auditType: selectedType,
                     auditMode: selectedMode.join(", "),
@@ -1358,7 +1646,7 @@
                     subgroups: subgroups.join(", ")
                 }));
                 updateWizardState();
-                printSetupSheet(true); // Automatically triggers windows print layout upon final confirmed submit!
+                printSummaryCards(); // Automatically triggers windows print layout upon final confirmed submit!
             } else {
                 alert("Submission Failed: " + data);
             }
@@ -1370,186 +1658,58 @@
     }
 
     // -------------------------------------------------------------
-    // DYNAMIC EXPORT TO CSV ENGINE
+    // PRINT SUMMARY CARDS
+    // Prints only the summary cards (sync stats + department breakdown)
     // -------------------------------------------------------------
-    function exportSetupToCsv() {
-        const tableRows = [];
-        const trs = document.querySelectorAll("#summaryTableBody tr");
+    function printSummaryCards() {
+        const syncCard = document.getElementById("syncSummaryCard");
+        const deptCard = document.getElementById("syncDeptBreakdownCard");
         
-        trs.forEach(tr => {
-            const tds = tr.querySelectorAll("td");
-            if (tds.length === 16) {
-                const item_code = tds[0].innerText.trim();
-                const item_name = tds[1].innerText.trim();
-                const barcode = tds[2].innerText.trim();
-                const image = tds[3].innerText.trim();
-                const price = tds[4].innerText.trim();
-                const dept = tds[5].innerText.trim();
-                const shop_code = tds[6].innerText.trim();
-                const curr_stock = tds[7].innerText.trim();
-                const ch_pi = tds[8].innerText.trim();
-                const ch_status = tds[9].innerText.trim();
-                const vc_group = tds[10].innerText.trim();
-                const vc_subgroup = tds[11].innerText.trim();
-                const vc_unit = tds[12].innerText.trim();
-                const vc_item_code = tds[13].innerText.trim();
-                const vc_shop_code = tds[14].innerText.trim();
-                const stock_qyt = tds[15].innerText.trim();
-                
-                tableRows.push({ item_code, item_name, barcode, image, price, dept, shop_code, curr_stock, ch_pi, ch_status, vc_group, vc_subgroup, vc_unit, vc_item_code, vc_shop_code, stock_qyt });
-            }
-        });
-
-        if (tableRows.length === 0) {
-            alert("No data available to export.");
+        if (!syncCard || syncCard.classList.contains("hidden")) {
+            // No summary data available to print, return silently
             return;
         }
-
-        // POST dynamic export submission form to export.php
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "export.php";
-        form.style.display = "none";
-
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "export_data";
-        input.value = JSON.stringify(tableRows);
-        form.appendChild(input);
 
         const stockDate = document.getElementById("setupDate").value;
         const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
-        
-        const inputDate = document.createElement("input");
-        inputDate.type = "hidden";
-        inputDate.name = "stock_date";
-        inputDate.value = stockDate;
-        form.appendChild(inputDate);
-
-        const inputShop = document.createElement("input");
-        inputShop.type = "hidden";
-        inputShop.name = "shop_code";
-        inputShop.value = shopCode;
-        form.appendChild(inputShop);
-
-        const inputType = document.createElement("input");
-        inputType.type = "hidden";
-        inputType.name = "audit_type";
-        inputType.value = selectedType;
-        form.appendChild(inputType);
-
-        const inputMode = document.createElement("input");
-        inputMode.type = "hidden";
-        inputMode.name = "scanning_mode";
-        inputMode.value = selectedMode.join(", ");
-        form.appendChild(inputMode);
-
-        const inputTotalItems = document.createElement("input");
-        inputTotalItems.type = "hidden";
-        inputTotalItems.name = "total_items";
-        inputTotalItems.value = document.getElementById("syncNoOfItems").innerText.trim();
-        form.appendChild(inputTotalItems);
-
-        const inputTotalQty = document.createElement("input");
-        inputTotalQty.type = "hidden";
-        inputTotalQty.name = "total_qty";
-        inputTotalQty.value = document.getElementById("syncTotalQty").innerText.trim();
-        form.appendChild(inputTotalQty);
-
-        const inputTotalValue = document.createElement("input");
-        inputTotalValue.type = "hidden";
-        inputTotalValue.name = "total_value";
-        inputTotalValue.value = document.getElementById("syncTotalValue").innerText.trim();
-        form.appendChild(inputTotalValue);
-
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-
-    }
-
-    // -------------------------------------------------------------
-    // HIGH-FIDELITY PRINT REPORT COMPILER
-    // -------------------------------------------------------------
-    function printSetupSheet(triggerPrint = true) {
-        const tableRows = [];
-        const trs = document.querySelectorAll("#summaryTableBody tr");
-        
-        const stockDateDefault = document.getElementById("setupDate").value;
-        const shopCodeDefault = document.getElementById("setupShopCode").value.trim().toUpperCase();
-        
-        trs.forEach(tr => {
-            const tds = tr.querySelectorAll("td");
-            if (tds.length === 16) {
-                const item_code = tds[0].innerText.trim();
-                const item_name = tds[1].innerText.trim();
-                const barcode = tds[2].innerText.trim();
-                const image = tds[3].innerText.trim();
-                const price = tds[4].innerText.trim();
-                const dept = tds[5].innerText.trim();
-                const shop_code = tds[6].innerText.trim();
-                const curr_stock = tds[7].innerText.trim();
-                const ch_pi = tds[8].innerText.trim();
-                const ch_status = tds[9].innerText.trim();
-                const vc_group = tds[10].innerText.trim();
-                const vc_subgroup = tds[11].innerText.trim();
-                const vc_unit = tds[12].innerText.trim();
-                const vc_item_code = tds[13].innerText.trim();
-                const vc_shop_code = tds[14].innerText.trim();
-                const stock_qyt = tds[15].innerText.trim();
-                
-                tableRows.push({ item_code, item_name, barcode, image, price, dept, shop_code, curr_stock, ch_pi, ch_status, vc_group, vc_subgroup, vc_unit, vc_item_code, vc_shop_code, stock_qyt });
-            }
-        });
-
-        if (tableRows.length === 0) {
-            alert("No data available to print.");
-            return;
-        }
-
-        let rowsHtml = "";
-        tableRows.forEach(row => {
-            rowsHtml += `
-                <tr>
-                    <td style="font-family: monospace; font-weight: bold;">${row.item_code}</td>
-                    <td style="font-weight: bold;">${row.item_name}</td>
-                    <td style="font-family: monospace;">${row.barcode}</td>
-                    <td>${row.image || 'N/A'}</td>
-                    <td>${row.price}</td>
-                    <td>${row.dept}</td>
-                    <td>${row.shop_code}</td>
-                    <td style="font-weight: bold;">${row.curr_stock}</td>
-                    <td>${row.ch_pi}</td>
-                    <td>${row.ch_status}</td>
-                    <td>${row.vc_group}</td>
-                    <td>${row.vc_subgroup}</td>
-                    <td style="font-weight: bold;">${row.vc_unit || 'N/A'}</td>
-                    <td style="font-family: monospace;">${row.vc_item_code || 'N/A'}</td>
-                    <td>${row.vc_shop_code || 'N/A'}</td>
-                    <td style="font-weight: bold;">${row.stock_qyt || '0'}</td>
-                </tr>
-            `;
-        });
-
         const loginEmail = "<?php echo htmlspecialchars($email); ?>";
-        const shopCode = shopCodeDefault;
 
-        let printScript = "";
-        if (triggerPrint) {
-            printScript = `
-                <script>
-                    window.addEventListener('load', () => {
-                        setTimeout(() => {
-                            window.print();
-                        }, 600);
-                    });
-                <\/script>
-            `;
+        let auditData = null;
+        try {
+            auditData = JSON.parse(localStorage.getItem('melcom_stock_audit_data'));
+        } catch(e) {}
+        
+        const opsManager = auditData?.opsManager || '__________________';
+        const storeManager = auditData?.storeManager || '__________________';
+        const auditLead = auditData?.auditLead || '__________________';
+
+        // Build department breakdown HTML
+        let deptHtml = "";
+        if (deptCard && !deptCard.classList.contains("hidden")) {
+            const rows = deptCard.querySelectorAll("#syncDeptBreakdownGrid tr");
+            rows.forEach(row => {
+                const tds = row.querySelectorAll("td");
+                const deptName = tds[0] ? tds[0].innerText.trim() : "";
+                const items = tds[1] ? tds[1].innerText.trim() : "0";
+                const qty = tds[2] ? tds[2].innerText.trim() : "0";
+                const value = tds[3] ? tds[3].innerText.trim() : "0";
+                deptHtml += `<div class="dept-row">
+                    <div style="display:flex;align-items:center;">
+                        <span class="dept-badge">DEPT</span>
+                        <span class="dept-name">${deptName}</span>
+                    </div>
+                    <div class="dept-stats">
+                        <div class="dept-stat"><span class="stat-label">Total Items</span><span class="stat-value">${items}</span></div>
+                        <div class="dept-stat"><span class="stat-label">Total Qty</span><span class="stat-value">${qty}</span></div>
+                        <div class="dept-stat"><span class="stat-label">Total Value</span><span class="stat-value primary">${value}</span></div>
+                    </div>
+                </div>`;
+            });
         }
 
         const printWindow = window.open("", "_blank");
         if (!printWindow) {
-            alert("Popup blocker prevented opening the print report window. Please allow popups for this site.");
+            alert("Popup blocker prevented opening the print window. Please allow popups for this site.");
             return;
         }
 
@@ -1558,124 +1718,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Print Scoped Master Items - ${shopCode}</title>
+    <title>Audit Summary - ${shopCode}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-        body {
-            font-family: 'Outfit', sans-serif;
-            color: #1e293b;
-            padding: 2rem;
-            margin: 0;
-            background-color: #ffffff;
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid #006D44;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .logo-circle {
-            width: 36px;
-            height: 36px;
-            background-color: #006D44;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 16px;
-        }
-        .brand-text-wrapper {
-            display: flex;
-            flex-direction: column;
-        }
-        .brand-title {
-            font-size: 20px;
-            font-weight: 900;
-            color: #006D44;
-            margin: 0;
-            line-height: 1.1;
-        }
-        .brand-subtitle {
-            font-size: 10px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin: 0;
-            font-weight: 700;
-        }
-        .meta-info {
-            text-align: right;
-            font-size: 12px;
-            color: #64748b;
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        .meta-info strong {
-            color: #0f172a;
-        }
-        .report-title {
-            font-size: 16px;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: #0f172a;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        th {
-            background-color: #006D44;
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 10px 12px;
-            border: 1px solid #005a38;
-            text-align: left;
-        }
-        td {
-            padding: 10px 12px;
-            border: 1px solid #e2e8f0;
-            font-size: 12px;
-            color: #334155;
-            font-weight: 500;
-        }
-        tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-        .footer {
-            margin-top: 4rem;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 1rem;
-            font-size: 10px;
-            color: #94a3b8;
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-        }
-        @media print {
-            body {
-                padding: 0;
-            }
-            @page {
-                size: auto;
-                margin: 15mm;
-            }
-        }
+        body { font-family: 'Outfit', sans-serif; color: #1e293b; padding: 2rem; margin: 0; background-color: #fff; }
+        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #006D44; padding-bottom: 1rem; margin-bottom: 2rem; }
+        .brand { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-circle { width: 36px; height: 36px; background-color: #006D44; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 16px; }
+        .brand-text-wrapper { display: flex; flex-direction: column; }
+        .brand-title { font-size: 20px; font-weight: 900; color: #006D44; margin: 0; line-height: 1.1; }
+        .brand-subtitle { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; font-weight: 700; }
+        .meta-info { text-align: right; font-size: 12px; color: #64748b; display: flex; flex-direction: column; gap: 0.25rem; }
+        .meta-info strong { color: #0f172a; }
+        .report-title { font-size: 16px; font-weight: 800; margin-bottom: 1.5rem; color: #0f172a; text-transform: uppercase; letter-spacing: 0.025em; }
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .summary-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1.25rem; text-align: center; }
+        .summary-card .label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.04em; display: block; margin-bottom: 0.5rem; }
+        .summary-card .value { font-size: 22px; font-weight: 900; color: #006D44; }
+        .dept-section-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.025em; }
+        .dept-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background-color: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 0.5rem; }
+        .dept-name { font-weight: 700; color: #0f172a; font-size: 13px; }
+        .dept-badge { font-weight: 800; color: #006D44; font-size: 10px; background-color: #dcfce7; padding: 0.2rem 0.5rem; border-radius: 6px; text-transform: uppercase; margin-right: 0.75rem; }
+        .dept-stats { display: flex; gap: 2rem; }
+        .dept-stat { text-align: right; min-width: 80px; }
+        .dept-stat .stat-label { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.02em; }
+        .dept-stat .stat-value { font-weight: 800; color: #0f172a; font-size: 12px; }
+        .dept-stat .stat-value.primary { color: #006D44; }
+        .footer { margin-top: 3rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; font-weight: 600; }
+        @media print { body { padding: 0; } @page { size: auto; margin: 15mm; } }
     </style>
 </head>
 <body>
@@ -1684,56 +1754,68 @@
             <div class="logo-circle">M</div>
             <div class="brand-text-wrapper">
                 <h1 class="brand-title">MELCOM</h1>
-                <p class="brand-subtitle">Audit Scoped Master Items</p>
+                <p class="brand-subtitle">Audit Summary Report</p>
             </div>
         </div>
         <div class="meta-info">
             <span>Auditor: <strong>${loginEmail}</strong></span>
-            <span>Audit Date: <strong>${stockDateDefault}</strong></span>
+            <span>Audit Date: <strong>${stockDate}</strong></span>
+            <span>Shop Code: <strong>${shopCode}</strong></span>
         </div>
     </div>
-    <div class="report-title">Setup Scoped Items Configuration Report</div>
-    <table>
-        <thead>
-            <tr>
-                <th>Item Code</th>
-                <th>Item Name</th>
-                <th>Barcode</th>
-                <th>Image</th>
-                <th>Price</th>
-                <th>Dept</th>
-                <th>Shop Code</th>
-                <th>Curr Stock</th>
-                <th>CH PI</th>
-                <th>CH Status</th>
-                <th>VC Group</th>
-                <th>VC Subgroup</th>
-                <th>VC Unit</th>
-                <th>VC Item Code</th>
-                <th>VC Shop Code</th>
-                <th>Stock Qyt</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${rowsHtml}
-        </tbody>
-    </table>
+    <div class="report-title">Synchronization Summary Report</div>
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="label">Total No. of Items</span>
+            <span class="value">${document.getElementById("syncNoOfItems").innerText}</span>
+        </div>
+        <div class="summary-card">
+            <span class="label">Total Qty</span>
+            <span class="value">${document.getElementById("syncTotalQty").innerText}</span>
+        </div>
+        <div class="summary-card">
+            <span class="label">Total Value</span>
+            <span class="value">${document.getElementById("syncTotalValue").innerText}</span>
+        </div>
+    </div>
+    ${deptHtml ? `<div class="dept-section-title">Department Breakdown Summary</div>${deptHtml}` : ""}
+    
+    <div style="margin-top: 4rem; display: flex; justify-content: space-around; page-break-inside: avoid; padding-top: 2rem;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
+            <div style="width: 200px; border-bottom: 1px solid #334155;"></div>
+            <div style="font-weight: 700; font-size: 14px; color: #1e293b; text-transform: uppercase;">Operations Manager<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${opsManager}</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
+            <div style="width: 200px; border-bottom: 1px solid #334155;"></div>
+            <div style="font-weight: 700; font-size: 14px; color: #1e293b; text-transform: uppercase;">Store Manager<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${storeManager}</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
+            <div style="width: 200px; border-bottom: 1px solid #334155;"></div>
+            <div style="font-weight: 700; font-size: 14px; color: #1e293b; text-transform: uppercase;">Audit Lead<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${auditLead}</span></div>
+        </div>
+    </div>
+    
     <div class="footer">
-        <span>Melcom Shop Setup Initialization System</span>
+        <span>Melcom Shop Audit System</span>
         <span>Report Confidential - Internal Audit Use Only</span>
     </div>
-    ${printScript}
+    <script>
+        window.addEventListener('load', () => { setTimeout(() => { window.print(); }, 600); });
+    <\/script>
 </body>
 </html>
         `);
         printWindow.document.close();
     }
 
+
     // -------------------------------------------------------------
     // RETRIEVES THE COMPLETE SYNCHRONIZATION SUMMARY STATISTICS
     // -------------------------------------------------------------
     function fetchAndRenderSyncSummary() {
         const syncCard = document.getElementById("syncSummaryCard");
+        const deptCard = document.getElementById("syncDeptBreakdownCard");
+        const deptGrid = document.getElementById("syncDeptBreakdownGrid");
         if (!syncCard) return;
 
         fetch("index.php?route=audit/summary")
@@ -1743,7 +1825,7 @@
                 document.getElementById("syncNoOfItems").innerText = Number(data.no_of_items).toLocaleString();
                 document.getElementById("syncTotalQty").innerText = Number(data.total_qty).toLocaleString();
                 
-                // Format total value beautifully as GH₵ currency
+                // Format total value beautifully as GHâ‚µ currency
                 const formattedValue = new Intl.NumberFormat('en-GH', {
                     style: 'currency',
                     currency: 'GHS'
@@ -1751,10 +1833,43 @@
                 document.getElementById("syncTotalValue").innerText = formattedValue;
                 
                 syncCard.classList.remove("hidden");
+
+                // Render dynamic department breakdown
+                if (data.depts && data.depts.length > 0 && deptCard && deptGrid) {
+                    let deptHtml = "";
+                    data.depts.forEach(dept => {
+                        const formattedPrice = new Intl.NumberFormat('en-GH', {
+                            style: 'currency',
+                            currency: 'GHS'
+                        }).format(dept.total_value);
+                        
+                        deptHtml += `
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 1rem 0.5rem; font-size: 13.5px; color: var(--color-text-main); font-weight: 500; display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f0fdf4; color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                    </div>
+                                    ${dept.dept_name}
+                                </td>
+                                <td style="padding: 1rem 0.5rem; font-size: 13.5px; color: var(--color-text-main); font-weight: 500; text-align: right;">${Number(dept.no_of_items).toLocaleString()}</td>
+                                <td style="padding: 1rem 0.5rem; font-size: 13.5px; color: var(--color-text-main); font-weight: 500; text-align: right;">${Number(dept.total_qty).toLocaleString()}</td>
+                                <td style="padding: 1rem 0.5rem; font-size: 13.5px; color: var(--color-text-main); font-weight: 500; text-align: right;">${formattedPrice}</td>
+                            </tr>
+                        `;
+                    });
+                    deptGrid.innerHTML = deptHtml;
+                    deptCard.classList.remove("hidden");
+                } else if (deptCard) {
+                    deptCard.classList.add("hidden");
+                }
             }
         })
         .catch(err => {
             console.error("Failed to fetch sync summary metrics:", err);
         });
+    }
+    function startStockTake() {
+        const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
+        window.location.href = "index.php?route=audit/bridge&shop=" + encodeURIComponent(shopCode);
     }
 </script>

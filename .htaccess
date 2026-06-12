@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteRule ^shop_audit\.php$ /Audit_new/admin_audit/shop_audit.php [L]
+RewriteRule ^upload_audit_shop\.php$ /Audit_new/admin_audit/upload_audit_shop.php [L]
+RewriteRule ^shop_report\.php$ /Audit_new/admin_audit/shop_report.php [L]

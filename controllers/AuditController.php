@@ -89,12 +89,13 @@ class AuditController {
      */
     public function handlePreviewItems() {
         header('Content-Type: application/json; charset=utf-8');
+        // Accept POST payload to avoid URI Too Long errors with many subgroups
         $params = [
-            'audit_type' => isset($_GET['audit_type']) ? $_GET['audit_type'] : '',
-            'depts' => isset($_GET['depts']) ? $_GET['depts'] : '',
-            'groups' => isset($_GET['groups']) ? $_GET['groups'] : '',
-            'subgroups' => isset($_GET['subgroups']) ? $_GET['subgroups'] : '',
-            'shop_code' => isset($_GET['shop_code']) ? $_GET['shop_code'] : ''
+            'audit_type' => isset($_POST['audit_type']) ? $_POST['audit_type'] : '',
+            'depts' => isset($_POST['depts']) ? $_POST['depts'] : '',
+            'groups' => isset($_POST['groups']) ? $_POST['groups'] : '',
+            'subgroups' => isset($_POST['subgroups']) ? $_POST['subgroups'] : '',
+            'shop_code' => isset($_POST['shop_code']) ? $_POST['shop_code'] : ''
         ];
         try {
             $results = AuditModel::getScopedItemsPreview($params);
@@ -118,6 +119,30 @@ class AuditController {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
             exit;
         }
+    }
+    /**
+     * Bridges session variables to the Old System before redirecting.
+     */
+    public function handleBridge() {
+        $shopCode = isset($_GET['shop']) ? $_GET['shop'] : '';
+        
+        // Inject old system session variables
+        $_SESSION['storecode'] = $shopCode;
+        $_SESSION['storename'] = $shopCode; // Old system just needs this set to pass confirm_logged_in()
+        $_SESSION['username'] = 'ADMIN';
+        $_SESSION['staff_id'] = 'ADMIN';
+        $_SESSION['rack_number'] = ""; // Match old system login behavior
+        
+        try {
+            AuditModel::initializeStockTakeSession($shopCode, 'ADMIN');
+        } catch (Exception $e) {
+            // If it fails, log or handle the error (we could redirect to an error page, but for now we'll just let the bridge continue so they aren't fully stuck)
+            error_log("Stock Take Initialization Failed: " . $e->getMessage());
+        }
+        
+        // Redirect to the old system index (relative so it works inside subfolders like Audit_new)
+        header('Location: admin_audit/index.php');
+        exit;
     }
 }
 ?>

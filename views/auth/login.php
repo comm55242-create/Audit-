@@ -388,7 +388,7 @@ unset($_SESSION['login_error']);
             btnConfirm.innerText = "Verify";
             if (data.status === 'success') {
                 if (timerInterval) clearInterval(timerInterval);
-                alert("Security Credentials Confirmed!");
+                // Security credentials confirmed, redirect silently
                 location.href = "index.php?route=dashboard";
             } else {
                 alert("Verification Failed: " + data.message);

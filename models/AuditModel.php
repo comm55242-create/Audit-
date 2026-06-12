@@ -26,10 +26,10 @@ class AuditModel {
                         TRIM(ITEM_NAME) as ITEM_NAME, 
                         TRIM(BARCODE) as BARCODE, 
                         PRICE, 
-                        CURR_STOCK, 
-                        TRIM(DEPT) as DEPT, 
-                        TRIM(VC_GROUP) as VC_GROUP, 
-                        TRIM(VC_SUBGROUP) as VC_SUBGROUP 
+                        0 as CURR_STOCK, 
+                        'GENERAL' as DEPT, 
+                        'GENERAL' as VC_GROUP, 
+                        'GENERAL' as VC_SUBGROUP 
                     FROM MASTER_ITEM 
                     WHERE UPPER(ITEM_CODE) LIKE :query 
                        OR UPPER(ITEM_NAME) LIKE :query 
@@ -96,10 +96,10 @@ class AuditModel {
                         TRIM(ITEM_NAME) as ITEM_NAME, 
                         TRIM(BARCODE) as BARCODE, 
                         PRICE, 
-                        CURR_STOCK, 
-                        TRIM(DEPT) as DEPT, 
-                        TRIM(VC_GROUP) as VC_GROUP, 
-                        TRIM(VC_SUBGROUP) as VC_SUBGROUP 
+                        0 as CURR_STOCK, 
+                        'GENERAL' as DEPT, 
+                        'GENERAL' as VC_GROUP, 
+                        'GENERAL' as VC_SUBGROUP 
                     FROM MASTER_ITEM 
                     WHERE UPPER(ITEM_CODE) IN ($in_clause)
                     ORDER BY ITEM_CODE";
@@ -170,26 +170,8 @@ class AuditModel {
         $group_list = array_filter(array_map('trim', explode(',', $groups)));
         $subgroup_list = array_filter(array_map('trim', explode(',', $subgroups)));
 
-        // Select and insert records matching column definitions of MASTER_ITEM, with no table joins and zero stock fallback to avoid invalid DB link functions
-        $select_query = "SELECT DISTINCT 
-                            TRIM(A.ITEM_CODE) AS ITEM_CODE, 
-                            SUBSTR(TRIM(A.ITEM_NAME), 1, 100) AS ITEM_NAME, 
-                            TRIM(A.BARCODE) AS BARCODE, 
-                            NULL AS IMAGE, 
-                            A.PRICE, 
-                            SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT, 
-                            :shop_code AS SHOP_CODE, 
-                            0 AS CURR_STOCK, 
-                            NVL(A.CH_PI, 'N') AS CH_PI, 
-                            NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
-                            SUBSTR(TRIM(A.GROUPS), 1, 50) AS VC_GROUP, 
-                            SUBSTR(TRIM(A.SUB_GROUP), 1, 50) AS VC_SUBGROUP,
-                            SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
-                            A.ITEM_CODE AS VC_ITEM_CODE,
-                            :shop_code AS VC_SHOP_CODE,
-                            0 AS STOCK_QYT
-                         FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
-
+        // Select and insert records matching column definitions of MASTER_ITEM, with no table joins
+        $inner_where = "";
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
         $bind_params = [':shop_code' => substr($shop_code, 0, 10)];
 
@@ -211,8 +193,8 @@ class AuditModel {
                 if (empty($dGroups)) {
                     // No groups selected for this department: fetch all items for this department
                     $pName = ':dept_' . $bind_counter++;
-                    $bind_params[$pName] = $dCode;
-                    $dept_filters[] = "(TRIM(A.DEPT_CODE) = $pName)";
+                    $bind_params[$pName] = strtoupper($dCode);
+                    $dept_filters[] = "(UPPER(TRIM(A.DEPT_CODE)) = $pName)";
                 } else {
                     // Groups are selected for this department: build group filters
                     $group_filters = [];
@@ -227,26 +209,31 @@ class AuditModel {
                         }
 
                         $gPlaceholder = ':grp_' . $bind_counter++;
-                        $bind_params[$gPlaceholder] = $gCode;
+                        $bind_params[$gPlaceholder] = strtoupper($gCode);
 
                         if (empty($gSubgroups)) {
                             // No subgroups selected for this group: fetch all items in this group
-                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder)";
+                            $group_filters[] = "(UPPER(TRIM(A.VC_GROUP_CODE)) = $gPlaceholder)";
                         } else {
                             // Subgroups are selected: filter by group AND subgroups IN list
                             $sub_placeholders = [];
                             foreach ($gSubgroups as $sCode) {
                                 $sPlaceholder = ':sub_' . $bind_counter++;
-                                $bind_params[$sPlaceholder] = $sCode;
+                                $bind_params[$sPlaceholder] = strtoupper($sCode);
                                 $sub_placeholders[] = $sPlaceholder;
                             }
-                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder AND TRIM(A.VC_SUB_GROUP_CODE) IN (" . implode(', ', $sub_placeholders) . "))";
+                            $sub_chunks = array_chunk($sub_placeholders, 999);
+                            $chunk_queries = [];
+                            foreach ($sub_chunks as $chunk) {
+                                $chunk_queries[] = "UPPER(TRIM(A.VC_SUB_GROUP_CODE)) IN (" . implode(', ', $chunk) . ")";
+                            }
+                            $group_filters[] = "(UPPER(TRIM(A.VC_GROUP_CODE)) = $gPlaceholder AND (" . implode(' OR ', $chunk_queries) . "))";
                         }
                     }
 
                     $dPlaceholder = ':dept_' . $bind_counter++;
-                    $bind_params[$dPlaceholder] = $dCode;
-                    $dept_filters[] = "(TRIM(A.DEPT_CODE) = $dPlaceholder AND (" . implode(' OR ', $group_filters) . "))";
+                    $bind_params[$dPlaceholder] = strtoupper($dCode);
+                    $dept_filters[] = "(UPPER(TRIM(A.DEPT_CODE)) = $dPlaceholder AND (" . implode(' OR ', $group_filters) . "))";
                 }
             }
 
@@ -256,19 +243,42 @@ class AuditModel {
         }
 
         if (!empty($where_clauses)) {
-            $select_query .= " WHERE " . implode(' AND ', $where_clauses);
+            $inner_where = " WHERE " . implode(' AND ', $where_clauses);
         }
 
-        // Oracle PL/SQL Block executing dynamic explicit cursor transaction
+        // Step A: Fetch filtered items from remote view and insert into local MASTER_ITEM with CURR_STOCK = 0 (no stock join to avoid hanging)
+        // Note: Pulling all rows directly without ROW_NUMBER deduplication so every barcode is preserved.
+        $select_query = "SELECT 
+                            TRIM(A.ITEM_CODE) AS ITEM_CODE, 
+                            SUBSTR(TRIM(A.ITEM_NAME), 1, 100) AS ITEM_NAME, 
+                            TRIM(A.BARCODE) AS BARCODE, 
+                            A.PRICE, 
+                            A.DT_EFFECT_DATE, 
+                            A.DEPT,
+                            SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT_CODE, 
+                            A.GROUPS AS VC_GROUP,
+                            SUBSTR(TRIM(A.VC_GROUP_CODE), 1, 50) AS VC_GROUP_CODE, 
+                            A.SUB_GROUP AS VC_SUBGROUP,
+                            SUBSTR(TRIM(A.VC_SUB_GROUP_CODE), 1, 50) AS VC_SUB_GROUP_CODE,
+                            A.PACK_SIZE,
+                            NVL(A.CH_PI, 'N') AS CH_PI, 
+                            NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
+                            SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
+                            :shop_code AS SHOP_CODE,
+                            0 AS CURR_STOCK
+                         FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A
+                         $inner_where";
+
+        // Oracle PL/SQL Block executing dynamic explicit cursor transaction inserting into Master Item
         $plsqlQuery = "
             DECLARE
                 CURSOR c_items IS $select_query;
             BEGIN
                 FOR r IN c_items LOOP
                     INSERT INTO SHOP.MASTER_ITEM (
-                        ITEM_CODE, ITEM_NAME, BARCODE, IMAGE, PRICE, DEPT, SHOP_CODE, CURR_STOCK, CH_PI, CH_STATUS, VC_GROUP, VC_SUBGROUP, VC_UNIT, VC_ITEM_CODE, VC_SHOP_CODE, STOCK_QYT
+                        ITEM_CODE, ITEM_NAME, BARCODE, PRICE, DT_EFFECT_DATE, DEPT, DEPT_CODE, VC_GROUP, VC_GROUP_CODE, VC_SUBGROUP, VC_SUB_GROUP_CODE, PACK_SIZE, CH_PI, CH_STATUS, VC_UNIT, SHOP_CODE, CURR_STOCK
                     ) VALUES (
-                        r.ITEM_CODE, r.ITEM_NAME, r.BARCODE, r.IMAGE, r.PRICE, r.DEPT, r.SHOP_CODE, r.CURR_STOCK, r.CH_PI, r.CH_STATUS, r.VC_GROUP, r.VC_SUBGROUP, r.VC_UNIT, r.VC_ITEM_CODE, r.VC_SHOP_CODE, r.STOCK_QYT
+                        r.ITEM_CODE, r.ITEM_NAME, r.BARCODE, r.PRICE, r.DT_EFFECT_DATE, r.DEPT, r.DEPT_CODE, r.VC_GROUP, r.VC_GROUP_CODE, r.VC_SUBGROUP, r.VC_SUB_GROUP_CODE, r.PACK_SIZE, r.CH_PI, r.CH_STATUS, r.VC_UNIT, r.SHOP_CODE, r.CURR_STOCK
                     );
                 END LOOP;
                 COMMIT;
@@ -294,13 +304,47 @@ class AuditModel {
         }
         if ($bulkStmt) oci_free_statement($bulkStmt);
 
+        // Step B: Update CURR_STOCK by calling makess.get_shop_stock@db_link_shop per item via cursor loop
+        $stockUpdateQuery = "
+            DECLARE
+                CURSOR c_stock IS SELECT DISTINCT ITEM_CODE FROM SHOP.MASTER_ITEM;
+                V_STK NUMBER := 0;
+            BEGIN
+                FOR I IN c_stock LOOP
+                    V_STK := 0;
+                    SELECT makess.get_shop_stock@db_link_shop('01', :shop_code_stk, I.ITEM_CODE)
+                    INTO V_STK
+                    FROM DUAL;
+                    UPDATE SHOP.MASTER_ITEM S
+                    SET S.CURR_STOCK = NVL(V_STK, 0)
+                    WHERE S.ITEM_CODE = I.ITEM_CODE;
+                END LOOP;
+                COMMIT;
+            END;
+        ";
+
+        $stockStmt = oci_parse($conn, $stockUpdateQuery);
+        if (!$stockStmt) {
+            $e = oci_error($conn);
+            throw new Exception("PL/SQL parsing failed for stock update: " . $e['message']);
+        }
+        $shop_code_stk = substr($shop_code, 0, 5);
+        oci_bind_by_name($stockStmt, ':shop_code_stk', $shop_code_stk);
+        $stockExec = @oci_execute($stockStmt);
+        if (!$stockExec) {
+            $e = oci_error($stockStmt);
+            if ($stockStmt) oci_free_statement($stockStmt);
+            throw new Exception("Cursor-based stock update failed: " . $e['message']);
+        }
+        if ($stockStmt) oci_free_statement($stockStmt);
+
         // 5. Insert active setup parameters configuration row in SHOP.AUDIT_SETUP
         $insertQuery = "
             INSERT INTO SHOP.AUDIT_SETUP (
                 STOCK_DATE, SHOP_CODE, AUDIT_TYPE, AUDIT_MODE, SELECTED_DEPTS, SELECTED_GROUPS, SELECTED_SUBGROUPS, MAIL
             ) VALUES (
-                TO_DATE(:stock_date, 'YYYY-MM-DD'), :shop_code_param, :audit_type, :audit_mode, :depts, :groups, :subgroups, :mail
-            )
+                TO_DATE(:stock_date, 'YYYY-MM-DD'), :shop_code_param, :audit_type, :audit_mode, empty_clob(), empty_clob(), empty_clob(), :mail
+            ) RETURNING SELECTED_DEPTS, SELECTED_GROUPS, SELECTED_SUBGROUPS INTO :depts_clob, :groups_clob, :subgroups_clob
         ";
 
         $insertStmt = oci_parse($conn, $insertQuery);
@@ -309,16 +353,26 @@ class AuditModel {
         oci_bind_by_name($insertStmt, ':audit_type', $audit_type);
         oci_bind_by_name($insertStmt, ':audit_mode', $audit_mode);
         oci_bind_by_name($insertStmt, ':mail', $mail);
-        oci_bind_by_name($insertStmt, ':depts', $depts);
-        oci_bind_by_name($insertStmt, ':groups', $groups);
-        oci_bind_by_name($insertStmt, ':subgroups', $subgroups);
 
-        $executeResult = @oci_execute($insertStmt);
+        $clobDepts = oci_new_descriptor($conn, OCI_D_LOB);
+        $clobGroups = oci_new_descriptor($conn, OCI_D_LOB);
+        $clobSubgroups = oci_new_descriptor($conn, OCI_D_LOB);
+
+        oci_bind_by_name($insertStmt, ':depts_clob', $clobDepts, -1, OCI_B_CLOB);
+        oci_bind_by_name($insertStmt, ':groups_clob', $clobGroups, -1, OCI_B_CLOB);
+        oci_bind_by_name($insertStmt, ':subgroups_clob', $clobSubgroups, -1, OCI_B_CLOB);
+
+        $executeResult = @oci_execute($insertStmt, OCI_DEFAULT);
         if (!$executeResult) {
             $e = oci_error($insertStmt);
             oci_free_statement($insertStmt);
             throw new Exception("Setup parameters insertion failed: " . $e['message']);
         }
+
+        if ($clobDepts && !empty($depts)) $clobDepts->save($depts);
+        if ($clobGroups && !empty($groups)) $clobGroups->save($groups);
+        if ($clobSubgroups && !empty($subgroups)) $clobSubgroups->save($subgroups);
+
         oci_free_statement($insertStmt);
 
         // Commit transaction
@@ -335,10 +389,14 @@ class AuditModel {
     public static function getSyncSummary() {
         $conn = Database::getConnection();
         $query = "SELECT 
-                    COUNT(DISTINCT TRIM(ITEM_CODE)) AS NO_OF_ITEMS,
-                    SUM(NVL(TO_NUMBER(STOCK_QYT), 0)) AS TOTAL_QTY,
-                    SUM(NVL(PRICE, 0)) AS TOTAL_VALUE 
-                  FROM SHOP.MASTER_ITEM";
+                    COUNT(ITEM_CODE) AS NO_OF_ITEMS,
+                    SUM(NVL(CURR_STOCK, 0)) AS TOTAL_QTY,
+                    SUM(NVL(PRICE, 0) * NVL(CURR_STOCK, 0)) AS TOTAL_VALUE 
+                  FROM (
+                      SELECT DISTINCT ITEM_CODE, PRICE, CURR_STOCK 
+                      FROM SHOP.MASTER_ITEM
+                      WHERE NVL(CURR_STOCK, 0) != 0
+                  )";
         $stmt = oci_parse($conn, $query);
 
         $no_of_items = 0;
@@ -347,16 +405,48 @@ class AuditModel {
         if ($stmt && @oci_execute($stmt)) {
             if ($row = oci_fetch_array($stmt, OCI_ASSOC)) {
                 $no_of_items = isset($row['NO_OF_ITEMS']) ? (int)$row['NO_OF_ITEMS'] : 0;
-                $total_qty = isset($row['TOTAL_QTY']) ? (float)$row['TOTAL_QTY'] : 0;
+                $total_qty = isset($row['TOTAL_QTY']) ? round((float)$row['TOTAL_QTY']) : 0;
                 $total_value = isset($row['TOTAL_VALUE']) ? (float)$row['TOTAL_VALUE'] : 0.0;
             }
             oci_free_statement($stmt);
         }
+
+        // Fetch dynamic department breakdown from MASTER_ITEM joined with local MST_DEPT for description lookups
+        $depts = [];
+        $deptQuery = "SELECT 
+                        NVL(D.DEPT, M.DEPT_CODE) AS DEPT_NAME,
+                        COUNT(M.ITEM_CODE) AS NO_OF_ITEMS,
+                        SUM(NVL(M.CURR_STOCK, 0)) AS TOTAL_QTY,
+                        SUM(NVL(M.PRICE, 0) * NVL(M.CURR_STOCK, 0)) AS TOTAL_VALUE
+                      FROM (
+                          SELECT DISTINCT ITEM_CODE, PRICE, CURR_STOCK, DEPT_CODE 
+                          FROM SHOP.MASTER_ITEM
+                          WHERE NVL(CURR_STOCK, 0) != 0
+                      ) M
+                      LEFT JOIN (
+                          SELECT DISTINCT DEPT_CODE, DEPT FROM SHOP.MST_DEPT
+                      ) D ON D.DEPT_CODE = M.DEPT_CODE
+                      GROUP BY D.DEPT, M.DEPT_CODE
+                      ORDER BY DEPT_NAME";
+        $deptStmt = oci_parse($conn, $deptQuery);
+        if ($deptStmt && @oci_execute($deptStmt)) {
+            while ($row = oci_fetch_array($deptStmt, OCI_ASSOC)) {
+                $depts[] = [
+                    'dept_name' => isset($row['DEPT_NAME']) ? trim($row['DEPT_NAME']) : 'UNKNOWN',
+                    'no_of_items' => isset($row['NO_OF_ITEMS']) ? (int)$row['NO_OF_ITEMS'] : 0,
+                    'total_qty' => isset($row['TOTAL_QTY']) ? round((float)$row['TOTAL_QTY']) : 0,
+                    'total_value' => isset($row['TOTAL_VALUE']) ? (float)$row['TOTAL_VALUE'] : 0.0
+                ];
+            }
+            oci_free_statement($deptStmt);
+        }
+
         return [
             'status' => 'ok',
             'no_of_items' => $no_of_items,
             'total_qty' => $total_qty,
-            'total_value' => $total_value
+            'total_value' => $total_value,
+            'depts' => $depts
         ];
     }
 
@@ -563,23 +653,22 @@ class AuditModel {
                             TRIM(A.ITEM_CODE) AS ITEM_CODE, 
                             SUBSTR(TRIM(A.ITEM_NAME), 1, 100) AS ITEM_NAME, 
                             TRIM(A.BARCODE) AS BARCODE, 
-                            NULL AS IMAGE,
                             A.PRICE, 
-                            SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT, 
-                            :shop_code AS SHOP_CODE, 
-                            0 AS CURR_STOCK, 
+                            A.DT_EFFECT_DATE, 
+                            SUBSTR(TRIM(A.DEPT), 1, 100) AS DEPT, 
+                            SUBSTR(TRIM(A.DEPT_CODE), 1, 50) AS DEPT_CODE, 
+                            SUBSTR(TRIM(A.GROUPS), 1, 100) AS GROUPS, 
+                            SUBSTR(TRIM(A.VC_GROUP_CODE), 1, 50) AS VC_GROUP_CODE, 
+                            SUBSTR(TRIM(A.SUB_GROUP), 1, 100) AS SUB_GROUP,
+                            SUBSTR(TRIM(A.VC_SUB_GROUP_CODE), 1, 50) AS VC_SUB_GROUP_CODE,
+                            A.PACK_SIZE,
                             NVL(A.CH_PI, 'N') AS CH_PI, 
                             NVL(A.CH_STATUS, 'Y') AS CH_STATUS, 
-                            SUBSTR(TRIM(A.GROUPS), 1, 50) AS VC_GROUP, 
-                            SUBSTR(TRIM(A.SUB_GROUP), 1, 50) AS VC_SUBGROUP,
-                            SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT,
-                            A.ITEM_CODE AS VC_ITEM_CODE,
-                            :shop_code AS VC_SHOP_CODE,
-                            0 AS STOCK_QYT
-                          FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
+                            SUBSTR(TRIM(A.VC_UNIT), 1, 12) AS VC_UNIT
+                         FROM MAKESS.VS_ITEM_AUDIT@DB_LINK_SHOP A";
 
         $where_clauses = ["A.ITEM_CODE IS NOT NULL"];
-        $bind_params = [':shop_code' => substr($shop_code, 0, 10)];
+        $bind_params = [];
 
         // Apply dynamic department, group, and subgroup filters hierarchically
         if ($audit_type !== 'PI') {
@@ -628,7 +717,12 @@ class AuditModel {
                                 $bind_params[$sPlaceholder] = $sCode;
                                 $sub_placeholders[] = $sPlaceholder;
                             }
-                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder AND TRIM(A.VC_SUB_GROUP_CODE) IN (" . implode(', ', $sub_placeholders) . "))";
+                            $sub_chunks = array_chunk($sub_placeholders, 999);
+                            $chunk_queries = [];
+                            foreach ($sub_chunks as $chunk) {
+                                $chunk_queries[] = "TRIM(A.VC_SUB_GROUP_CODE) IN (" . implode(', ', $chunk) . ")";
+                            }
+                            $group_filters[] = "(TRIM(A.VC_GROUP_CODE) = $gPlaceholder AND (" . implode(' OR ', $chunk_queries) . "))";
                         }
                     }
 
@@ -673,19 +767,18 @@ class AuditModel {
                 'ITEM_CODE' => isset($row['ITEM_CODE']) ? trim($row['ITEM_CODE']) : 'N/A',
                 'ITEM_NAME' => isset($row['ITEM_NAME']) ? trim($row['ITEM_NAME']) : 'UNNAMED',
                 'BARCODE' => isset($row['BARCODE']) ? trim($row['BARCODE']) : 'N/A',
-                'IMAGE' => isset($row['IMAGE']) ? trim($row['IMAGE']) : 'N/A',
                 'PRICE' => $row['PRICE'] !== null ? floatval($row['PRICE']) : 0.00,
+                'DT_EFFECT_DATE' => isset($row['DT_EFFECT_DATE']) ? trim($row['DT_EFFECT_DATE']) : 'N/A',
                 'DEPT' => isset($row['DEPT']) ? trim($row['DEPT']) : 'N/A',
-                'SHOP_CODE' => isset($row['SHOP_CODE']) ? trim($row['SHOP_CODE']) : 'N/A',
-                'CURR_STOCK' => isset($row['CURR_STOCK']) ? floatval($row['CURR_STOCK']) : 0.0,
+                'DEPT_CODE' => isset($row['DEPT_CODE']) ? trim($row['DEPT_CODE']) : 'N/A',
+                'GROUPS' => isset($row['GROUPS']) ? trim($row['GROUPS']) : 'N/A',
+                'VC_GROUP_CODE' => isset($row['VC_GROUP_CODE']) ? trim($row['VC_GROUP_CODE']) : 'N/A',
+                'SUB_GROUP' => isset($row['SUB_GROUP']) ? trim($row['SUB_GROUP']) : 'N/A',
+                'VC_SUB_GROUP_CODE' => isset($row['VC_SUB_GROUP_CODE']) ? trim($row['VC_SUB_GROUP_CODE']) : 'N/A',
+                'PACK_SIZE' => $row['PACK_SIZE'] !== null ? floatval($row['PACK_SIZE']) : 0.000,
                 'CH_PI' => isset($row['CH_PI']) ? trim($row['CH_PI']) : 'N',
                 'CH_STATUS' => isset($row['CH_STATUS']) ? trim($row['CH_STATUS']) : 'Y',
-                'VC_GROUP' => isset($row['VC_GROUP']) ? trim($row['VC_GROUP']) : 'N/A',
-                'VC_SUBGROUP' => isset($row['VC_SUBGROUP']) ? trim($row['VC_SUBGROUP']) : 'N/A',
-                'VC_UNIT' => isset($row['VC_UNIT']) ? trim($row['VC_UNIT']) : 'N/A',
-                'VC_ITEM_CODE' => isset($row['VC_ITEM_CODE']) ? trim($row['VC_ITEM_CODE']) : 'N/A',
-                'VC_SHOP_CODE' => isset($row['VC_SHOP_CODE']) ? trim($row['VC_SHOP_CODE']) : 'N/A',
-                'STOCK_QYT' => isset($row['STOCK_QYT']) ? floatval($row['STOCK_QYT']) : 0.0
+                'VC_UNIT' => isset($row['VC_UNIT']) ? trim($row['VC_UNIT']) : 'N/A'
             ];
         }
         oci_free_statement($stmt);
@@ -888,6 +981,117 @@ class AuditModel {
             }
             oci_free_statement($createStmt);
         }
+
+        // 3. Resolve or create HEAD_AUDIT_ARCHIVE table
+        $auditArchiveExists = false;
+        $chkArchive = "SELECT table_name FROM user_tables WHERE UPPER(table_name) = 'HEAD_AUDIT_ARCHIVE'";
+        $chkArchiveStmt = oci_parse($conn, $chkArchive);
+        if ($chkArchiveStmt && @oci_execute($chkArchiveStmt)) {
+            if (oci_fetch_array($chkArchiveStmt, OCI_ASSOC)) {
+                $auditArchiveExists = true;
+            }
+        }
+        if ($chkArchiveStmt) oci_free_statement($chkArchiveStmt);
+
+        if (!$auditArchiveExists) {
+            $createArchive = "
+                CREATE TABLE SHOP.HEAD_AUDIT_ARCHIVE (
+                    SHOP_CODE VARCHAR2(20),
+                    ITEM_CODE VARCHAR2(20),
+                    QTY FLOAT,
+                    DATE_SYS VARCHAR2(50),
+                    EMP_CODE VARCHAR2(20),
+                    IP VARCHAR2(50),
+                    USER_NAME VARCHAR2(50),
+                    RACK_NUM VARCHAR2(50),
+                    AUDIT_ROUND NUMBER,
+                    ARCHIVE_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ";
+            $createStmt = oci_parse($conn, $createArchive);
+            $createResult = @oci_execute($createStmt);
+            if (!$createResult) {
+                $e = oci_error($createStmt);
+                oci_free_statement($createStmt);
+                throw new Exception("Failed to initialize archive table SHOP.HEAD_AUDIT_ARCHIVE: " . $e['message']);
+            }
+            oci_free_statement($createStmt);
+        }
+
+        // Self-healing: Recompile the ZS_VW_AUDIT_PENDING view in case it became invalid
+        // due to dropping/recreating the MST_DEPT table. This fixes ORA-04063 errors in the old system.
+        $compileStmt = @oci_parse($conn, "ALTER VIEW SHOP.ZS_VW_AUDIT_PENDING COMPILE");
+        @oci_execute($compileStmt);
+        if ($compileStmt) oci_free_statement($compileStmt);
+    }
+
+    /**
+     * Safely triggers the initialization boundaries of a physical inventory stock-take.
+     * Archives the old session, clears buffers, sets the ACTIVE shop contexts, and logs the session.
+     */
+    public static function initializeStockTakeSession($shopCode, $adminUsername) {
+        $conn = Database::getConnection();
+        if (!$conn) {
+            throw new Exception("Oracle database connection failed during session initialization.");
+        }
+
+        // Ensure prerequisite tables exist
+        self::ensureTablesExist($conn);
+
+        // 1. Archive previous stock-take data
+        // Using exact old logic to ensure all columns (including AUDIT_ROUND) are captured properly
+        $archiveSql = "INSERT INTO SHOP.HEAD_AUDIT_ARCHIVE SELECT * FROM SHOP.HEAD_AUDIT";
+        
+        $archiveStmt = oci_parse($conn, $archiveSql);
+        if (!@oci_execute($archiveStmt)) {
+            $e = oci_error($archiveStmt);
+            oci_free_statement($archiveStmt);
+            throw new Exception("Failed to archive HEAD_AUDIT: " . $e['message']);
+        }
+        oci_free_statement($archiveStmt);
+
+        // 2. Clear buffers (TRUNCATE)
+        $truncHeadStmt = @oci_parse($conn, "TRUNCATE TABLE SHOP.HEAD_AUDIT");
+        @oci_execute($truncHeadStmt);
+        if ($truncHeadStmt) oci_free_statement($truncHeadStmt);
+
+        // $truncShopStmt = @oci_parse($conn, "TRUNCATE TABLE SHOP.MASTER_SHOP");
+        // @oci_execute($truncShopStmt);
+        // if ($truncShopStmt) oci_free_statement($truncShopStmt);
+
+        // 3. Initialize Active Shop
+        // We set ACTIVE=1 and AUDIT_SYS='1' to perfectly emulate the old system's start procedures
+        $initShopSql = "INSERT INTO SHOP.MASTER_SHOP (SHOP_CODE, SHOP_NAME, ACTIVE, AUDIT_SYS) 
+                        VALUES (:code, :name, 1, '1')";
+        $initShopStmt = oci_parse($conn, $initShopSql);
+        oci_bind_by_name($initShopStmt, ':code', $shopCode);
+        oci_bind_by_name($initShopStmt, ':name', $shopCode); // Using shop code as name fallback
+        if (!@oci_execute($initShopStmt)) {
+            $e = oci_error($initShopStmt);
+            oci_free_statement($initShopStmt);
+            throw new Exception("Failed to initialize MASTER_SHOP: " . $e['message']);
+        }
+        oci_free_statement($initShopStmt);
+
+        // 4. Log the Session to STK_LOG
+        // The manager requested REMARKS to simply be the Shop Code
+        $logSql = "INSERT INTO STK_LOG@DB_LINK_SHOP (SHOPCODE, START_BY, STATUS, REMARKS, START_DATE, END_DATE) 
+                   VALUES (:code, :admin, 'A', :remarks, SYSDATE, SYSDATE)";
+        $logStmt = oci_parse($conn, $logSql);
+        oci_bind_by_name($logStmt, ':code', $shopCode);
+        oci_bind_by_name($logStmt, ':admin', $adminUsername);
+        oci_bind_by_name($logStmt, ':remarks', $shopCode);
+        
+        if (!@oci_execute($logStmt)) {
+            $e = oci_error($logStmt);
+            oci_free_statement($logStmt);
+            // It is safe to just ignore the remote DB_LINK errors or throw them if it's critical. 
+            // We'll throw to be safe and let it be logged.
+            throw new Exception("Failed to record STK_LOG session: " . $e['message']);
+        }
+        oci_free_statement($logStmt);
+
+        return true;
     }
 }
 ?>

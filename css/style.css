@@ -619,7 +619,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1.5rem;
-    max-height: 380px;
+    max-height: 580px;
     overflow-y: auto;
     width: 100%;
 }
@@ -784,6 +784,7 @@ body {
 .workspace-footer {
     padding-top: 1.5rem;
     margin-top: 1.5rem;
+    padding-bottom: 2.5rem; /* Replaced margin with padding to prevent collapse */
     border-top: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
@@ -2119,7 +2120,7 @@ body {
     border-radius: 16px;
     padding: 1.25rem;
     margin: 0 auto 1.25rem;
-    max-width: 720px;
+    max-width: 100%;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     animation: fadeIn 0.4s ease-out;
 }

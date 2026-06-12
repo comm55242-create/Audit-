@@ -5,9 +5,7 @@ $sc = $_SESSION['storecode'];
 if(empty($gotru)){
 	redirect_to("index.php");
 	}
-	?>
 	
-	<?php
 	if(isset($_GET['not'])){
 	
 	$sql = oci_parse($conn, "select ITEM_CODE, SHOP_CODE, QTY FROM HEAD_AUDIT WHERE EMP_CODE = '{$gotru}' AND SHOP_CODE = '{$sc}' ");
@@ -37,7 +35,7 @@ $dron2 = 'C:\report\books'.$gotru.' '.$dtime.'.csv';
 }
 
 ?>
-    <div id="content" class="col-lg-12">
+    <div id="content" class="col-lg-10 col-sm-10">
             <!-- content starts -->
            <div class="box-inner">
             <div class="box-header well">
