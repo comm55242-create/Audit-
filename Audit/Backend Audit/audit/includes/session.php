@@ -6,6 +6,7 @@
 		return isset($_SESSION['admin']);
 		return isset($_SESSION['storecode']);
 		return isset($_SESSION['staff_id']);
+		return isset($_SESSION['rack']);
 	}
 	
 	function confirm_logged_in() {

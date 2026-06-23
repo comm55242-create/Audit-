@@ -50,6 +50,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.item_code_scan = (EditText) findViewById(R.id.editText_item);
         this.qty = (EditText) findViewById(R.id.editText_qty);
+
+        // Automatically trigger SCAN when the hardware scanner presses Enter in the item code field
+        this.item_code_scan.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
+                if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE || 
+                    actionId == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT || 
+                    (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN)) {
+                    
+                    MainActivity.this.Onscan(null);
+                    return true;
+                }
+                return false;
+            }
+        });
         this.item_code_d = (TextView) findViewById(R.id.textView_itemcode);
         this.item_name_d = (TextView) findViewById(R.id.textView_name);
         this.barcode_d = (TextView) findViewById(R.id.textView_barcode);
@@ -73,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
         int ipAddress = wifiInf.getIpAddress();
         String ip = String.format("%d.%d.%d.%d", Integer.valueOf(ipAddress & 255), Integer.valueOf((ipAddress >> 8) & 255), Integer.valueOf((ipAddress >> 16) & 255), Integer.valueOf((ipAddress >> 24) & 255));
         this.ip_d.setText(ip.toString());
-        this.Username.setText(this.username.toString());
-        this.Zone_name.setText(this.zone1.toString());
+        this.Username.setText("Audit Name: " + this.username.toString());
+        this.Zone_name.setText("Zone: " + this.zone1.toString());
         this.qty.setText("");
         this.item_code_d.setText("");
         this.price_d.setText("");
@@ -83,15 +98,45 @@ public class MainActivity extends AppCompatActivity {
         this.barcode_d.setText("");
         this.item_code_d.setText("");
         this.dept_d.setText("");
-        this.save.setEnabled(true);
+        this.item_code_d.setText("");
+        this.dept_d.setText("");
+        this.save.setEnabled(false); // Disable save by default until valid qty
         this.qty.setEnabled(true);
+
+        this.qty.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                String val = s.toString().trim();
+                boolean validQty = false;
+                if (!TextUtils.isEmpty(val)) {
+                    try {
+                        double d = Double.parseDouble(val);
+                        if (d != 0.0) {
+                            validQty = true;
+                        }
+                    } catch (NumberFormatException e) {}
+                }
+                boolean itemFound = MainActivity.this.item_code_d.getText().length() > 2;
+                MainActivity.this.save.setEnabled(validQty && itemFound);
+            }
+        });
     }
 
     public void Onscan(View View) {
-        if (TextUtils.isEmpty(this.item_code_scan.getText().toString())) {
+        String scannedCode = this.item_code_scan.getText().toString().trim();
+        if (TextUtils.isEmpty(scannedCode)) {
             Toast.makeText(this, "Please Scan Item", 1).show();
             return;
         }
+        // Force the text field to show the trimmed code
+        this.item_code_scan.setText(scannedCode);
+        
         this.qty.setText("");
         this.item_code_d.setText("");
         this.price_d.setText("");
@@ -100,13 +145,13 @@ public class MainActivity extends AppCompatActivity {
         this.barcode_d.setText("");
         this.item_code_d.setText("");
         this.dept_d.setText("");
-        this.save.setEnabled(true);
+        this.save.setEnabled(false); // Initially disabled until qty is typed
         this.qty.setEnabled(true);
         Log.d("RESULT", "hi");
-        this.qty.requestFocus();
+        // Removed this.qty.requestFocus() so scanner input stays in item field
         try {
             BackgroundWorker backgroundWorker = new BackgroundWorker(this);
-            backgroundWorker.execute(this.item_code_scan.getText().toString());
+            backgroundWorker.execute(scannedCode);
         } catch (Exception e) {
             Toast.makeText(this, "Connection Problem, Please check WiFi connection", 1).show();
         }
@@ -119,6 +164,13 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Please check qty", 1).show();
             return;
         }
+        try {
+            double d = Double.parseDouble(this.qty.getText().toString().trim());
+            if (d == 0.0) {
+                Toast.makeText(this, "Quantity cannot be 0", 1).show();
+                return;
+            }
+        } catch (Exception e) {}
         int length = this.qty.length();
         String.valueOf(length);
         Log.d("RESULT", "hi");
@@ -189,16 +241,63 @@ public class MainActivity extends AppCompatActivity {
         /* JADX INFO: Access modifiers changed from: protected */
         @Override // android.os.AsyncTask
         public void onPostExecute(String Result) {
+            if (Result == null) {
+                Toast.makeText(MainActivity.this, "Device is not connected to the server.", 1).show();
+                return;
+            }
             Log.d("RESULT FINAL", Result);
-            List<Input_values> Result_list = (List) new Gson().fromJson(Result, new TypeToken<List<Input_values>>() { // from class: com.melcomgroup.zahed.melcomshopaudit.MainActivity.BackgroundWorker.1
-            }.getType());
-            for (Input_values input_fileds : Result_list) {
-                MainActivity.this.item_code_d.setText(input_fileds.getITEM_CODE());
-                MainActivity.this.item_name_d.setText(input_fileds.getITEM_NAME());
-                MainActivity.this.barcode_d.setText(input_fileds.getBARCODE());
-                MainActivity.this.price_d.setText(input_fileds.getPRICE());
-                MainActivity.this.dept_d.setText(input_fileds.getDEPT());
-                MainActivity.this.shop_code_d.setText(input_fileds.getSHOP_CODE());
+            try {
+                List<Input_values> Result_list = (List) new Gson().fromJson(Result, new TypeToken<List<Input_values>>() { // from class: com.melcomgroup.zahed.melcomshopaudit.MainActivity.BackgroundWorker.1
+                }.getType());
+                if (Result_list == null) {
+                    throw new Exception("Null response list");
+                }
+                for (Input_values input_fileds : Result_list) {
+                    MainActivity.this.item_code_d.setText(input_fileds.getITEM_CODE());
+                    MainActivity.this.item_name_d.setText(input_fileds.getITEM_NAME());
+                    MainActivity.this.barcode_d.setText(input_fileds.getBARCODE());
+                    MainActivity.this.price_d.setText(input_fileds.getPRICE());
+                    MainActivity.this.dept_d.setText(input_fileds.getDEPT());
+                    MainActivity.this.shop_code_d.setText(input_fileds.getSHOP_CODE());
+                    
+                    String unit = input_fileds.getUNIT();
+                    String name = input_fileds.getITEM_NAME();
+                    boolean isKgs = false;
+                    if (unit != null && (unit.toUpperCase().contains("KGS") || unit.toUpperCase().contains("KG"))) {
+                        isKgs = true;
+                    } else if (name != null && (name.toUpperCase().contains("KGS") || name.toUpperCase().contains("KG ") || name.toUpperCase().endsWith("KG"))) {
+                        isKgs = true;
+                    }
+                    
+                    if (isKgs) {
+                        MainActivity.this.qty.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL | android.text.InputType.TYPE_NUMBER_FLAG_SIGNED);
+                        MainActivity.this.qty.setKeyListener(android.text.method.DigitsKeyListener.getInstance(true, true));
+                    } else {
+                        MainActivity.this.qty.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_SIGNED);
+                        MainActivity.this.qty.setKeyListener(android.text.method.DigitsKeyListener.getInstance(true, false));
+                    }
+                    
+                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) MainActivity.this.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.restartInput(MainActivity.this.qty);
+                    }
+                    
+                    // Re-evaluate save button state now that item might be found
+                    String val = MainActivity.this.qty.getText().toString().trim();
+                    boolean validQty = false;
+                    if (!TextUtils.isEmpty(val)) {
+                        try {
+                            double d = Double.parseDouble(val);
+                            if (d != 0.0) {
+                                validQty = true;
+                            }
+                        } catch (NumberFormatException e) {}
+                    }
+                    boolean itemFound = MainActivity.this.item_code_d.getText().length() > 2;
+                    MainActivity.this.save.setEnabled(validQty && itemFound);
+                }
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Server error or item not found.", Toast.LENGTH_SHORT).show();
             }
             Integer n = Integer.valueOf(MainActivity.this.item_code_d.getText().length());
             if (n.intValue() <= 2) {
@@ -244,6 +343,10 @@ public class MainActivity extends AppCompatActivity {
         /* JADX INFO: Access modifiers changed from: protected */
         @Override // android.os.AsyncTask
         public void onPostExecute(String Result) {
+            if (Result == null) {
+                Toast.makeText(MainActivity.this, "Device is not connected to the server.", 1).show();
+                return;
+            }
             Log.d("RESULT FINAL", Result);
         }
     }
@@ -271,16 +374,27 @@ public class MainActivity extends AppCompatActivity {
         /* JADX INFO: Access modifiers changed from: protected */
         @Override // android.os.AsyncTask
         public void onPostExecute(String Result) {
+            if (Result == null) {
+                Toast.makeText(MainActivity.this, "Device is not connected to the server.", 1).show();
+                return;
+            }
             Log.d("RESULT view", Result);
-            List<Input_values> Result_list = (List) new Gson().fromJson(Result, new TypeToken<List<Input_values>>() { // from class: com.melcomgroup.zahed.melcomshopaudit.MainActivity.BackgroundWorker_view.1
-            }.getType());
-            for (Input_values input_fileds : Result_list) {
-                MainActivity.this.item_code_d.setText(input_fileds.getITEM_CODE());
-                MainActivity.this.item_name_d.setText(input_fileds.getITEM_NAME());
-                MainActivity.this.barcode_d.setText(input_fileds.getBARCODE());
-                MainActivity.this.price_d.setText(input_fileds.getPRICE());
-                MainActivity.this.dept_d.setText(input_fileds.getDEPT());
-                MainActivity.this.shop_code_d.setText(input_fileds.getSHOP_CODE());
+            try {
+                List<Input_values> Result_list = (List) new Gson().fromJson(Result, new TypeToken<List<Input_values>>() { // from class: com.melcomgroup.zahed.melcomshopaudit.MainActivity.BackgroundWorker_view.1
+                }.getType());
+                if (Result_list == null) {
+                    throw new Exception("Null response list");
+                }
+                for (Input_values input_fileds : Result_list) {
+                    MainActivity.this.item_code_d.setText(input_fileds.getITEM_CODE());
+                    MainActivity.this.item_name_d.setText(input_fileds.getITEM_NAME());
+                    MainActivity.this.barcode_d.setText(input_fileds.getBARCODE());
+                    MainActivity.this.price_d.setText(input_fileds.getPRICE());
+                    MainActivity.this.dept_d.setText(input_fileds.getDEPT());
+                    MainActivity.this.shop_code_d.setText(input_fileds.getSHOP_CODE());
+                }
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Server error or no data found.", Toast.LENGTH_SHORT).show();
             }
             Integer n = Integer.valueOf(MainActivity.this.item_code_d.getText().length());
             if (n.intValue() <= 2) {

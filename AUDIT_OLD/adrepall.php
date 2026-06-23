@@ -153,7 +153,7 @@ $sc = $_SESSION['storecode'];
 		</div>
 	</p>     
         <?php
-        $sql = oci_parse($conn, "SELECT ITEM_CODE, QTY, DATE_SYS FROM HEAD_AUDIT WHERE SHOP_CODE = '{$sc}'");
+        $sql = oci_parse($conn, "SELECT ITEM_CODE, QTY, DATE_SYS FROM HEAD_AUDIT ORDER BY DATE_SYS DESC");
         if (!$sql) {
           $e2 = oci_error($conn);
           trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);

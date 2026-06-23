@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Recount API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { margin-top: 20px; padding: 10px 20px; background-color: #009688; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #00796B; }
+        #response { margin-top: 20px; padding: 15px; background-color: #f4f4f4; border: 1px solid #ddd; white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Test Recount API (request_approval.php)</h2>
+        <form id="testForm">
+            <label>Shop Code:</label>
+            <input type="text" id="shop_code" name="shop_code" value="101" required>
+
+            <label>User Name:</label>
+            <input type="text" id="user_name" name="user_name" value="TestUser" required>
+
+            <label>Zone Name:</label>
+            <input type="text" id="zone_name" name="zone_name" value="Zone A" required>
+
+            <button type="button" onclick="submitForm()">Simulate App Login</button>
+        </form>
+
+        <h3>Server Response:</h3>
+        <div id="response">Waiting for test...</div>
+    </div>
+
+    <script>
+        function submitForm() {
+            var shop = document.getElementById('shop_code').value;
+            var user = document.getElementById('user_name').value;
+            var zone = document.getElementById('zone_name').value;
+            
+            var params = "shop_code=" + encodeURIComponent(shop) + 
+                         "&user_name=" + encodeURIComponent(user) + 
+                         "&zone_name=" + encodeURIComponent(zone);
+
+            document.getElementById('response').innerText = "Sending request...";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "request_approval.php", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState == 4) {
+                    var out = "HTTP Status: " + xhr.status + "\n\nRaw Output:\n" + xhr.responseText;
+                    document.getElementById('response').innerText = out;
+                }
+            };
+            xhr.send(params);
+        }
+    </script>
+</body>
+</html>

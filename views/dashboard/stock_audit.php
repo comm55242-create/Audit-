@@ -1483,7 +1483,7 @@
         printWindow.document.write(`
             <html>
             <head>
-                <title>Audit Configuration Scope - ${shopCode}</title>
+                <title>STOCK AUDIT (DEPARTMENTS, GROUPS AND SUBGROUPS) - ${shopCode}</title>
                 <style>
                     body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 2rem; color: #334155; }
                     .print-header { text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
@@ -1491,13 +1491,13 @@
                     .print-header p { margin: 8px 0 0 0; font-size: 13px; color: #64748b; font-weight: 600; }
                     
                     /* Normalize injected html for print */
-                    #hierarchyListContent { display: flex; flex-direction: column; gap: 1rem; }
+                    #hierarchyListContent { display: block; }
                     #hierarchyListContent > div { 
                         border: 1px solid #cbd5e1 !important; 
                         padding: 1rem !important; 
                         border-radius: 8px !important; 
-                        page-break-inside: avoid;
                         background: none !important;
+                        margin-bottom: 1rem;
                     }
                     /* Reset inline backgrounds for print clarity */
                     span[style*="background"] { border: 1px solid #cbd5e1 !important; }
@@ -1518,8 +1518,9 @@
                         text-align: center;
                     }
                     .sig-line {
-                        width: 200px;
+                        width: 250px;
                         border-bottom: 1px solid #334155;
+                        margin-top: 60px;
                     }
                     .sig-title {
                         font-weight: 700;
@@ -1529,13 +1530,24 @@
                     }
                     
                     @media print {
-                        body { padding: 0; }
+                        body { padding: 0; padding-bottom: 150px; }
+                        .print-signatures {
+                            position: fixed;
+                            bottom: 0;
+                            left: 0;
+                            width: 100%;
+                            background: white;
+                            margin: 0;
+                            padding-top: 10px;
+                            padding-bottom: 20px;
+                            border-top: none;
+                        }
                     }
                 </style>
             </head>
             <body>
                 <div class="print-header">
-                    <h1>Stock Audit Configuration Scope</h1>
+                    <h1>STOCK AUDIT (DEPARTMENTS, GROUPS AND SUBGROUPS)</h1>
                     <p>SHOP: ${shopCode} &nbsp;&nbsp;|&nbsp;&nbsp; DATE: ${stockDate}</p>
                 </div>
                 <div id="hierarchyListContent">
@@ -1720,8 +1732,7 @@
 <head>
     <title>Audit Summary - ${shopCode}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-        body { font-family: 'Outfit', sans-serif; color: #1e293b; padding: 2rem; margin: 0; background-color: #fff; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 2rem; margin: 0; background-color: #fff; }
         .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #006D44; padding-bottom: 1rem; margin-bottom: 2rem; }
         .brand { display: flex; align-items: center; gap: 0.75rem; }
         .logo-circle { width: 36px; height: 36px; background-color: #006D44; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 16px; }
@@ -1745,7 +1756,13 @@
         .dept-stat .stat-value { font-weight: 800; color: #0f172a; font-size: 12px; }
         .dept-stat .stat-value.primary { color: #006D44; }
         .footer { margin-top: 3rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; font-weight: 600; }
-        @media print { body { padding: 0; } @page { size: auto; margin: 15mm; } }
+        .print-signatures { margin-top: 4rem; display: flex; justify-content: space-around; page-break-inside: avoid; padding-top: 2rem; }
+        @media print { 
+            body { padding: 0; padding-bottom: 150px; } 
+            @page { size: auto; margin: 15mm; }
+            .print-signatures { position: fixed; bottom: 30px; left: 0; width: 100%; background: white; margin: 0; padding-top: 10px; padding-bottom: 10px; }
+            .footer { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 10px 0; background: white; }
+        }
     </style>
 </head>
 <body>
@@ -1780,7 +1797,7 @@
     </div>
     ${deptHtml ? `<div class="dept-section-title">Department Breakdown Summary</div>${deptHtml}` : ""}
     
-    <div style="margin-top: 4rem; display: flex; justify-content: space-around; page-break-inside: avoid; padding-top: 2rem;">
+    <div class="print-signatures">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;">
             <div style="width: 200px; border-bottom: 1px solid #334155;"></div>
             <div style="font-weight: 700; font-size: 14px; color: #1e293b; text-transform: uppercase;">Operations Manager<br><span style="font-size: 11px; color: #475569; text-transform: none; font-weight: 500;">${opsManager}</span></div>
@@ -1800,7 +1817,7 @@
         <span>Report Confidential - Internal Audit Use Only</span>
     </div>
     <script>
-        window.addEventListener('load', () => { setTimeout(() => { window.print(); }, 600); });
+        window.print();
     <\/script>
 </body>
 </html>

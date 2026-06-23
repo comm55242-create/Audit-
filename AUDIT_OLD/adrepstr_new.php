@@ -61,7 +61,13 @@ if (isset($_GET['not'])) {
   }
   $r2 = oci_execute($sql);
   $dtime = date('Y-m-d H:i:s');
-  $dron2 = 'C:\report\Initial_stock_count.csv';
+  
+  if (!file_exists('export')) {
+      mkdir('export', 0777, true);
+  }
+
+  $filename = 'Initial_stock_count_' . $cant . '.csv';
+  $dron2 = 'export/' . $filename;
   $fp = fopen($dron2, 'w');
 
   while ($row = oci_fetch_assoc($sql)) {
@@ -71,7 +77,7 @@ if (isset($_GET['not'])) {
   ?>
   <div class="alert alert-success">
     <button type="button" class="close" data-dismiss="alert">×</button>
-    <strong>Export successful on!</strong> <a href="<?php echo 'C:\report\Initial_stock_count.csv'; ?>" download = "<?php echo 'Initial_stock_count' . $gotru; ?>"><?php echo 'C:\report\Initial_stock_count' . $cant . $dtime . '.csv'; ?></a>
+    <strong>Export successful!</strong> <a href="<?php echo $dron2; ?>" download="<?php echo $filename; ?>">Click here to download <?php echo $filename; ?></a>
   </div> 
   <?php
   fclose($fp);
@@ -108,8 +114,9 @@ if (isset($_GET['not'])) {
 
         <button id='exportcdiscreport' class="btn btn-primary" ><i class="glyphicon glyphicon-cloud-download icon-white"></i> Export Csv</button>
 
-        <button id='upload' class='btn btn-info'> Upload</button>
+        <!-- <button id='upload' class='btn btn-info'> Upload</button> -->
         <button id='cancel' class='btn btn-danger'> Cancel</button>
+        <button id='uploadToErp' class='btn btn-warning'> Upload to ERP</button>
 
         <span id='itemcount' style="display:inline-block;margin-left: 20px;font-weight: bold; font-size: 20px;color: black;"></span>
     
@@ -191,6 +198,43 @@ if (isset($_GET['not'])) {
 
 <hr>
 
+<!-- ERP Confirmation Modals -->
+<div class="modal fade" id="erpModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>Confirm Upload</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to upload to ERP?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>
+        <a href="#" class="btn btn-primary" id="btnConfirm1">Yes, continue</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="erpModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>Final Confirmation</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you absolutely sure? This will finalize the stock adjustments and push directly to the ERP.</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>
+        <a href="#" class="btn btn-warning" id="btnConfirmFinal">Yes, Upload to ERP!</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <?php require('footer.php'); ?>
 
 <script type="text/javascript">
@@ -221,5 +265,46 @@ if (isset($_GET['not'])) {
     })
   })
   
+  $('#uploadToErp').click(function(e){
+    e.preventDefault();
+    $('#erpModal1').modal('show');
+  });
+
+  $('#btnConfirm1').click(function(e){
+    e.preventDefault();
+    $('#erpModal1').modal('hide');
+    setTimeout(function() {
+        $('#erpModal2').modal('show');
+    }, 400); // slight delay to allow first modal to fade out
+  });
+
+  $('#btnConfirmFinal').click(function(e){
+    e.preventDefault();
+    $('#erpModal2').modal('hide');
+    
+    $('#uploadToErp').prop('disabled', true).text('Uploading...');
+    $('#loadingDiv').show();
+    $.ajax({
+      url:'postfolder/ajaxpost.php',
+      type:'post',
+      data:'uploadtoerp=ok&sc=<?php echo $cant; ?>',
+      dataType:'text',
+      success: function(donne, status){
+        if(donne.trim() == 'success'){
+          $('#uploadToErp').text('Uploaded to ERP');
+          $('#progress').css('width','100%');
+          $('#loadingSpan').text('Complete 100');
+          alert('Upload to ERP completed successfully!');
+        } else {
+          $('#uploadToErp').text('Upload failed').prop('disabled', false);
+          alert('Error: ' + donne);
+        }
+      },
+      error:function(){
+        $('#uploadToErp').text('Upload failed').prop('disabled', false);
+        alert('Server error occurred.');
+      }
+    });
+  });
 
 </script>

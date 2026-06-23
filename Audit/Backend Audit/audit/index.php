@@ -197,6 +197,85 @@ $rack_id = $_SESSION['rack_number'];
 </div>
 </div><!--box-inner-->
 
+  <!-- LIVE SCANNER FEED SECTION -->
+  <div class="box-inner" style="margin-top: 20px;">
+    <div class="box-header well">
+      <h2 style="font-size: 13px;"><i class="glyphicon glyphicon-eye-open"></i> Live Scanner Feed <span style="display:inline-block; width:10px; height:10px; background-color:#2ecc71; border-radius:50%; margin-left:5px; animation: pulse 2s infinite;"></span></h2>
+    </div>
+    <div class="box-content row">
+        <style>
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+        .live-feed-item {
+            transition: all 0.5s ease;
+        }
+        </style>
+        <div id="live_feed_container" class="container-fluid" style="padding: 15px;">
+            <p style="color: #7f8c8d;">Waiting for live scans...</p>
+        </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+        let lastScanData = '';
+        
+        function fetchLiveFeed() {
+            $.ajax({
+                url: 'postfolder/live_feed.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data && data.length > 0) {
+                        let currentDataHash = JSON.stringify(data);
+                        // Only update UI if new data arrived to prevent UI flickering
+                        if (currentDataHash !== lastScanData) {
+                            lastScanData = currentDataHash;
+                            $('#live_feed_container').empty();
+                            
+                            $.each(data, function(index, item) {
+                                let html = `
+                                <div class="live-feed-item panel panel-info" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #bce8f1; margin-bottom: 15px;">
+                                    <div class="panel-heading" style="border-top-left-radius: 7px; border-top-right-radius: 7px; background-color: #d9edf7; padding: 12px 15px;">
+                                        <h3 class="panel-title" style="margin: 0; font-weight: bold; color: #31708f; font-size: 16px;"><i class="glyphicon glyphicon-phone"></i> Scanned by ${item.E_NAME}</h3>
+                                    </div>
+                                    <div class="panel-body" style="padding: 20px;">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4 style="color: #2c3e50; font-weight: 800; font-size: 18px; margin-top: 0; margin-bottom: 15px;">${item.ITEM_NAME}</h4>
+                                                <p style="margin-bottom: 8px;"><strong style="color: #7f8c8d;">Item Code:</strong> <span style="font-family: monospace; font-size: 14px; background: #ecf0f1; padding: 2px 6px; border-radius: 4px;">${item.ITEM_CODE}</span></p>
+                                                <p style="margin-bottom: 8px;"><strong style="color: #7f8c8d;">Barcode:</strong> <span style="font-family: monospace; font-size: 14px; background: #ecf0f1; padding: 2px 6px; border-radius: 4px;">${item.BARCODE}</span></p>
+                                                <p style="margin-bottom: 8px;"><strong style="color: #7f8c8d;">Qty:</strong> <span style="font-size: 14px; background: #ecf0f1; padding: 2px 6px; border-radius: 4px;">${item.QTY}</span></p>
+                                                <p style="margin-bottom: 8px;"><strong style="color: #7f8c8d;">Time:</strong> <span style="font-size: 14px; background: #ecf0f1; padding: 2px 6px; border-radius: 4px;">${item.DATE_SYS}</span></p>
+                                                <p style="margin-bottom: 0;"><strong style="color: #7f8c8d;">Unit:</strong> <span class="label label-primary" style="font-size: 12px; padding: 4px 8px;">${item.VC_UNIT}</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+                                $(html).hide().appendTo('#live_feed_container').fadeIn(500);
+                            });
+                        }
+                    } else if (data && data.error) {
+                        console.log("Live Feed Error: " + data.error);
+                    }
+                },
+                error: function() {
+                    console.log("Failed to fetch live feed.");
+                }
+            });
+        }
+        
+        // Poll every 2 seconds
+        setInterval(fetchLiveFeed, 2000);
+        // Initial fetch
+        fetchLiveFeed();
+    });
+  </script>
   <!-- content ends -->
 </div><!--/#content.col-md-12-->
 

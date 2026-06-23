@@ -49,10 +49,21 @@ public class ViewActivity extends AppCompatActivity {
         /* JADX INFO: Access modifiers changed from: protected */
         @Override // android.os.AsyncTask
         public void onPostExecute(String Result) {
+            if (Result == null) {
+                android.widget.Toast.makeText(ViewActivity.this, "Device is not connected to the server.", 1).show();
+                return;
+            }
             Log.d("RESULT view", Result);
-            List<Input_values_Vview> Result_list = (List) new Gson().fromJson(Result, new TypeToken<List<Input_values_Vview>>() { // from class: com.melcomgroup.zahed.melcomshopaudit.ViewActivity.BackgroundWorker_view.1
-            }.getType());
-            ViewActivity.this.adapter.setData(Result_list);
+            try {
+                List<Input_values_Vview> Result_list = (List) new Gson().fromJson(Result, new TypeToken<List<Input_values_Vview>>() { // from class: com.melcomgroup.zahed.melcomshopaudit.ViewActivity.BackgroundWorker_view.1
+                }.getType());
+                if (Result_list == null) {
+                    throw new Exception("Null response list");
+                }
+                ViewActivity.this.adapter.setData(Result_list);
+            } catch (Exception e) {
+                android.widget.Toast.makeText(ViewActivity.this, "Server error or no data found.", 0).show();
+            }
         }
     }
 }

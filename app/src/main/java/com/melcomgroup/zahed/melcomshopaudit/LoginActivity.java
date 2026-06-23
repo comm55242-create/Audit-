@@ -35,17 +35,39 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void OnLogin(View View) {
-        if (TextUtils.isEmpty(this.username.getText().toString())) {
-            Toast.makeText(this, "Enter user name ", 1).show();
+        String uName = this.username.getText().toString().trim();
+        String zName = this.zone.getText().toString().trim();
+
+        // If wedge scanner pasted "Shop,Zone,Category" into username or zone, auto-split it
+        if (uName.contains(",")) {
+            String[] parts = uName.split(",");
+            if (parts.length >= 2) {
+                uName = parts[0];
+                zName = parts[1];
+                this.username.setText(uName);
+                this.zone.setText(zName);
+            }
+        } else if (zName.contains(",")) {
+            String[] parts = zName.split(",");
+            if (parts.length >= 2) {
+                uName = parts[0];
+                zName = parts[1];
+                this.username.setText(uName);
+                this.zone.setText(zName);
+            }
+        }
+
+        if (TextUtils.isEmpty(uName)) {
+            Toast.makeText(this, "Enter user name", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (TextUtils.isEmpty(this.zone.getText().toString())) {
-            Toast.makeText(this, "Enter ZONE /Rack number", 1).show();
+        if (TextUtils.isEmpty(zName)) {
+            Toast.makeText(this, "Enter ZONE /Rack number", Toast.LENGTH_SHORT).show();
             return;
         }
         Intent i1 = new Intent(this, (Class<?>) MainActivity.class);
-        i1.putExtra("USERNAME", this.username.getText().toString());
-        i1.putExtra("ZONE", this.zone.getText().toString());
+        i1.putExtra("USERNAME", uName);
+        i1.putExtra("ZONE", zName);
         i1.addFlags(335577088);
         startActivity(i1);
     }

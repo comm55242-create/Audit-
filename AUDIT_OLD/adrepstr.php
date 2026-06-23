@@ -1,4 +1,4 @@
-﻿<?php include('header.php'); ?>
+<?php include('header.php'); ?>
 <?php confirm_logged_in(); ?>
 <?php
 //$gotru = $_GET['tanto'];
@@ -137,7 +137,7 @@ if (isset($_GET['not'])) {
             </tr><?php $count++;
           } 
 
-          $sqlpending = oci_parse($conn, "SELECT * FROM ZS_VW_AUDIT_PENDING");
+          $sqlpending = oci_parse($conn, "SELECT MAX(p.SHOP_CODE) AS SHOP_CODE, p.ITEM_CODE, MAX(p.ITEM_NAME) AS ITEM_NAME, MAX(p.PRICE) AS PRICE, MAX(p.DEPT) AS DEPT, MAX(p.CURR_STOCK) AS CURR_STOCK FROM ZS_VW_AUDIT_PENDING p WHERE p.SHOP_CODE = '{$cant}' GROUP BY p.ITEM_CODE");
           oci_execute($sqlpending);
 
           while ($trica = oci_fetch_array($sqlpending)) {
@@ -164,8 +164,7 @@ if (isset($_GET['not'])) {
               <td class="center"><?php echo $DEPT; ?></td>
 
             </tr><?php $count++;
-          }
-          ?>
+          } ?>
         </tbody>
       </table>
 

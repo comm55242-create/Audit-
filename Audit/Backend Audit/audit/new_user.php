@@ -57,59 +57,56 @@ if (isset($_POST['submit'])) { // Form has been submitted.
 ?>
 
 <div>
-  <ol class="breadcrumb">
-    <li><a href="#">Home</a></li>
-    <li><a href="#">User Manager</a></li>
-  </ol>
+  <ul class="breadcrumb">
+    <li>
+      <a href="#">Home</a>
+    </li>
+    <li>
+      <a href="#">User Manager</a>
+    </li>
+  </ul>
 </div>
 
 <div class="row">
   <div class="box col-md-12">
     <div class="box-inner">
       <div class="box-content">
-        <form action="new_user.php" method="post" class="form-horizontal container">
-			<div class="form-group">
-			<label class="col-sm-2 control-label">Full Name:</label>
-			<div class="col-sm-3"><input type="text" name="fullname" maxlength="30" class="form-control"
-                         value="<?php echo htmlentities($fullname); ?>"  required/></div>
-            <div class="col-sm-7"></div>
-			</div>
-			<div class="form-group">
-            <label class="col-sm-2 control-label">User name:</label>
-            <div class="col-sm-3"><input type="text" name="username" maxlength="30" class="form-control"
-                         value="<?php echo htmlentities($username); ?>"  required/></div>
-            <div class="col-sm-7"></div>
-			</div>
-			<div class="form-group">
-			<label class="col-sm-2 control-label">Staff Id:</label>
-			<div class="col-sm-3"><input type="text" name="staffid" maxlength="30" class="form-control"
-                         value="<?php echo htmlentities($staffid); ?>"  required/></div>
-			<div class="col-sm-7"></div>
-            </div>
-			<div class="form-group">
-			<label class="col-sm-2 control-label">Password:</label>
-			<div class="col-sm-3"><input type="password" name="password" maxlength="30" class="form-control"
-                         value="<?php echo htmlentities($password); ?>"  required/></div>
-            <div class="col-sm-7"></div>
-            </div>
-            <div class="form-group">
-			<label class="col-sm-2 control-label">Administrator:</label>
-			<div class="col-sm-3"><input type="checkbox" name="admin" value="1" /></div>
-			<div class="col-sm-7"></div>
-            </div>
-            <div class="form-group">
-			<div class="col-sm-2"></div>
-            <div class="col-sm-2">
-			<input type="submit" name="submit" class="btn btn-primary" value="Create user"></div>
-			<div class="col-sm-8"></div>
-			</div>
+        <form action="new_user.php" method="post">
+          <table>
+            <tr>
+              <td><label>Full Name:</label></td>
+              <td><input type="text" name="fullname" maxlength="30"
+                         value="<?php echo htmlentities($fullname); ?>"  required/></td>
+            </tr>
+            <tr>
+              <td><label>User name:</label></td>
+              <td><input type="text" name="username" maxlength="30"
+                         value="<?php echo htmlentities($username); ?>"  required/></td>
+            </tr>
+            <tr>
+              <td><label>Staff Id:</label></td>
+              <td><input type="text" name="staffid" maxlength="30"
+                         value="<?php echo htmlentities($staffid); ?>"  required/></td>
+            </tr>
+            
+            <tr>
+              <td><label>Password:</label></td>
+              <td><input type="password" name="password" maxlength="30"
+                         value="<?php echo htmlentities($password); ?>"  required/></td>
+            </tr>
+            <tr>
+              <td><label>Administrator:</label></td>
+              <td><input type="checkbox" class ="form-control" name="admin" value="1" /></td>
+            </tr>
+            <tr>
+              <td><input type="submit" name="submit"class="btn btn-primary" value="Create user"></td>
+            </tr>
+          </table>
         </form>
       </div>
     </div>
-	<br>
-	<div class="panel panel-default">
     <div class="box-header well" data-original-title="">
-      <h2><i class="glyphicon glyphicon-user"></i> Users Master</h2>
+      <h2><i class="glyphicon glyphicon-user"></i> Users</h2>
 
       <div class="box-icon">
         <a href="#" class="btn btn-minimize btn-round btn-default"><i
@@ -171,16 +168,23 @@ if (isset($_POST['submit'])) { // Form has been submitted.
                     User
   <?php } ?>
                 </td>
-                <td class="center"> <a class="btn btn-xs btn-danger" href="del_content_u.php?subj=<?php echo $idss; ?>" onClick="return confirm('Are you sure?');">
-                    <i class="icon-trash icon-white"></i> Delete </a>
+                <td class="center">																<a class="btn btn-danger" href="del_content_u.php?subj=<?php echo $idss; ?>" onClick="return confirm('Are you sure?');">
+                    <i class="icon-trash icon-white"></i> 
+                    Delete
+                  </a>
                 </td>
               </tr>
-		<?php } ?>
-				</tbody>
-			</table>
-			</div>
-		</div>
-	</div></div>
+<?php } ?>
+
+
+
+
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div><!--/row-->
 
 

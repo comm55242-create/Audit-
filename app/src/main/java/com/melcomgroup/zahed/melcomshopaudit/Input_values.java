@@ -82,4 +82,15 @@ public class Input_values implements Serializable {
     public void setCURR_STOCK(String CURR_STOCK) {
         this.CURR_STOCK = CURR_STOCK;
     }
+
+    @SerializedName("UNIT")
+    private String UNIT;
+
+    public String getUNIT() {
+        return this.UNIT;
+    }
+
+    public void setUNIT(String UNIT) {
+        this.UNIT = UNIT;
+    }
 }

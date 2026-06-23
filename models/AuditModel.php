@@ -153,6 +153,21 @@ class AuditModel {
         // 2. Ensure both MST_DEPT and AUDIT_SETUP tables are initialized on local schema
         self::ensureTablesExist($conn);
 
+        // 2.5 Archive HEAD_AUDIT to HEAD_AUDIT_ARCHIVE and clear HEAD_AUDIT
+        $archiveStmt = oci_parse($conn, "INSERT INTO SHOP.HEAD_AUDIT_ARCHIVE SELECT * FROM SHOP.HEAD_AUDIT");
+        @oci_execute($archiveStmt);
+        if ($archiveStmt) oci_free_statement($archiveStmt);
+
+        $truncHeadStmt = @oci_parse($conn, "TRUNCATE TABLE SHOP.HEAD_AUDIT");
+        $truncHeadSuccess = @oci_execute($truncHeadStmt);
+        if ($truncHeadStmt) oci_free_statement($truncHeadStmt);
+
+        if (!$truncHeadSuccess) {
+            $delHeadStmt = oci_parse($conn, "DELETE FROM SHOP.HEAD_AUDIT");
+            @oci_execute($delHeadStmt);
+            if ($delHeadStmt) oci_free_statement($delHeadStmt);
+        }
+
         // 3. Clear/Truncate local table SHOP.MASTER_ITEM
         $truncStmt = @oci_parse($conn, "TRUNCATE TABLE SHOP.MASTER_ITEM");
         $truncSuccess = @oci_execute($truncStmt);

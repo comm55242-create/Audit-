@@ -526,62 +526,54 @@ if(isset($_POST['variancereport'])){
 	session_start();
 	$cant = $_SESSION['storecode'];
 
-	$sql = oci_parse($conn, "SELECT ab.SHOP_CODE, ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, SUM(ab.QTY)QTY, AVG(ab.CURR_STOCK) CURR_STOCK, ab.DEPT, ab.rack_num, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
- FROM 
-  (
-    SELECT SHOP_CODE,ITEM_CODE, PRICE, ITEM_NAME, QTY, DEPT, CURR_STOCK, rack_num,user_name,SUBSTR(DATE_SYS,1,10)DATE_SYS 
-    FROM ZS_VW_AUDIT_REPORT a
-  ) ab
-  LEFT JOIN MASTER_ITEM mi ON ab.ITEM_CODE = mi.ITEM_CODE AND ab.SHOP_CODE = mi.SHOP_CODE
-  WHERE ab.SHOP_CODE = '{$cant}' 
-  GROUP BY ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.DEPT, ab.SHOP_CODE, ab.rack_num");
+	$sql = oci_parse($conn, "SELECT a.VC_ITEM_CODE AS ITEM_CODE, MAX(a.ITEM_NAME) AS ITEM_NAME, MAX(a.PRICE) AS PRICE, MAX(a.VC_AUDIT_QTY) AS QTY, MAX(a.DEPT) AS DEPT, MAX(mi.CURR_STOCK) AS CURR_STOCK, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+ FROM ZS_STOCK_AUDIT_ERP_NEW a
+ LEFT JOIN MASTER_ITEM mi ON a.VC_ITEM_CODE = mi.ITEM_CODE AND a.VC_SHOP_CODE = mi.SHOP_CODE
+ WHERE a.VC_SHOP_CODE = '{$cant}'
+ GROUP BY a.VC_ITEM_CODE");
 	if (!$sql) {
 		$e2 = oci_error($conn);
 		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
 	}
 
-	$sqlpending = oci_parse($conn, "SELECT p.*, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE");
-    oci_execute($sqlpending);
-
 	$r2 = oci_execute($sql);
 	$dtime = date('Y-m-d_H-i-s');
-	$name = 'Variance_Report_'.$dtime.'.csv';
+    $name = 'Variance_Report_'.$dtime.'.csv';
 	$dron2 = '../export/'.$name;
 	$fp = fopen($dron2, 'w');
 
-	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','AUDIT_QTY','ERP_QTY','PRICE','DIFF','DIFF VALUE','DEPT','GROUPS','SUBGROUPS','ZONES']);
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','DEPT','GROUPS','SUBGROUPS','ERP_QTY','AUDIT_QTY','DIFF','DIFF VALUE','ZONES', 'PHYSICAL_QTY']);
+
+    // 1. Fetch Distinct Zones per Item
+    $zone_query = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, RACK_NUM FROM ZS_VW_AUDIT_REPORT WHERE SHOP_CODE = '{$cant}'");
+    oci_execute($zone_query);
+    $item_zones = [];
+    while ($zrow = oci_fetch_assoc($zone_query)) {
+        $icode = $zrow['ITEM_CODE'];
+        if (!isset($item_zones[$icode])) {
+            $item_zones[$icode] = [];
+        }
+        $item_zones[$icode][] = $zrow['RACK_NUM'];
+    }
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
 		$data = [];
         $data['ITEM_CODE'] = $row['ITEM_CODE'];
         $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        $data['ERP_QTY'] = $row['CURR_STOCK'];
         $data['AUDIT_QTY'] = $row['QTY'];
-        $data['ERP_QTY'] = $row['CURR_STOCK'];
-        $data['PRICE'] = $row['PRICE'];
-        $data['DIFF'] = $data['AUDIT_QTY'] - $data['ERP_QTY'];
+        $data['DIFF'] = $row['QTY'] - $row['CURR_STOCK'];
         $data['DIFF VALUE'] = $data['DIFF'] * $data['PRICE'];
-        $data['DEPT'] = $row['DEPT'];
-        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
-        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
-        $data['ZONES'] = isset($row['RACK_NUM']) ? $row['RACK_NUM'] : '';
-        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
-	}
+        
+        $zones_string = isset($item_zones[$row['ITEM_CODE']]) ? implode(", ", $item_zones[$row['ITEM_CODE']]) : '';
+        $data['ZONES'] = $zones_string;
+        $data['PHYSICAL_QTY'] = '';
 
-	while ($row = oci_fetch_assoc($sqlpending)) {
-		
-		$data = [];
-        $data['ITEM_CODE'] = $row['ITEM_CODE'];
-        $data['ITEM_NAME'] = $row['ITEM_NAME'];
-        $data['AUDIT_QTY'] = 0;
-        $data['ERP_QTY'] = $row['CURR_STOCK'];
-        $data['PRICE'] = $row['PRICE'];
-        $data['DIFF'] = $data['AUDIT_QTY'] - $data['ERP_QTY'];
-        $data['DIFF VALUE'] = $data['DIFF'] * $data['PRICE'];
-        $data['DEPT'] = $row['DEPT'];
-        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
-        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
-        $data['ZONES'] = '';
         if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
 	}
 

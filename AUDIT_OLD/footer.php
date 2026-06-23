@@ -28,25 +28,27 @@ aria-hidden="true">
 	
 				if ($ytu['ADMIN'] == '1' || $_SESSION['staff_id'] === 'ADMIN') {
 				?>
-				<li role="presentation" class="active"><a href="#dropdown1" aria-controls="dropdown1" role="tab" data-toggle="tab">Audit Report</a></li>
-				<li role="presentation"><a href="#messages23" aria-controls="messages23" role="tab" data-toggle="tab">View Reports</a></li>
-				<li role="presentation"><a href="#dropdown3" aria-controls="dropdown3" role="tab" data-toggle="tab">Pending Stock Take</a></li>
-				<li role="presentation"><a href="#messages24" aria-controls="messages24" role="tab" data-toggle="tab">Provisional Discrepancy Report</a></li>
-				<li role="presentation"><a href="#messages37" aria-controls="messages37" role="tab" data-toggle="tab">Consolidated Discrepancy Report</a></li>
-				<li role="presentation"><a href="#messages27" aria-controls="messages27" role="tab" data-toggle="tab">Audit Report 2</a></li>
-				<li role="presentation"><a href="#messages25" aria-controls="messages25" role="tab" data-toggle="tab"><?php echo $rita3; ?> Stock Audit Report ERP</a></li>
-				<li role="presentation"><a href="#messsage26" aria-controls="messsage26" role="tab" data-toggle="tab">Final Report</a></li>
-				<li role="presentation"><a href="#messages38" aria-controls="messages38" role="tab" data-toggle="tab">Recounting Report</a></li>
-				<li role="presentation"><a href="#messages39" aria-controls="messages39" role="tab" data-toggle="tab">Variance Report</a></li>
+				<li role="presentation" class="active"><a href="#dropdown1" aria-controls="dropdown1" role="tab" data-toggle="tab">1. Audit Report</a></li>
+				<li role="presentation"><a href="#messages39" aria-controls="messages39" role="tab" data-toggle="tab">2. Variance Report</a></li>
+				<!-- <li role="presentation"><a href="#messages23" aria-controls="messages23" role="tab" data-toggle="tab">View Reports</a></li> -->
+				<!-- <li role="presentation"><a href="#dropdown3" aria-controls="dropdown3" role="tab" data-toggle="tab">Pending Stock Take</a></li> -->
+				<!-- <li role="presentation"><a href="#messages24" aria-controls="messages24" role="tab" data-toggle="tab">Provisional Discrepancy Report</a></li> -->
+				<!-- <li role="presentation"><a href="#messages37" aria-controls="messages37" role="tab" data-toggle="tab">Consolidated Discrepancy Report</a></li> -->
+				<!-- <li role="presentation"><a href="#messages27" aria-controls="messages27" role="tab" data-toggle="tab">Audit Report 2</a></li> -->
+				<!-- <li role="presentation"><a href="#messages25" aria-controls="messages25" role="tab" data-toggle="tab"> Final Stock Audit Report ERP</a></li> -->
+				<li role="presentation"><a href="#messsage26" aria-controls="messsage26" role="tab" data-toggle="tab">3. Final Report - ERP UPLOAD </a></li>
+				<!-- <li role="presentation"><a href="#messages38" aria-controls="messages38" role="tab" data-toggle="tab">Recounting Report</a></li> -->
 				<?php } ?>
 			</ul>
           <!-- Tab panes -->
 			<div class="tab-content">
 				<!-- Removed Profile, Reports, Staffs Report, and Departme. Report tabs as requested -->
+					<!--
 					<div role="tabpanel" class="tab-pane" id="messages23"><br>
 						<a href="adrepall.php?addon=default" title="View All Report For Today" data-toggle="tooltip" class="btn btn-info">View Reports</a>
 						<button class="btn btn-info exportbutton-direct" data-action="viewreportse" style="margin-left:5px;"><i class="glyphicon glyphicon-cloud-download icon-white"></i> Export CSV</button>
 					</div>
+					-->
 					<div role="tabpanel" class="tab-pane active" id="dropdown1"><br>
 						<a href="adrepall.php?addon=yes" title="View All Report For Today" data-toggle="tooltip" class="btn btn-info">View Audit Report</a>
 						<button class="btn btn-info exportbutton-direct" data-action="auditfirstrount" style="margin-left:5px;"><i class="glyphicon glyphicon-cloud-download icon-white"></i> Export CSV</button>
@@ -112,7 +114,7 @@ aria-hidden="true">
 			</div>
 			<div role="tabpanel" class="tab-pane" id="messages39">
 				<br>
-				<a href="adrepstr.php" title="View Variance Report" data-toggle="tooltip" class="btn btn-info">View Variance Report</a>
+				<a href="variance_report_view.php" title="View Variance Report" data-toggle="tooltip" class="btn btn-info">View Variance Report</a>
 				<button class="btn btn-info exportbutton-direct" data-action="variancereport" style="margin-left:5px;"><i class="glyphicon glyphicon-cloud-download icon-white"></i> Export CSV</button>
 			</div>
 			</div><!--tab-content-->
@@ -166,7 +168,7 @@ aria-hidden="true">
 <!-- history.js for cross-browser state change on ajax -->
 <script src="js/jquery.history.js"></script>
 <!-- application script for Charisma demo -->
-<script src="js/charisma.js"></script>
+<script src="js/charisma.js?v=2"></script>
 
 <script>
 $(document).ready(function() {
@@ -207,8 +209,9 @@ $(document).ready(function() {
 
 <!--
 //var jQuery_1_3_2 = $.noConflict(true);
-  jQuery_1_3_2(document).ready(function () {
-    jQuery_1_3_2('#example').DataTable({
+  $(document).ready(function () {
+    $('#example').DataTable({
+      bDestroy: true,
       dom: 'T<"clear">lfrtip',
       tableTools: {
         sSwfPath: "swf/copy_csv_xls_pdf.swf"
@@ -302,6 +305,7 @@ if ($_SERVER['HTTP_HOST'] == 'usman.it') {
 	var xhr;
 	var working = false;
 
+	/*
 	$('#upload').click(function(){
 
 
@@ -356,6 +360,7 @@ if ($_SERVER['HTTP_HOST'] == 'usman.it') {
 		}
 
 	})
+	*/
 
 	// $('#cancel').click(function(){
 

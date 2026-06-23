@@ -204,139 +204,109 @@
                         <tr>
                             <th style="width: 40px; text-align: center;">SR No</th>
                             <th>Check Point</th>
-                            <th style="width: 100px; text-align: center;">Status<br><small>(Store Manager)</small></th>
-                            <th style="width: 180px; text-align: center;">Remarks<br><small>(Store Manager)</small></th>
-                            <th style="width: 100px; text-align: center;">Status<br><small>(Auditor)</small></th>
-                            <th style="width: 180px; text-align: center;">Remarks<br><small>(Auditor)</small></th>
+                            <th style="width: 100px; text-align: center;">Status <span style="color: #ef4444; font-weight: bold;">*</span><br><small>(Auditor)</small></th>
+                            <th style="width: 350px; text-align: center;">Remarks <span style="color: #ef4444; font-weight: bold;">*</span><br><small>(Auditor)</small></th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Inwards -->
-                        <tr><td colspan="6" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Inwards</td></tr>
+                        <tr><td colspan="4" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Inwards</td></tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">1</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Warehouse Receipts being closed/posted in the ERP</td>
-                            <td><select id="smStatus-1" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-1" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-1" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-1" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">2</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Store To Store Receipts being closed/posted in the ERP</td>
-                            <td><select id="smStatus-2" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-2" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-2" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-2" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">3</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Direct Supply Receipts being closed/posted in the ERP</td>
-                            <td><select id="smStatus-3" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-3" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-3" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-3" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
 
                         <!-- Outwards -->
-                        <tr><td colspan="6" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Outwards</td></tr>
+                        <tr><td colspan="4" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Outwards</td></tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">4</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Returns to Warehouse being closed/posted in the ERP</td>
-                            <td><select id="smStatus-4" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-4" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-4" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-4" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">5</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Store To Store Transfer (STST) being closed/posted in the ERP</td>
-                            <td><select id="smStatus-5" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-5" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-5" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-5" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">6</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Returns to Direct Supply being closed/posted in the ERP</td>
-                            <td><select id="smStatus-6" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-6" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-6" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-6" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
 
                         <!-- Outwards (Damage/Expiry/Repair) -->
-                        <tr><td colspan="6" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Outwards (Damage/Expiry/Repair)</td></tr>
+                        <tr><td colspan="4" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Outwards (Damage/Expiry/Repair)</td></tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">7</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">Warehouse/Direct Supply being closed/posted in the ERP</td>
-                            <td><select id="smStatus-7" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-7" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-7" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-7" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">8</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All stock transfer for Repair to Service Center being closed/posted in the system</td>
-                            <td><select id="smStatus-8" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-8" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-8" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-8" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
 
                         <!-- Negative Inventory -->
-                        <tr><td colspan="6" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Negative Inventory</td></tr>
+                        <tr><td colspan="4" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Negative Inventory</td></tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">9</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Negative Inventory being booked/posted in the ERP</td>
-                            <td><select id="smStatus-9" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-9" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-9" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-9" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
 
                         <!-- Fixed Assets/Consumption/Sampling -->
-                        <tr><td colspan="6" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Fixed Assets/Consumption/Sampling</td></tr>
+                        <tr><td colspan="4" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Fixed Assets/Consumption/Sampling</td></tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">10</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All Fixed assets assigned to the store are correctly recorded in the system</td>
-                            <td><select id="smStatus-10" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-10" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-10" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-10" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">11</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All store consumption stock being booked/posted in the ERP</td>
-                            <td><select id="smStatus-11" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-11" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-11" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-11" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">12</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">All sampling stock being booked/posted in the ERP</td>
-                            <td><select id="smStatus-12" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-12" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-12" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-12" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
 
                         <!-- Others -->
-                        <tr><td colspan="6" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Others</td></tr>
+                        <tr><td colspan="4" style="background:#f1f5f9; font-weight:800; color:var(--color-primary); padding: 0.5rem 1rem; font-size:12px; text-transform:uppercase;">Others</td></tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">13</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">Any item Billed but laying in the store, pending for delivery to the customer?</td>
-                            <td><select id="smStatus-13" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-13" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-13" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-13" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
                         <tr>
                             <td style="text-align: center; font-weight: 800; color: var(--color-text-light);">14</td>
                             <td style="font-weight: 700; color: var(--color-text-main); font-size:12px; line-height:1.4;">Is Annexure 1.0 properly filled & signed by the Store/Operation/IT/Audit Manager</td>
-                            <td><select id="smStatus-14" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
-                            <td><input type="text" id="smRemark-14" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                             <td><select id="auStatus-14" class="checklist-select" onchange="saveChecklistState()"><option value="" disabled selected>-</option><option value="Yes">Yes</option><option value="No">No</option></select></td>
                             <td><input type="text" id="auRemark-14" class="checklist-input" placeholder="Remarks" oninput="saveChecklistState()"></td>
                         </tr>
@@ -416,6 +386,26 @@
 <!-- ========================================== -->
 <!-- PREMIUM SECURE CONFIRMATION MODAL -->
 <!-- ========================================== -->
+<!-- VALIDATION WARNING MODAL (CHECKLIST) -->
+<!-- ========================================== -->
+<div id="validationWarningModal" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.2s ease;">
+    <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 480px; padding: 1.75rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #ef4444;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 24px; height: 24px; stroke-width: 2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <h3 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: -0.01em;">Action Required</h3>
+        </div>
+        <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;">
+            Please make sure you have selected a <strong>Status</strong> and provided <strong>Remarks</strong> for all 14 checklist items before continuing to the next step.
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+            <button type="button" onclick="document.getElementById('validationWarningModal').classList.add('hidden')" class="btn btn-secondary" style="padding: 0.6rem 1.25rem; font-size: 12px; font-weight: 700; border-radius: 10px; cursor: pointer; height: auto;">Understood</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- CONFIRM FINISH MODAL -->
+<!-- ========================================== -->
 <div id="confirmDetailsFinishModal" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; transition: opacity 0.2s ease;">
     <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 480px; padding: 1.75rem; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 1.25rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--color-primary);">
@@ -440,12 +430,12 @@
         <div style="display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: #dcfce7; color: #16a34a; margin-bottom: 0.25rem;">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke-width: 3;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
         </div>
-        <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--color-text-main); margin: 0; text-transform: uppercase; letter-spacing: -0.01em;">Congratulations!</h3>
+        <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--color-text-main); margin: 0; text-transform: uppercase; letter-spacing: -0.01em;">Confirmation</h3>
         <p style="font-size: 14px; color: var(--color-text-muted); line-height: 1.6; margin: 0;">
-            All stock take details and checklists have been successfully completed and locked. You can now proceed!
+            All stock take details and checklists have been successfully recorded. The audit preparation is now fully confirmed.
         </p>
         <div style="display: flex; justify-content: center; width: 100%; margin-top: 0.75rem;">
-            <button type="button" onclick="closeSuccessFinishModal()" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 13px; font-weight: 700; border-radius: 10px; cursor: pointer; height: auto; width: 100%;">Okay, Let's Go!</button>
+            <button type="button" onclick="closeSuccessFinishModal()" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 13px; font-weight: 700; border-radius: 10px; cursor: pointer; height: auto; width: 100%;">Acknowledge & Close</button>
         </div>
     </div>
 </div>
@@ -650,22 +640,11 @@
 
         // Save Pre-Stock Workflow
         for (let i = 1; i <= 14; i++) {
-            const smStatus = document.getElementById("smStatus-" + i).value;
-            const smRemark = document.getElementById("smRemark-" + i).value;
             const auStatus = document.getElementById("auStatus-" + i).value;
             const auRemark = document.getElementById("auRemark-" + i).value;
-            preStockState.push({ smStatus, smRemark, auStatus, auRemark });
+            preStockState.push({ auStatus, auRemark });
             
             // Render nice color indicators dynamically
-            const smSel = document.getElementById("smStatus-" + i);
-            if (smStatus === 'Yes') {
-                smSel.style.color = '#065f46'; smSel.style.backgroundColor = '#ecfdf5'; smSel.style.borderColor = '#a7f3d0';
-            } else if (smStatus === 'No') {
-                smSel.style.color = '#991b1b'; smSel.style.backgroundColor = '#fef2f2'; smSel.style.borderColor = '#fca5a5';
-            } else {
-                smSel.style.color = ''; smSel.style.backgroundColor = ''; smSel.style.borderColor = '';
-            }
-
             const auSel = document.getElementById("auStatus-" + i);
             if (auStatus === 'Yes') {
                 auSel.style.color = '#065f46'; auSel.style.backgroundColor = '#ecfdf5'; auSel.style.borderColor = '#a7f3d0';
@@ -686,7 +665,7 @@
         let completedPre = 0;
 
         for (let i = 1; i <= 14; i++) {
-            if (document.getElementById("smStatus-" + i).value !== '' && document.getElementById("auStatus-" + i).value !== '') {
+            if (document.getElementById("auStatus-" + i).value !== '') {
                 completedPre++;
             }
         }
@@ -781,9 +760,7 @@
                 const state = JSON.parse(prestock);
                 state.forEach((item, index) => {
                     const i = index + 1;
-                    if (document.getElementById("smStatus-" + i)) {
-                        document.getElementById("smStatus-" + i).value = item.smStatus || "";
-                        document.getElementById("smRemark-" + i).value = item.smRemark || "";
+                    if (document.getElementById("auStatus-" + i)) {
                         document.getElementById("auStatus-" + i).value = item.auStatus || "";
                         document.getElementById("auRemark-" + i).value = item.auRemark || "";
                     }
@@ -818,7 +795,7 @@
         // Check Checklist Pre-stock
         let completedPre = 0;
         for (let i = 1; i <= 14; i++) {
-            if (document.getElementById("smStatus-" + i) && document.getElementById("smStatus-" + i).value !== '' && document.getElementById("auStatus-" + i) && document.getElementById("auStatus-" + i).value !== '') completedPre++;
+            if (document.getElementById("auStatus-" + i) && document.getElementById("auStatus-" + i).value !== '') completedPre++;
         }
         if (completedPre === 14) completed++;
 
@@ -833,6 +810,23 @@
     let activeDetailsStep = 1;
 
     function handleDetailsNavigationNext() {
+        if (activeDetailsStep === 2) {
+            let isValid = true;
+            for (let i = 1; i <= 14; i++) {
+                const statusSelect = document.getElementById("auStatus-" + i);
+                const remarkInput = document.getElementById("auRemark-" + i);
+                if (statusSelect && remarkInput) {
+                    if (!statusSelect.value || statusSelect.value.trim() === "" || !remarkInput.value || remarkInput.value.trim() === "") {
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+            if (!isValid) {
+                document.getElementById('validationWarningModal').classList.remove('hidden');
+                return;
+            }
+        }
         if (activeDetailsStep === 3) {
             showDetailsFinishModal();
             return;
@@ -867,6 +861,7 @@
     }
 
     function generatePrintableSignOff(type = 'checklist') {
+        const jsBarcodeSource = <?php echo json_encode(file_get_contents(__DIR__ . '/jsbarcode.min.js')); ?>;
         const storeCode = document.getElementById("infoStoreCode").value || "N/A";
         const storeName = document.getElementById("infoStoreName").value || "N/A";
         const auditStartDate = document.getElementById("infoAuditStartDate").value || "N/A";
@@ -902,23 +897,23 @@
             
             contentHTML = `
                 <h3>Pre-Stock Take Checklist</h3>
+                <div style="margin-bottom: 20px; font-size: 13px;">
+                    <b>Audit Start Date:</b> ${auditStartDate} <br>
+                    <b>Audit End Date:</b> ${document.getElementById('infoAuditEndDate')?.value || 'N/A'}
+                </div>
                 <table class="checklist-table">
                     <thead>
                         <tr>
                             <th style="width: 40px; text-align: center;">SR No</th>
                             <th>Check Point</th>
-                            <th style="width: 80px; text-align: center;">Status (SM)</th>
-                            <th>Remarks (SM)</th>
                             <th style="width: 80px; text-align: center;">Status (AU)</th>
-                            <th>Remarks (AU)</th>
+                            <th style="width: 350px;">Remarks (AU)</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
             
             for (let i = 1; i <= 14; i++) {
-                const smStat = document.getElementById("smStatus-" + i)?.value || "-";
-                const smRem = document.getElementById("smRemark-" + i)?.value || "";
                 const auStat = document.getElementById("auStatus-" + i)?.value || "-";
                 const auRem = document.getElementById("auRemark-" + i)?.value || "";
                 
@@ -926,8 +921,6 @@
                     <tr>
                         <td style="text-align: center; border: 1px solid #cbd5e1; padding: 4px;">${i}</td>
                         <td style="border: 1px solid #cbd5e1; padding: 4px;">${labels[i-1]}</td>
-                        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 4px; font-weight: bold;">${smStat}</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 4px;">${smRem}</td>
                         <td style="text-align: center; border: 1px solid #cbd5e1; padding: 4px; font-weight: bold;">${auStat}</td>
                         <td style="border: 1px solid #cbd5e1; padding: 4px;">${auRem}</td>
                     </tr>
@@ -954,7 +947,7 @@
                         if (h.includes("CATEGORY")) catIdx = idx;
                     });
 
-                    contentHTML += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">`;
+                    contentHTML += `<div style="display: block; width: 100%;">`;
                     
                     for (let i = 1; i < rows.length; i++) {
                         if (!rows[i] || rows[i].length < 2 || !rows[i][0]) continue;
@@ -966,15 +959,18 @@
                         // Code128 handles alphanumeric and dashes well
                         const barcodeValue = `${zoneVal} - ${catVal}`.substring(0, 40); // limit length to avoid scanner issues
                         
+                        // Add page break and increase barcode dimensions for "BIG" sizing
                         contentHTML += `
-                            <div style="border: 1px dashed #cbd5e1; padding: 1.5rem 1rem; border-radius: 8px; text-align: center; background: #ffffff;">
-                                <div style="font-weight: 800; font-size: 14px; margin-bottom: 0.5rem;">ZONE: ${escapeHtml(zoneVal)}</div>
-                                <div style="font-size: 11px; color: #64748b; margin-bottom: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(catVal)}</div>
+                            <div style="border: 2px dashed #cbd5e1; padding: 3rem; border-radius: 8px; text-align: center; background: #ffffff; margin-bottom: 2rem; page-break-after: always; break-after: page; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh;">
+                                <div style="font-weight: 900; font-size: 32px; margin-bottom: 1rem; color: #1e293b;">ZONE: ${escapeHtml(zoneVal)}</div>
+                                <div style="font-size: 24px; color: #475569; margin-bottom: 3rem;">${escapeHtml(catVal)}</div>
                                 <svg class="barcode-svg" 
                                      jsbarcode-format="CODE128" 
                                      jsbarcode-value="${escapeHtml(barcodeValue)}" 
                                      jsbarcode-textmargin="0" 
-                                     jsbarcode-height="50"
+                                     jsbarcode-height="150"
+                                     jsbarcode-width="3"
+                                     jsbarcode-fontsize="24"
                                      jsbarcode-fontoptions="bold">
                                 </svg>
                             </div>
@@ -1028,7 +1024,7 @@
             <html>
             <head>
                 <title>${docTitle} - ${storeCode}</title>
-                ${type === 'zone_barcodes' ? '<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\\/script>' : ''}
+                ${type === 'zone_barcodes' ? '<script>' + jsBarcodeSource + '<\/script>' : ''}
                 <style>
                     body { font-family: sans-serif; padding: 2rem; color: #1e293b; line-height: 1.6; font-size: 13px; }
                     h1 { border-bottom: 2px solid #0f172a; padding-bottom: 0.5rem; font-size: 20px; text-transform: uppercase; }
@@ -1141,6 +1137,7 @@
                 if (btnNext) {
                     btnNext.disabled = false;
                     btnNext.className = "btn btn-primary";
+                    
                 }
                 if (btnStartStockTake) btnStartStockTake.classList.add("hidden");
             }

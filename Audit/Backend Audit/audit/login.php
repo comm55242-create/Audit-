@@ -12,8 +12,9 @@ if (isset($_POST['submit'])) { // Form has been submitted.
   $errors = array();
   $username = $_POST['username'];
   $password = $_POST['password'];
-  $hashed_password = sha1($password);
+  //$hashed_password = sha1($password);
   $storeid = $_POST['department'];
+  $rack =$_POST['rack'];
 //  $rack_number = $_POST['department'];
   // clean up the form data before putting it in the database
   //echo $hashed_password;
@@ -24,22 +25,23 @@ if (isset($_POST['submit'])) { // Form has been submitted.
     //$query .= "WHERE USERNAME = '{$username}' ";
     //$query .= "AND HASHED_PASSWORD = '{$hashed_password}' ";
     //$query .= "LIMIT 1";
-    $result_set = oci_parse($conn, "SELECT USERNAME, STAFF_ID FROM USERS WHERE USERNAME ='" . $username . "' AND HASHED_PASSWORD ='" . $hashed_password . "'");
+   /// $result_set = oci_parse($conn, "SELECT USERNAME, STAFF_ID FROM USERS WHERE USERNAME ='" . $username . "' AND HASHED_PASSWORD ='" . $hashed_password . "'");
 
-    if (!$result_set) {
-      $e = oci_error($conn);
-      trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-    }
+   // if (!$result_set) {
+//$e = oci_error($conn);
+     // trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+ ////   }
 
-    $r = oci_execute($result_set);
-    if (!$r) {
-      $e = oci_error($result_set);
-      trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
-    }
-    $found_user = oci_fetch_array($result_set);
+    //$r = oci_execute($result_set);
+    //if (!$r) {
+      //$e = oci_error($result_set);
+      //trigger_error(htmlentities($e['message'], ENT_QUOTES), E_USER_ERROR);
+    //}
+   // $found_user = oci_fetch_array($result_set);
 
-
-    if (oci_num_rows($result_set) == '1') {
+ $found_user = $username;
+ 
+   // if (oci_num_rows($result_set) == '1') {
       //username/password authenticated
       // and only 1 match
       $query2 = oci_parse($conn, "SELECT * FROM MASTER_SHOP WHERE SHOP_CODE = '" . $storeid . "'");
@@ -59,16 +61,17 @@ if (isset($_POST['submit'])) { // Form has been submitted.
       $_SESSION['storecode'] = $found_store['SHOP_CODE'];
 
       $_SESSION['username'] = $found_user['USERNAME'];
-      $_SESSION['staff_id'] = $found_user['STAFF_ID'];
+      $_SESSION['staff_id'] = $found_user['USERNAME'];;
       $_SESSION['rack_number'] = "";
+	  $_SESSION['rack'] = $rack;
 
 
       redirect_to("index.php");
-    } else {
+   // } else {
       // username/password combo was not found in the database
-      $message = "<font color=\"#FF0033\"> <span class='glyphicon glyphicon-remove-sign'></span> Username/password combination incorrect.</font><br />
-					Check for caps lock key is off and try again.";
-    }
+      $message = "<font color=\"#FF0033\">Username/password combination incorrect.</font><br />
+					Please make sure your caps lock key is off and try again.";
+   // }
   } else {
     if (count($errors) == 1) {
       $message = "There was 1 error in the form.";
@@ -78,22 +81,23 @@ if (isset($_POST['submit'])) { // Form has been submitted.
   }
 } else { // Form has not been submitted.
   if (isset($_GET['logout']) && $_GET['logout'] == 1) {
-    $message = "<span class='glyphicon glyphicon-ok-sign'></span> You are now logged out ";
+    $message = "You are now logged out ";
   }
   $username = "";
-  $password = "";
+  //$password = "";
   $storeid = "";
+  $rack="";
 }
 ?>
 <div class="row">
   <div class="col-md-12 center login-header">
-    <h3>Welcome To Melcom Audit System </h3>
+    <h2>MELCOM AUDIT SYSTEM </h2>
   </div>
   <!--/span-->
 </div><!--/row-->
 
 <div class="row">
-  <div class="well col-md-3 center login-box">
+  <div class="well col-md-5 center login-box">
     <div class="alert alert-info">
       <?php
       if (!empty($message)) {
@@ -102,26 +106,26 @@ if (isset($_POST['submit'])) { // Form has been submitted.
         display_errors($errors);
       } else {
         ?>
-        <span class="glyphicon glyphicon-lock red"></span> Please Login with your Credentials.
+        Please Enter your name and rack/zone number.
 <?php } ?>
     </div>
     <form class="form-horizontal" action="login.php" method="post" >
       <fieldset>
-        <div class="input-group input-group-xs">
-          <span class="input-group-addon"><i class="glyphicon glyphicon-user blue"></i></span>
+        <div class="input-group input-group-lg">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-user red"></i></span>
           <input type="text" name="username" class="form-control" placeholder="Username" required="required">
         </div>
         <div class="clearfix"></div><br>
 
-        <div class="input-group input-group-xs">
-          <span class="input-group-addon"><i class="glyphicon glyphicon-eye-close blue"></i></span>
-          <input type="password" class="form-control" name="password" placeholder="Password" required="required">
-        </div>
+        
 
+		 <div class="input-group input-group-lg">
+          <span class="input-group-addon"><i class="glyphicon glyphicon-lock red"></i></span>
+          <input type="text" class="form-control" name="rack" placeholder="rack" required="required">
+        </div>
         <div class="clearfix"></div><br>
-		<div class=" col-md-5 col-xs-6">
-        <label class="remember12">Select Store:</label></div>
-		<div class="col-md-7 col-xs-6"><select class="form-control"  id="selectError" required name = "department">
+
+       <b>Select Store: </b><select class="form-control"  id="selectError" required name = "department">
           <?php
           $sqler = oci_parse($conn, "SELECT * FROM MASTER_SHOP WHERE ACTIVE = '1' ");
           oci_execute($sqler);
@@ -132,20 +136,20 @@ if (isset($_POST['submit'])) { // Form has been submitted.
 
 <?php }
 ?>
-        </select></div>
+        </select>
 
 
         <div class="clearfix"></div>
-        <p>
-          <button type="submit" name="submit" class="btn btn-info btn-block">Login</button>
-        </p><br>
-		<div class="form-group row">
-        <div class="input-prepend col-xs-6">
+        <div class="input-prepend">
           <label class="remember" for="remember"><input type="checkbox" id="remember"> Remember me</label>
         </div>
-		<div class="col-xs-6"><label class="remember"><a href="#">Forget Password ?</a></label></div>
-		</div>
+        <div class="clearfix"></div>
+
+        <p class="center col-md-5">
+          <button type="submit" name="submit" class="btn btn-primary">Login</button>
+        </p>
       </fieldset>
+
     </form>
   </div>
   <!--/span-->

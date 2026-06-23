@@ -41,4 +41,8 @@ android {
 
 dependencies {
     // TODO: dependencies
+    implementation 'com.android.support:appcompat-v7:24.2.1'
+    implementation 'com.android.support:recyclerview-v7:24.2.1'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
 }

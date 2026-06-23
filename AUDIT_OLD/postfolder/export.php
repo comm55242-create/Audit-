@@ -1,4 +1,5 @@
 <?php 
+$seen = [];
 
 $conn=oci_connect('SHOP','SHOP','(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521)) (CONNECT_DATA = (SERVICE_NAME = orcl) (SID = orcl)))');
 if(!$conn){
@@ -34,7 +35,7 @@ if(isset($_POST['cdiscreport'])){
 		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
 	}
 
-	$sqlpending = oci_parse($conn, "SELECT p.*, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE");
+	$sqlpending = oci_parse($conn, "SELECT MAX(p.SHOP_CODE) AS SHOP_CODE, p.ITEM_CODE, MAX(p.ITEM_NAME) AS ITEM_NAME, MAX(p.PRICE) AS PRICE, MAX(p.DEPT) AS DEPT, MAX(p.CURR_STOCK) AS CURR_STOCK, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE AND p.SHOP_CODE = mi.SHOP_CODE WHERE p.SHOP_CODE = '{$cant}' GROUP BY p.ITEM_CODE");
     oci_execute($sqlpending);
 
 	$r2 = oci_execute($sql);
@@ -47,12 +48,21 @@ if(isset($_POST['cdiscreport'])){
 	
 	$seenRows = [];
 
+    // 1. Fetch Distinct Zones per Item
+    $zone_query = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, RACK_NUM FROM ZS_VW_AUDIT_REPORT WHERE SHOP_CODE = '{$cant}'");
+    oci_execute($zone_query);
+    $item_zones = [];
+    while ($zrow = oci_fetch_array($zone_query)) {
+        $item_zones[$zrow['ITEM_CODE']][] = $zrow['RACK_NUM'];
+    }
+
 	while ($row = oci_fetch_assoc($sql)) {
         $audit_qty = isset($row['QTY']) ? $row['QTY'] : 0;
         $erp_qty = isset($row['CURR_STOCK']) ? $row['CURR_STOCK'] : 0;
         $price = isset($row['PRICE']) ? $row['PRICE'] : 0;
         $diff = $audit_qty - $erp_qty;
         $diff_val = $diff * $price;
+        $zones = isset($item_zones[$row['ITEM_CODE']]) ? implode(',', $item_zones[$row['ITEM_CODE']]) : '';
         
 		$dataArray = [
             $row['SHOP_CODE'],
@@ -66,7 +76,7 @@ if(isset($_POST['cdiscreport'])){
             $row['DEPT'],
             isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '',
             isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '',
-            '' // ZONES
+            $zones // ZONES
         ];
         
         $hash = md5(serialize($dataArray));
@@ -140,7 +150,7 @@ if(isset($_POST['finalreport'])){
         $data['GROUP'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
         $data['SUB_GROUP'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
 
-        fputcsv($fp, $data);
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
 	}
 
 	echo $name;
@@ -200,7 +210,7 @@ if(isset($_POST['provdiscreporte'])){
 		$data = [$tinto, $item_name, $item_price, $qty, $shop_qty,  $diff, $diff_val/*, $perc*/, $Date, $user, $rack, $grp, $sgrp];
         
 
-        fputcsv($fp, $data);
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
 	}
 
 	echo $name;
@@ -228,7 +238,7 @@ if(isset($_POST['auditfirstrount'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -256,7 +266,7 @@ if(isset($_POST['tobescannede'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -284,7 +294,7 @@ if(isset($_POST['zerostocke'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -312,7 +322,7 @@ if(isset($_POST['allitemse'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -340,7 +350,7 @@ if(isset($_POST['notallowede'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -371,7 +381,7 @@ if(isset($_POST['categorye'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -399,7 +409,7 @@ if(isset($_POST['uploadedreporte'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -408,8 +418,9 @@ if(isset($_POST['uploadedreporte'])){
 
 if(isset($_POST['pendingalle'])){
 
-	
-	$sql = oci_parse($conn, "SELECT p.*, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE");
+	session_start();
+	$cant = $_SESSION['storecode'];	
+	$sql = oci_parse($conn, "SELECT p.ITEM_CODE, MAX(p.ITEM_NAME) AS ITEM_NAME, MAX(p.PRICE) AS PRICE, MAX(p.DEPT) AS DEPT, MAX(p.CURR_STOCK) AS CURR_STOCK, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE AND p.SHOP_CODE = mi.SHOP_CODE WHERE p.SHOP_CODE = '{$cant}' GROUP BY p.ITEM_CODE");
 	if (!$sql) {
 		$e2 = oci_error($conn);
 		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
@@ -466,7 +477,7 @@ if(isset($_POST['pendingdepte'])){
 
 	$n = str_replace(' ', '_',str_replace('&', 'AND', $category));
 
-	$sql = oci_parse($conn, "SELECT p.ITEM_CODE, p.ITEM_NAME, p.DEPT, (p.PRICE * p.CURR_STOCK) As value, mi.VC_GROUP, mi.VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE WHERE p.DEPT = '{$category}'");
+	$sql = oci_parse($conn, "SELECT p.ITEM_CODE, MAX(p.ITEM_NAME) AS ITEM_NAME, MAX(p.DEPT) AS DEPT, MAX(p.PRICE * p.CURR_STOCK) As value, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE AND p.SHOP_CODE = mi.SHOP_CODE WHERE p.DEPT = '{$category}' AND p.SHOP_CODE = '{$cant}' GROUP BY p.ITEM_CODE");
 	if (!$sql) {
 		$e2 = oci_error($conn);
 		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
@@ -482,7 +493,7 @@ if(isset($_POST['pendingdepte'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -510,7 +521,7 @@ if(isset($_POST['audit2report'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -538,7 +549,7 @@ if(isset($_POST['stockauditerp'])){
 
 	while ($row = oci_fetch_assoc($sql)) {
 		
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
@@ -565,8 +576,132 @@ if(isset($_POST['viewreportse'])){
 	fputcsv($fp, ['ITEM_CODE','QTY','DATE/TIME']);
 
 	while ($row = oci_fetch_assoc($sql)) {
-        fputcsv($fp, $row);
+        if(!isset($seen[md5(serialize($row))])){ $seen[md5(serialize($row))] = true; fputcsv($fp, $row); }
 	}
 
 	echo $name;
 }
+if(isset($_POST['recountingreport'])){
+
+	session_start();
+	$cant = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT ab.SHOP_CODE, ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, SUM(ab.QTY)QTY, AVG(ab.CURR_STOCK) CURR_STOCK, ab.DEPT, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+ FROM 
+  (
+    SELECT SHOP_CODE,ITEM_CODE, PRICE, ITEM_NAME, QTY, DEPT, CURR_STOCK, rack_num,user_name,SUBSTR(DATE_SYS,1,10)DATE_SYS 
+    FROM ZS_VW_AUDIT_REPORT a
+  ) ab
+  LEFT JOIN MASTER_ITEM mi ON ab.ITEM_CODE = mi.ITEM_CODE AND ab.SHOP_CODE = mi.SHOP_CODE
+  WHERE ab.SHOP_CODE = '{$cant}' 
+  GROUP BY ab.ITEM_CODE, ab.PRICE, ab.ITEM_NAME, ab.DEPT, ab.SHOP_CODE");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$sqlpending = oci_parse($conn, "SELECT p.ITEM_CODE, MAX(p.ITEM_NAME) AS ITEM_NAME, MAX(p.PRICE) AS PRICE, MAX(p.DEPT) AS DEPT, MAX(p.CURR_STOCK) AS CURR_STOCK, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP FROM ZS_VW_AUDIT_PENDING p LEFT JOIN MASTER_ITEM mi ON p.ITEM_CODE = mi.ITEM_CODE AND p.SHOP_CODE = mi.SHOP_CODE WHERE p.SHOP_CODE = '{$cant}' GROUP BY p.ITEM_CODE");
+    oci_execute($sqlpending);
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+	$name = 'Recounting_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PHYSICAL_QTY','PRICE','DIFF QTY','DIFF VALUE','DEPT','GROUPS','SUBGROUPS']);
+
+	while ($row = oci_fetch_assoc($sql)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PHYSICAL_QTY'] = '';
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF QTY'] = $row['QTY'] - $row['CURR_STOCK'];
+        $data['DIFF VALUE'] = $data['DIFF QTY'] * $data['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	while ($row = oci_fetch_assoc($sqlpending)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PHYSICAL_QTY'] = '';
+        $data['PRICE'] = $row['PRICE'];
+        $data['DIFF QTY'] = 0 - $row['CURR_STOCK'];
+        $data['DIFF VALUE'] = $data['DIFF QTY'] * $data['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	echo $name;
+
+}
+
+if(isset($_POST['variancereport'])){
+
+	session_start();
+	$cant = $_SESSION['storecode'];
+
+	$sql = oci_parse($conn, "SELECT a.VC_ITEM_CODE AS ITEM_CODE, MAX(a.ITEM_NAME) AS ITEM_NAME, MAX(a.PRICE) AS PRICE, MAX(a.VC_AUDIT_QTY) AS QTY, MAX(a.DEPT) AS DEPT, MAX(mi.CURR_STOCK) AS CURR_STOCK, MAX(mi.VC_GROUP) AS VC_GROUP, MAX(mi.VC_SUBGROUP) AS VC_SUBGROUP
+ FROM ZS_STOCK_AUDIT_ERP_NEW a
+ LEFT JOIN MASTER_ITEM mi ON a.VC_ITEM_CODE = mi.ITEM_CODE AND a.VC_SHOP_CODE = mi.SHOP_CODE
+ WHERE a.VC_SHOP_CODE = '{$cant}'
+ GROUP BY a.VC_ITEM_CODE");
+	if (!$sql) {
+		$e2 = oci_error($conn);
+		trigger_error(htmlentities($e2['message'], ENT_QUOTES), E_USER_ERROR);
+	}
+
+	$r2 = oci_execute($sql);
+	$dtime = date('Y-m-d_H-i-s');
+    $name = 'Variance_Report_'.$dtime.'.csv';
+	$dron2 = '../export/'.$name;
+	$fp = fopen($dron2, 'w');
+
+	fputcsv($fp, ['ITEM_CODE','ITEM_NAME','PRICE','DEPT','GROUPS','SUBGROUPS','ERP_QTY','AUDIT_QTY','DIFF','DIFF VALUE','ZONES', 'PHYSICAL_QTY']);
+
+    // 1. Fetch Distinct Zones per Item
+    $zone_query = oci_parse($conn, "SELECT DISTINCT ITEM_CODE, RACK_NUM FROM ZS_VW_AUDIT_REPORT WHERE SHOP_CODE = '{$cant}'");
+    oci_execute($zone_query);
+    $item_zones = [];
+    while ($zrow = oci_fetch_assoc($zone_query)) {
+        $icode = $zrow['ITEM_CODE'];
+        if (!isset($item_zones[$icode])) {
+            $item_zones[$icode] = [];
+        }
+        $item_zones[$icode][] = $zrow['RACK_NUM'];
+    }
+
+	while ($row = oci_fetch_assoc($sql)) {
+		
+		$data = [];
+        $data['ITEM_CODE'] = $row['ITEM_CODE'];
+        $data['ITEM_NAME'] = $row['ITEM_NAME'];
+        $data['PRICE'] = $row['PRICE'];
+        $data['DEPT'] = $row['DEPT'];
+        $data['GROUPS'] = isset($row['VC_GROUP']) ? $row['VC_GROUP'] : '';
+        $data['SUBGROUPS'] = isset($row['VC_SUBGROUP']) ? $row['VC_SUBGROUP'] : '';
+        $data['ERP_QTY'] = $row['CURR_STOCK'];
+        $data['AUDIT_QTY'] = $row['QTY'];
+        $data['DIFF'] = $row['QTY'] - $row['CURR_STOCK'];
+        $data['DIFF VALUE'] = $data['DIFF'] * $data['PRICE'];
+        
+        $zones_string = isset($item_zones[$row['ITEM_CODE']]) ? implode(", ", $item_zones[$row['ITEM_CODE']]) : '';
+        $data['ZONES'] = $zones_string;
+        $data['PHYSICAL_QTY'] = '';
+
+        if(!isset($seen[md5(serialize($data))])){ $seen[md5(serialize($data))] = true; fputcsv($fp, $data); }
+	}
+
+	echo $name;
+
+}
+?>

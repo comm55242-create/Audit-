@@ -29,7 +29,7 @@ aria-hidden="true">
 				if ($ytu['ADMIN'] == '1' || $_SESSION['staff_id'] === 'ADMIN') {
 				?>
 				<li role="presentation" class="active"><a href="#dropdown1" aria-controls="dropdown1" role="tab" data-toggle="tab">Audit Report</a></li>
-				<li role="presentation"><a href="#messages23" aria-controls="messages23" role="tab" data-toggle="tab">View Reports</a></li>
+				<!-- <li role="presentation"><a href="#messages23" aria-controls="messages23" role="tab" data-toggle="tab">View Reports</a></li> -->
 				<li role="presentation"><a href="#dropdown3" aria-controls="dropdown3" role="tab" data-toggle="tab">Pending Stock Take</a></li>
 				<li role="presentation"><a href="#messages24" aria-controls="messages24" role="tab" data-toggle="tab">Provisional Discrepancy Report</a></li>
 				<li role="presentation"><a href="#messages37" aria-controls="messages37" role="tab" data-toggle="tab">Consolidated Discrepancy Report</a></li>
@@ -43,10 +43,12 @@ aria-hidden="true">
           <!-- Tab panes -->
 			<div class="tab-content">
 				<!-- Removed Profile, Reports, Staffs Report, and Departme. Report tabs as requested -->
+					<!--
 					<div role="tabpanel" class="tab-pane" id="messages23"><br>
 						<a href="adrepall.php?addon=default" title="View All Report For Today" data-toggle="tooltip" class="btn btn-info">View Reports</a>
 						<button class="btn btn-info exportbutton-direct" data-action="viewreportse" style="margin-left:5px;"><i class="glyphicon glyphicon-cloud-download icon-white"></i> Export CSV</button>
 					</div>
+					-->
 					<div role="tabpanel" class="tab-pane active" id="dropdown1"><br>
 						<a href="adrepall.php?addon=yes" title="View All Report For Today" data-toggle="tooltip" class="btn btn-info">View Audit Report</a>
 						<button class="btn btn-info exportbutton-direct" data-action="auditfirstrount" style="margin-left:5px;"><i class="glyphicon glyphicon-cloud-download icon-white"></i> Export CSV</button>

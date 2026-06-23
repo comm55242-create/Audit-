@@ -17,7 +17,7 @@ try {
 	// mysql connection
 	$db = new PDO("oci:dbname=".$tns,$db_username,$db_password);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Connection successful!";
+   // echo "Connection successful!";
 } catch (PDOException $e) {
 	echo "Error: " . $e->getMessage();
 }
