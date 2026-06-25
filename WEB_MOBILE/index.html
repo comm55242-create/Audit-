@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Melcom Shop Audit</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- =============== LOGIN SCREEN =============== -->
+    <div id="screen-login" class="screen active">
+        <div class="login-container">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="12" fill="url(#grad1)"/>
+                        <path d="M14 24L20 30L34 16" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs><linearGradient id="grad1" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#2A5298"/><stop offset="1" stop-color="#1E3C72"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <h1 class="app-title">Shop Audit</h1>
+                <p class="app-subtitle">Melcom Group</p>
+            </div>
+
+            <div class="input-group">
+                <label for="login-username">Auditor Name</label>
+                <input type="text" id="login-username" placeholder="Enter your name" autocomplete="off" autocapitalize="characters">
+            </div>
+
+            <div class="input-group">
+                <label for="login-zone">Zone / Rack Number</label>
+                <input type="text" id="login-zone" placeholder="Enter zone or rack" autocomplete="off" autocapitalize="characters">
+            </div>
+
+            <button id="btn-login" class="btn-primary" onclick="doLogin()">LOG IN</button>
+
+            <p class="footer-text">Web Audit v1.0</p>
+        </div>
+    </div>
+
+    <!-- =============== MAIN AUDIT SCREEN =============== -->
+    <div id="screen-main" class="screen">
+        <div class="main-container">
+
+            <!-- Header Bar -->
+            <div class="header-bar">
+                <div class="header-left">
+                    <span class="header-user" id="display-username"></span>
+                    <span class="header-ip" id="display-ip"></span>
+                </div>
+                <div class="header-right">
+                    <span class="header-zone" id="display-zone"></span>
+                </div>
+            </div>
+
+            <!-- Scan Row -->
+            <div class="scan-row">
+                <input type="text" id="input-itemcode" class="scan-input" placeholder="Item code / Barcode" autocomplete="off" autofocus>
+                <button class="btn-scan" onclick="doScan()">SCAN</button>
+                <button class="btn-clear" onclick="doClear()">C</button>
+            </div>
+
+            <!-- Timing Badge -->
+            <div id="timing-badge" class="timing-badge hidden">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span id="timing-text"></span>
+            </div>
+
+            <!-- Item Details Card -->
+            <div id="item-card" class="item-card">
+                <div class="item-name" id="d-item-name">—</div>
+                <div class="item-row">
+                    <span class="item-price" id="d-price">—</span>
+                    <span class="item-shop" id="d-shop">—</span>
+                </div>
+                <div class="item-detail"><span class="detail-label">Code:</span> <span id="d-item-code">—</span></div>
+                <div class="item-detail"><span class="detail-label">Barcode:</span> <span id="d-barcode">—</span></div>
+                <div class="item-detail"><span class="detail-label">Dept:</span> <span id="d-dept">—</span></div>
+                <div class="item-detail"><span class="detail-label">Stock:</span> <span id="d-stock">—</span></div>
+                <div class="item-detail"><span class="detail-label">Unit:</span> <span id="d-unit">—</span></div>
+            </div>
+
+            <!-- QTY Section -->
+            <div class="qty-section">
+                <label class="qty-label">QUANTITY</label>
+                <input type="number" id="input-qty" class="qty-input" placeholder="QTY" step="1" min="0" maxlength="6" disabled>
+                <span id="unit-hint" class="unit-hint hidden">Decimals allowed (KGS)</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-row">
+                <button class="btn-link btn-view" onclick="showView()">VIEW</button>
+                <button class="btn-link btn-back" onclick="doBack()">BACK</button>
+            </div>
+
+            <!-- SAVE Button -->
+            <button id="btn-save" class="btn-primary btn-save" onclick="doSave()" disabled>SAVE</button>
+        </div>
+    </div>
+
+    <!-- =============== VIEW SCREEN =============== -->
+    <div id="screen-view" class="screen">
+        <div class="view-container">
+            <div class="view-header">
+                <button class="btn-view-back" onclick="closeView()">&#8592; Back</button>
+                <h2>Scanned Items</h2>
+                <span id="view-count" class="view-count">0</span>
+            </div>
+
+            <div class="view-table-wrapper">
+                <table id="view-table" class="view-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>QTY</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-tbody">
+                        <tr><td colspan="4" class="empty-row">No items scanned yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Timing for view -->
+            <div id="view-timing" class="timing-badge hidden" style="margin-top:12px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span id="view-timing-text"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

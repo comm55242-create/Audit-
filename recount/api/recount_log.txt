@@ -1,0 +1,168 @@
+2026-06-20 15:02:18 - Request received. POST data: {"shop_code":"101","user_name":"TestUser","zone_name":"Zone A"}
+2026-06-20 15:02:18 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:02:18 - Variables parsed - Shop: 101, User: TestUser, Zone: Zone A
+2026-06-20 15:02:18 - No existing request found, inserting new PENDING request.
+2026-06-20 15:02:18 - Successfully inserted PENDING request.
+2026-06-20 15:27:16 - Request received. POST data: {"shop_code":"0","user_name":"HS","zone_name":"GS"}
+2026-06-20 15:27:16 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:27:16 - Variables parsed - Shop: 0, User: HS, Zone: GS
+2026-06-20 15:27:16 - No existing request found, inserting new PENDING request.
+2026-06-20 15:27:16 - Successfully inserted PENDING request.
+2026-06-20 15:27:20 - Request received. POST data: {"shop_code":"0","user_name":"HS","zone_name":"GS"}
+2026-06-20 15:27:20 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:27:20 - Variables parsed - Shop: 0, User: HS, Zone: GS
+2026-06-20 15:27:20 - Found existing request with status: PENDING
+2026-06-20 15:27:23 - Request received. POST data: {"shop_code":"0","user_name":"HS","zone_name":"GS"}
+2026-06-20 15:27:23 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:27:23 - Variables parsed - Shop: 0, User: HS, Zone: GS
+2026-06-20 15:27:23 - Found existing request with status: PENDING
+2026-06-20 15:27:26 - Request received. POST data: {"shop_code":"0","user_name":"HS","zone_name":"GS"}
+2026-06-20 15:27:26 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:27:26 - Variables parsed - Shop: 0, User: HS, Zone: GS
+2026-06-20 15:27:26 - Found existing request with status: PENDING
+2026-06-20 15:27:29 - Request received. POST data: {"shop_code":"0","user_name":"HS","zone_name":"GS"}
+2026-06-20 15:27:29 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:27:29 - Variables parsed - Shop: 0, User: HS, Zone: GS
+2026-06-20 15:27:29 - Found existing request with status: APPROVED
+2026-06-20 15:59:01 - Request received. POST data: {"shop_code":"0","user_name":"TEST","zone_name":"TEST 1"}
+2026-06-20 15:59:01 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:59:01 - Variables parsed - Shop: 0, User: TEST, Zone: TEST 1
+2026-06-20 15:59:01 - No existing request found, inserting new PENDING request.
+2026-06-20 15:59:01 - Successfully inserted PENDING request.
+2026-06-20 15:59:05 - Request received. POST data: {"shop_code":"0","user_name":"TEST","zone_name":"TEST 1"}
+2026-06-20 15:59:05 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:59:05 - Variables parsed - Shop: 0, User: TEST, Zone: TEST 1
+2026-06-20 15:59:05 - Found existing request with status: PENDING
+2026-06-20 15:59:08 - Request received. POST data: {"shop_code":"0","user_name":"TEST","zone_name":"TEST 1"}
+2026-06-20 15:59:08 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:59:08 - Variables parsed - Shop: 0, User: TEST, Zone: TEST 1
+2026-06-20 15:59:08 - Found existing request with status: PENDING
+2026-06-20 15:59:11 - Request received. POST data: {"shop_code":"0","user_name":"TEST","zone_name":"TEST 1"}
+2026-06-20 15:59:11 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 15:59:11 - Variables parsed - Shop: 0, User: TEST, Zone: TEST 1
+2026-06-20 15:59:11 - Found existing request with status: APPROVED
+2026-06-20 17:08:35 - Request received. POST data: {"shop_code":"0","user_name":"VJ","zone_name":"GJ"}
+2026-06-20 17:08:35 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 17:08:35 - Variables parsed - Shop: 0, User: VJ, Zone: GJ
+2026-06-20 17:08:35 - No existing request found, inserting new PENDING request.
+2026-06-20 17:08:35 - Successfully inserted PENDING request.
+2026-06-20 17:08:38 - Request received. POST data: {"shop_code":"0","user_name":"VJ","zone_name":"GJ"}
+2026-06-20 17:08:38 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 17:08:38 - Variables parsed - Shop: 0, User: VJ, Zone: GJ
+2026-06-20 17:08:38 - Found existing request with status: PENDING
+2026-06-20 17:08:41 - Request received. POST data: {"shop_code":"0","user_name":"VJ","zone_name":"GJ"}
+2026-06-20 17:08:41 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 17:08:41 - Variables parsed - Shop: 0, User: VJ, Zone: GJ
+2026-06-20 17:08:41 - Found existing request with status: PENDING
+2026-06-20 17:08:44 - Request received. POST data: {"shop_code":"0","user_name":"VJ","zone_name":"GJ"}
+2026-06-20 17:08:44 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-20 17:08:44 - Variables parsed - Shop: 0, User: VJ, Zone: GJ
+2026-06-20 17:08:44 - Found existing request with status: APPROVED
+2026-06-21 14:35:43 - Request received. POST data: {"shop_code":"0","user_name":"TEAT","zone_name":"TSY"}
+2026-06-21 14:35:43 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:35:43 - Variables parsed - Shop: 0, User: TEAT, Zone: TSY
+2026-06-21 14:35:43 - No existing request found, inserting new PENDING request.
+2026-06-21 14:35:43 - Successfully inserted PENDING request.
+2026-06-21 14:35:55 - Request received. POST data: {"shop_code":"0","user_name":"TEAT","zone_name":"TSY"}
+2026-06-21 14:35:55 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:35:55 - Variables parsed - Shop: 0, User: TEAT, Zone: TSY
+2026-06-21 14:35:55 - Found existing request with status: REJECTED
+2026-06-21 14:47:35 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:35 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:35 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:35 - No existing request found, inserting new PENDING request.
+2026-06-21 14:47:35 - Successfully inserted PENDING request.
+2026-06-21 14:47:38 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:38 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:38 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:38 - Found existing request with status: PENDING
+2026-06-21 14:47:41 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:41 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:41 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:41 - Found existing request with status: PENDING
+2026-06-21 14:47:44 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:44 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:44 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:44 - Found existing request with status: PENDING
+2026-06-21 14:47:47 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:47 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:47 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:47 - Found existing request with status: PENDING
+2026-06-21 14:47:50 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:50 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:50 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:50 - Found existing request with status: PENDING
+2026-06-21 14:47:53 - Request received. POST data: {"shop_code":"0","user_name":"GH","zone_name":"BN"}
+2026-06-21 14:47:53 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:47:53 - Variables parsed - Shop: 0, User: GH, Zone: BN
+2026-06-21 14:47:53 - Found existing request with status: APPROVED
+2026-06-21 14:50:48 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"2"}
+2026-06-21 14:50:48 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:50:48 - Variables parsed - Shop: 0, User: DAVID, Zone: 2
+2026-06-21 14:50:48 - No existing request found, inserting new PENDING request.
+2026-06-21 14:50:48 - Successfully inserted PENDING request.
+2026-06-21 14:50:51 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"2"}
+2026-06-21 14:50:51 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:50:51 - Variables parsed - Shop: 0, User: DAVID, Zone: 2
+2026-06-21 14:50:51 - Found existing request with status: PENDING
+2026-06-21 14:50:54 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"2"}
+2026-06-21 14:50:54 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:50:54 - Variables parsed - Shop: 0, User: DAVID, Zone: 2
+2026-06-21 14:50:54 - Found existing request with status: PENDING
+2026-06-21 14:50:57 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"2"}
+2026-06-21 14:50:57 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-21 14:50:57 - Variables parsed - Shop: 0, User: DAVID, Zone: 2
+2026-06-21 14:50:57 - Found existing request with status: APPROVED
+2026-06-22 11:04:01 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:01 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:01 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:01 - No existing request found, inserting new PENDING request.
+2026-06-22 11:04:01 - Successfully inserted PENDING request.
+2026-06-22 11:04:04 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:04 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:04 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:04 - Found existing request with status: PENDING
+2026-06-22 11:04:07 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:07 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:07 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:07 - Found existing request with status: PENDING
+2026-06-22 11:04:10 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:10 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:10 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:10 - Found existing request with status: PENDING
+2026-06-22 11:04:13 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:13 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:13 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:13 - Found existing request with status: PENDING
+2026-06-22 11:04:16 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:16 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:16 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:16 - Found existing request with status: PENDING
+2026-06-22 11:04:19 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:19 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:19 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:19 - Found existing request with status: PENDING
+2026-06-22 11:04:23 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:23 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:23 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:23 - Found existing request with status: PENDING
+2026-06-22 11:04:26 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:26 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:26 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:26 - Found existing request with status: PENDING
+2026-06-22 11:04:29 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:29 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:29 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:29 - Found existing request with status: PENDING
+2026-06-22 11:04:32 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:32 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:32 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:32 - Found existing request with status: PENDING
+2026-06-22 11:04:35 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:35 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:35 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:35 - Found existing request with status: PENDING
+2026-06-22 11:04:38 - Request received. POST data: {"shop_code":"0","user_name":"DAVID","zone_name":"1"}
+2026-06-22 11:04:38 - Found connection.php at: ../../admin_audit/includes/connection.php
+2026-06-22 11:04:38 - Variables parsed - Shop: 0, User: DAVID, Zone: 1
+2026-06-22 11:04:38 - Found existing request with status: APPROVED

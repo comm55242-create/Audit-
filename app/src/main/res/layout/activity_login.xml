@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_login"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F4F8"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- Logo Placeholder -->
+    <ImageView
+        android:id="@+id/imageView_logo"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="40dp"
+        android:contentDescription="Melcom Logo"
+        android:src="@mipmap/ic_launcher" />
+
+    <!-- Name Input -->
+    <EditText
+        android:id="@+id/editText_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_input"
+        android:ems="10"
+        android:hint="Auditor Name"
+        android:inputType="textCapCharacters"
+        android:padding="16dp"
+        android:textColor="#333333"
+        android:textColorHint="#888888" />
+
+    <!-- Zone Input -->
+    <EditText
+        android:id="@+id/editText_zone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/bg_input"
+        android:ems="10"
+        android:hint="Zone / Rack Number"
+        android:inputType="textCapCharacters"
+        android:padding="16dp"
+        android:textColor="#333333"
+        android:textColorHint="#888888" />
+
+    <!-- Login Button -->
+    <Button
+        android:id="@+id/button_login"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_rounded_button"
+        android:onClick="OnLogin"
+        android:text="LOG-IN"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/button_exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/transparent"
+        android:onClick="Onexit1"
+        android:text="EXIT APP"
+        android:textColor="#888888" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="By : Zahed"
+        android:textColor="#BBBBBB" />
+
+</LinearLayout>
