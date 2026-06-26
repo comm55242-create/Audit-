@@ -406,6 +406,55 @@
 </div>
 
 <!-- ============================================== -->
+<!-- SAVE PROGRESS BAR MODAL                      -->
+<!-- Shown during submitSetupData() DB save only  -->
+<!-- ============================================== -->
+<div id="saveProgressModal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:420px;padding:2.25rem 2rem;border-radius:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+            <div style="width:42px;height:42px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <div>
+                <h3 style="font-size:1rem;font-weight:900;color:var(--color-text-main);margin:0 0 2px;text-transform:uppercase;letter-spacing:-.01em;">Saving Setup Configuration...</h3>
+                <p id="spDesc" style="font-size:12px;color:var(--color-text-muted);margin:0;line-height:1.4;">Initialising...</p>
+            </div>
+        </div>
+        <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span id="spPhaseLabel" style="font-size:11px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em;">Phase 1 of 5</span>
+                <span id="spPct" style="font-size:15px;font-weight:800;color:#1D9E75;">0%</span>
+            </div>
+            <div style="height:8px;background:#E8F5F0;border-radius:99px;overflow:hidden;">
+                <div id="spBarFill" style="height:100%;width:0%;background:linear-gradient(90deg,#1D9E75,#34d399);border-radius:99px;transition:width .4s ease-out;"></div>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+            <?php
+            $sp_phases = [
+                ['Archiving current audit data',      'HEAD_AUDIT → HEAD_AUDIT_ARCHIVE'],
+                ['Clearing item master table',        'Truncating MASTER_ITEM'],
+                ['Syncing items from ERP',            'Pulling from VS_ITEM_AUDIT@DB_LINK_SHOP'],
+                ['Syncing current stock quantities',  'Calling get_shop_stock per item'],
+                ['Saving configuration & finalising', 'Writing to AUDIT_SETUP'],
+            ];
+            foreach ($sp_phases as $si => $sp): ?>
+            <div id="spRow<?= $si ?>" style="display:flex;align-items:center;gap:10px;padding:5px 8px;border-radius:8px;transition:background .2s;">
+                <div id="spIcon<?= $si ?>" style="width:18px;height:18px;border-radius:50%;border:1.5px solid #CBD5E1;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <div style="width:5px;height:5px;border-radius:50%;background:#CBD5E1;"></div>
+                </div>
+                <div>
+                    <div id="spTitle<?= $si ?>" style="font-size:12px;font-weight:600;color:#94A3B8;transition:color .2s;"><?= $sp[0] ?></div>
+                    <div style="font-size:10px;color:#B0BEC5;"><?= $sp[1] ?></div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <p style="font-size:11px;color:#B0BEC5;text-align:center;margin-top:1.25rem;margin-bottom:0;">Writing to Oracle database — do not refresh this page.</p>
+    </div>
+</div>
+
+<!-- ============================================== -->
 <!-- ACTIVE WIZARD ENGINE SCRIPTS -->
 <!-- ============================================== -->
 <script>
@@ -1583,11 +1632,110 @@
     // -------------------------------------------------------------
     // FINAL SECURE AJAX DATABASE SUBMIT ACTION
     // -------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────
+    // SAVE PROGRESS BAR ENGINE
+    // Reads real progress milestones streamed from AuditModel::sendProgress()
+    // and fills between them with smooth asymptotic animation.
+    // ─────────────────────────────────────────────────────────────
+    const SP_PHASES = [
+        { label:"Phase 1 of 5", desc:"Archiving current scan data...",            ceiling:18 },
+        { label:"Phase 2 of 5", desc:"Clearing item master table...",             ceiling:22 },
+        { label:"Phase 3 of 5", desc:"Syncing items from ERP — please wait...",  ceiling:67 },
+        { label:"Phase 4 of 5", desc:"Syncing stock quantities...",               ceiling:91 },
+        { label:"Phase 5 of 5", desc:"Saving configuration & finalising...",     ceiling:99 },
+    ];
+    let _spInterval = null;
+    let _spPct      = 0;
+    let _spDone     = false;
+
+    function showSaveLoader() {
+        _spPct = 0; _spDone = false;
+        clearInterval(_spInterval);
+        for (let i = 0; i < 5; i++) _spSetState(i, "idle");
+        _spSetState(0, "active");
+        document.getElementById("saveProgressModal").classList.remove("hidden");
+        _spSetProgress(0, SP_PHASES[0].label, SP_PHASES[0].desc);
+        _spStartFill(0); // begin animating toward first ceiling while waiting for real update
+    }
+
+    function hideSaveLoader() {
+        _spDone = true;
+        clearInterval(_spInterval);
+        _spSetProgress(100, "Complete ✓", "Setup saved successfully.");
+        for (let i = 0; i < 5; i++) _spSetState(i, "done");
+        setTimeout(() => {
+            document.getElementById("saveProgressModal").classList.add("hidden");
+            _spSetProgress(0, "Phase 1 of 5", "Initialising...");
+        }, 800);
+    }
+
+    // Called when a real progress line arrives from the server
+    function _spForceUpdate(pct, phase, desc) {
+        if (_spDone) return;
+        clearInterval(_spInterval);
+        _spPct = pct;
+        const phIdx = phase - 1;
+        for (let i = 0; i < phIdx; i++) _spSetState(i, "done");
+        _spSetState(phIdx, "active");
+        _spSetProgress(pct, SP_PHASES[phIdx] ? SP_PHASES[phIdx].label : "Phase "+phase+" of 5", desc);
+        // Animate toward the NEXT ceiling while waiting for next server update
+        const nextCeiling = SP_PHASES[phIdx] ? SP_PHASES[phIdx].ceiling : 99;
+        _spStartFill(nextCeiling);
+    }
+
+    // Asymptotic fill toward a ceiling — runs between real server updates
+    function _spStartFill(ceiling) {
+        clearInterval(_spInterval);
+        _spInterval = setInterval(() => {
+            if (_spDone) { clearInterval(_spInterval); return; }
+            const gap = ceiling - _spPct;
+            if (gap > 0.3) {
+                _spPct = Math.min(ceiling - 0.1, _spPct + Math.max(0.15, gap * 0.06));
+                const bar = document.getElementById("spBarFill");
+                const pEl = document.getElementById("spPct");
+                if (bar) bar.style.width = Math.floor(_spPct) + "%";
+                if (pEl) pEl.innerText   = Math.floor(_spPct) + "%";
+            }
+        }, 350);
+    }
+
+    function _spSetProgress(pct, label, desc) {
+        const bar = document.getElementById("spBarFill");
+        const pEl = document.getElementById("spPct");
+        const lEl = document.getElementById("spPhaseLabel");
+        const dEl = document.getElementById("spDesc");
+        if (bar) bar.style.width = pct + "%";
+        if (pEl) pEl.innerText   = pct + "%";
+        if (lEl) lEl.innerText   = label;
+        if (dEl) dEl.innerText   = desc;
+    }
+
+    function _spSetState(i, state) {
+        const row   = document.getElementById("spRow"   + i);
+        const icon  = document.getElementById("spIcon"  + i);
+        const title = document.getElementById("spTitle" + i);
+        if (!row || !icon || !title) return;
+        if (state === "active") {
+            row.style.background = "#F0FBF7";
+            icon.style.cssText   = "width:18px;height:18px;border-radius:50%;border:1.5px solid #1D9E75;background:#1D9E75;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+            icon.innerHTML       = `<div style="width:6px;height:6px;border-radius:50%;background:#fff;animation:spPulse .8s infinite alternate;"></div>`;
+            title.style.color    = "#1D9E75";
+        } else if (state === "done") {
+            row.style.background = "transparent";
+            icon.style.cssText   = "width:18px;height:18px;border-radius:50%;border:1.5px solid #1D9E75;background:#1D9E75;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+            icon.innerHTML       = `<span style="font-size:10px;color:#fff;font-weight:700;">✓</span>`;
+            title.style.color    = "#334155";
+        } else {
+            row.style.background = "transparent";
+            icon.style.cssText   = "width:18px;height:18px;border-radius:50%;border:1.5px solid #CBD5E1;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+            icon.innerHTML       = `<div style="width:5px;height:5px;border-radius:50%;background:#CBD5E1;"></div>`;
+            title.style.color    = "#94A3B8";
+        }
+    }
+    // ─────────────────────────────────────────────────────────────
+
     function submitSetupData() {
-        showLoader(
-            "Saving Setup Configuration...",
-            "Writing parameters to the secure Oracle database and performing live catalog schema audits. Please do not refresh this page."
-        );
+        showSaveLoader();
 
         const stockDate = document.getElementById("setupDate").value;
         const shopCode = document.getElementById("setupShopCode").value.trim().toUpperCase();
@@ -1636,15 +1784,34 @@
         formData.append("groups", groups.join(", "));
         formData.append("subgroups", subgroups.join(", "));
 
-        // AJAX Post fetch to our MVC route secure endpoint!
-        fetch("index.php?route=audit/save", {
-            method: "POST",
-            body: formData
-        })
-        .then(res => res.text())
-        .then(data => {
-            hideLoader();
-            if (data.trim() === "ok") {
+        // Use XHR instead of fetch so we can read streaming progress lines via onprogress
+        const xhr = new XMLHttpRequest();
+        let _xhrPos = 0; // tracks how far into responseText we've already parsed
+
+        xhr.onprogress = function() {
+            // Parse only the NEW chunk since last onprogress event
+            const chunk = xhr.responseText.slice(_xhrPos);
+            _xhrPos = xhr.responseText.length;
+            chunk.split("\n").forEach(line => {
+                line = line.trim();
+                if (!line || line === "ok") return;
+                if (line.startsWith("ERROR:")) return; // handle below in onload
+                try {
+                    const data = JSON.parse(line);
+                    if (data.p !== undefined) {
+                        _spForceUpdate(data.p, data.ph, data.d);
+                    }
+                } catch(e) {}
+            });
+        };
+
+        xhr.onload = function() {
+            const body = xhr.responseText.trim();
+            // Final line should be "ok" from the controller
+            const lines = body.split("\n");
+            const lastLine = lines[lines.length - 1].trim();
+            if (lastLine === "ok") {
+                hideSaveLoader();
                 isSetupSubmitted = true;
                 localStorage.setItem("melcom_stock_audit_submitted", "true");
                 localStorage.setItem("melcom_stock_audit_data", JSON.stringify({
@@ -1658,15 +1825,22 @@
                     subgroups: subgroups.join(", ")
                 }));
                 updateWizardState();
-                printSummaryCards(); // Automatically triggers windows print layout upon final confirmed submit!
+                printSummaryCards();
             } else {
-                alert("Submission Failed: " + data);
+                hideSaveLoader();
+                // Strip progress JSON lines from error to show clean message
+                const errorLines = lines.filter(l => !l.trim().startsWith("{"));
+                alert("Submission Failed: " + errorLines.join(" ").trim());
             }
-        })
-        .catch(err => {
-            hideLoader();
+        };
+
+        xhr.onerror = function() {
+            hideSaveLoader();
             alert("Network Error: Could not connect to the database save script.");
-        });
+        };
+
+        xhr.open("POST", "index.php?route=audit/save");
+        xhr.send(formData);
     }
 
     // -------------------------------------------------------------
@@ -1736,6 +1910,7 @@
         .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #006D44; padding-bottom: 1rem; margin-bottom: 2rem; }
         .brand { display: flex; align-items: center; gap: 0.75rem; }
         .logo-circle { width: 36px; height: 36px; background-color: #006D44; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 16px; }
+        @keyframes spPulse { from{transform:scale(0.7);opacity:.5;} to{transform:scale(1.3);opacity:1;} }
         .brand-text-wrapper { display: flex; flex-direction: column; }
         .brand-title { font-size: 20px; font-weight: 900; color: #006D44; margin: 0; line-height: 1.1; }
         .brand-subtitle { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; font-weight: 700; }

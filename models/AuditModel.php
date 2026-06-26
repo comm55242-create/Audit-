@@ -10,6 +10,21 @@ require_once 'Database.php';
 class AuditModel {
 
     /**
+     * Streams a progress update to the browser during saveSetupConfiguration().
+     * Format: JSON line {"p":<pct>,"ph":<phase>,"d":<description>}
+     * The controller must have disabled output buffering for this to stream live.
+     */
+    private static function sendProgress($pct, $phase, $desc) {
+        $line = json_encode(['p' => $pct, 'ph' => $phase, 'd' => $desc]);
+        // Pad each line to 512 bytes — ensures the line exceeds any remaining
+        // Apache/PHP buffer threshold and is delivered to the browser immediately.
+        // The frontend silently ignores non-JSON trailing whitespace.
+        echo $line . str_repeat(' ', max(0, 512 - strlen($line))) . "\n";
+        if (ob_get_level() > 0) ob_flush();
+        flush();
+    }
+
+    /**
      * Executes real-time search queries against MASTER_ITEM.
      */
     public static function searchItems($query) {
@@ -168,6 +183,8 @@ class AuditModel {
             if ($delHeadStmt) oci_free_statement($delHeadStmt);
         }
 
+        self::sendProgress(10, 1, "Audit data archived.");
+
         // 3. Clear/Truncate local table SHOP.MASTER_ITEM
         $truncStmt = @oci_parse($conn, "TRUNCATE TABLE SHOP.MASTER_ITEM");
         $truncSuccess = @oci_execute($truncStmt);
@@ -179,6 +196,8 @@ class AuditModel {
             oci_execute($delStmt);
             if ($delStmt) oci_free_statement($delStmt);
         }
+
+        self::sendProgress(18, 2, "Item master table cleared.");
 
         // 4. Populate categories/items scope into MASTER_ITEM from remote VS_ITEM_AUDIT@DB_LINK_SHOP using an explicit PL/SQL Cursor
         $dept_list = array_filter(array_map('trim', explode(',', $depts)));
@@ -311,6 +330,8 @@ class AuditModel {
             oci_bind_by_name($bulkStmt, $placeholder, $bind_params[$placeholder]);
         }
 
+        self::sendProgress(22, 3, "Syncing items from ERP — please wait...");
+
         $bulkExec = @oci_execute($bulkStmt);
         if (!$bulkExec) {
             $e = oci_error($bulkStmt);
@@ -318,6 +339,8 @@ class AuditModel {
             throw new Exception("Cursor-based transactional insertion failed: " . $e['message']);
         }
         if ($bulkStmt) oci_free_statement($bulkStmt);
+
+        self::sendProgress(68, 3, "Items synced from ERP.");
 
         // Step B: Update CURR_STOCK by calling makess.get_shop_stock@db_link_shop per item via cursor loop
         $stockUpdateQuery = "
@@ -345,6 +368,9 @@ class AuditModel {
         }
         $shop_code_stk = substr($shop_code, 0, 5);
         oci_bind_by_name($stockStmt, ':shop_code_stk', $shop_code_stk);
+
+        self::sendProgress(72, 4, "Syncing current stock quantities...");
+
         $stockExec = @oci_execute($stockStmt);
         if (!$stockExec) {
             $e = oci_error($stockStmt);
@@ -353,7 +379,11 @@ class AuditModel {
         }
         if ($stockStmt) oci_free_statement($stockStmt);
 
+        self::sendProgress(92, 4, "Stock quantities synced.");
+
         // 5. Insert active setup parameters configuration row in SHOP.AUDIT_SETUP
+        self::sendProgress(96, 5, "Saving configuration & finalising...");
+
         $insertQuery = "
             INSERT INTO SHOP.AUDIT_SETUP (
                 STOCK_DATE, SHOP_CODE, AUDIT_TYPE, AUDIT_MODE, SELECTED_DEPTS, SELECTED_GROUPS, SELECTED_SUBGROUPS, MAIL

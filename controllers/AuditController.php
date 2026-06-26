@@ -57,7 +57,27 @@ class AuditController {
      * Processes OCI transactional parameter saves and triggers auto DDL alterations.
      */
     public function handleSave() {
+        // ── STREAMING SETUP ───────────────────────────────────────────────────
+        // 1. Release PHP session write lock — without this, Apache holds output
+        //    until the session lock is released (i.e. request end). Critical.
+        session_write_close();
+
+        // 2. Disable all compression and buffering
         header('Content-Type: text/plain; charset=utf-8');
+        header('X-Accel-Buffering: no');       // Nginx: disable proxy buffering
+        header('Content-Encoding: none');       // Disable gzip — compressed output cannot stream
+        header('Cache-Control: no-cache');
+        @ini_set('zlib.output_compression', 0);
+        @ini_set('implicit_flush', 1);
+        while (ob_get_level() > 0) { ob_end_clean(); }
+
+        // 3. Send > 8 KB of whitespace padding so Apache's output buffer
+        //    threshold is immediately exceeded and streaming begins.
+        //    The frontend ignores non-JSON lines.
+        echo str_repeat(' ', 8193) . "\n";
+        flush();
+        // ─────────────────────────────────────────────────────────────────────
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             echo "Invalid request method.";
             exit;
@@ -65,21 +85,21 @@ class AuditController {
 
         try {
             $params = [
-                'shop_code' => isset($_POST['shop_code']) ? $_POST['shop_code'] : '',
+                'shop_code'  => isset($_POST['shop_code'])  ? $_POST['shop_code']  : '',
                 'stock_date' => isset($_POST['stock_date']) ? $_POST['stock_date'] : '',
                 'audit_type' => isset($_POST['audit_type']) ? $_POST['audit_type'] : '',
                 'audit_mode' => isset($_POST['audit_mode']) ? $_POST['audit_mode'] : '',
-                'depts' => isset($_POST['depts']) ? $_POST['depts'] : '',
-                'groups' => isset($_POST['groups']) ? $_POST['groups'] : '',
-                'subgroups' => isset($_POST['subgroups']) ? $_POST['subgroups'] : '',
-                'mail' => isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : ''
+                'depts'      => isset($_POST['depts'])      ? $_POST['depts']      : '',
+                'groups'     => isset($_POST['groups'])     ? $_POST['groups']     : '',
+                'subgroups'  => isset($_POST['subgroups'])  ? $_POST['subgroups']  : '',
+                'mail'       => isset($_SESSION['logged_in_email']) ? $_SESSION['logged_in_email'] : ''
             ];
 
             $res = AuditModel::saveSetupConfiguration($params);
             echo $res;
             exit;
         } catch (Exception $e) {
-            echo $e->getMessage();
+            echo "ERROR:" . $e->getMessage();
             exit;
         }
     }
